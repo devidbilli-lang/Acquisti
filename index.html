@@ -173,10 +173,10 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
 /* RIGHT SIDEBAR */
 .right-sticky{display:flex;flex-direction:column;gap:16px;position:sticky;top:16px;}
 .summary-card{background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:16px;padding:16px 20px;box-shadow:0 4px 20px rgba(57,224,244,0.4);display:flex;align-items:center;justify-content:space-between;}
-.dual-card{background:linear-gradient(135deg,#39e0f4,#0ea5b8);box-shadow:0 0 16px rgba(57,224,244,0.7),0 0 36px rgba(57,224,244,0.3);display:flex;align-items:stretch;justify-content:center;padding:10px 8px;gap:0;border-radius:12px;border:2px solid #39e0f4;}
-.dual-card .dual-half{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:0 8px;}
-.dual-card .dual-lbl{color:#fff;font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;opacity:0.9;}
-.dual-card .dual-val{color:#fff;font-size:18px;font-weight:900;letter-spacing:0.3px;line-height:1;}
+.dual-card{background:linear-gradient(135deg,#39e0f4,#0ea5b8);box-shadow:0 0 16px rgba(57,224,244,0.7),0 0 36px rgba(57,224,244,0.3);display:flex;align-items:stretch;justify-content:center;padding:22px 12px;gap:0;border-radius:12px;border:2px solid #39e0f4;}
+.dual-card .dual-half{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:0 8px;}
+.dual-card .dual-lbl{color:#fff;font-size:12px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;opacity:0.9;}
+.dual-card .dual-val{color:#fff;font-size:48px;font-weight:900;letter-spacing:0.3px;line-height:1;}
 .dual-card .dual-divider{width:1px;background:rgba(255,255,255,0.4);align-self:stretch;}
 
 /* Compact status cards (Ordini sidebar) */
@@ -309,11 +309,11 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
 <div id="tab-anagrafica" class="tab-panel active">
   <div class="filters">
     <div class="search-wrap">
-      <input type="text" id="f-a-tipologia" placeholder="Cerca tipologia..." style="width:200px;" oninput="filtra()"/>
+      <input type="text" id="f-a-tipologia" placeholder="Cerca materiale..." style="width:200px;" oninput="filtra()"/>
       <button class="clear-btn" onclick="document.getElementById('f-a-tipologia').value='';filtra()">×</button>
     </div>
     <div class="search-wrap">
-      <input type="text" id="f-a-codice" placeholder="Cerca codice..." style="width:160px;" oninput="filtra()"/>
+      <input type="text" id="f-a-codice" placeholder="Cerca codice conto..." style="width:180px;" oninput="filtra()"/>
       <button class="clear-btn" onclick="document.getElementById('f-a-codice').value='';filtra()">×</button>
     </div>
     <div class="search-wrap">
@@ -331,10 +331,10 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
       <table>
         <thead><tr>
           <th class="th-act">Azioni</th>
-          <th>Tipologia</th>
-          <th>Codice</th>
+          <th>Materiale</th>
           <th>Classe</th>
-          <th>Fornitori e prezzi</th>
+          <th>Codice conto</th>
+          <th>Fornitore</th>
         </tr></thead>
         <tbody id="tb-anagrafica"><tr><td colspan="5" class="empty">Nessun materiale registrato</td></tr></tbody>
       </table>
@@ -391,7 +391,7 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
         <span class="status-val" id="kpi-ordini-chiusi">0</span>
       </div>
       <div class="right-card">
-        <div class="right-card-title">🏭 Per Fornitore</div>
+        <div class="right-card-title">DETTAGLIO FORNITORE</div>
         <div id="ordini-fornitori" class="right-card-list"></div>
       </div>
     </div>
@@ -416,16 +416,14 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
       <table>
         <thead><tr>
           <th class="th-act">Azioni</th>
-          <th>Data</th><th>Linea</th><th>Materiale</th><th>Codice</th><th>Qtà</th>
+          <th>Data</th><th>Linea</th><th>Materiale</th><th>Codice conto</th><th>Qtà</th>
         </tr></thead>
         <tbody id="tb-consegne"><tr><td colspan="6" class="empty">Nessuna consegna registrata</td></tr></tbody>
       </table>
     </div>
     <div class="right-sticky">
-      <div class="summary-card blue"><span class="lbl">Consegne</span><span class="val" id="kpi-consegne-count">0</span></div>
-      <div class="summary-card"><span class="lbl">Pezzi Tot.</span><span class="val" id="kpi-consegne-pezzi">0</span></div>
       <div class="right-card blue">
-        <div class="right-card-title">🚚 Per Linea</div>
+        <div class="right-card-title">DETTAGLIO LINEA</div>
         <div id="consegne-linee" class="right-card-list"></div>
       </div>
     </div>
@@ -445,7 +443,7 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
     <div class="table-wrap">
       <table>
         <thead><tr>
-          <th>Materiale</th><th>Codice</th><th>Classe</th><th class="th-tot">Giacenza</th>
+          <th>Materiale</th><th>Codice conto</th><th>Classe</th><th class="th-tot">Giacenza</th>
         </tr></thead>
         <tbody id="tb-armadietto"><tr><td colspan="4" class="empty">Aggiungi materiali in Anagrafica</td></tr></tbody>
       </table>
@@ -478,7 +476,7 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
     <div class="modal-title" id="modal-anag-title">Aggiungi Materiale</div>
     <div class="modal-grid">
       <div class="fg" style="position:relative;">
-        <label>Tipologia *</label>
+        <label>Materiale *</label>
         <input type="text" id="m-a-tipologia" placeholder="Inizia a scrivere per i suggerimenti..." autocomplete="off" oninput="searchCatalog()" onfocus="searchCatalog()" onblur="hideCatalog()">
         <div class="dropdown-list" id="catalog-dropdown" style="position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1.5px solid var(--accent);border-radius:10px;max-height:260px;overflow-y:auto;z-index:200;display:none;box-shadow:0 8px 24px rgba(57,224,244,0.15);"></div>
       </div>
@@ -806,7 +804,7 @@ function salvaAnagrafica(){
   const tipologia=document.getElementById('m-a-tipologia').value.trim().toUpperCase();
   const codice=document.getElementById('m-a-codice').value.trim().toUpperCase();
   const classe=document.getElementById('m-a-classe').value.trim().toUpperCase();
-  if(!tipologia||!codice){ showAlert('Tipologia e codice sono obbligatori','err'); return; }
+  if(!tipologia||!codice){ showAlert('Materiale e codice conto sono obbligatori','err'); return; }
 
   const fornitori=[];
   document.querySelectorAll('.supplier-block').forEach(r=>{
@@ -902,7 +900,7 @@ function updateOrdineFornitori(){
   }
   sel.innerHTML='<option value="">Seleziona...</option>'+
     mat.fornitori.map((f,i)=>'<option value="'+i+'">'+escapeHtml(f.nome)+' \u2014 \u20ac'+f.prezzo.toFixed(2)+'</option>').join('');
-  info.innerHTML = '<b>Codice:</b> '+escapeHtml(mat.codice)+' &nbsp;\u00b7&nbsp; <b>Classe:</b> '+escapeHtml(mat.classe||'\u2014')+' &nbsp;\u00b7&nbsp; <b>Giacenza attuale:</b> '+(state.armadietto[mat.codice]||0);
+  info.innerHTML = '<b>Codice conto:</b> '+escapeHtml(mat.codice)+' &nbsp;\u00b7&nbsp; <b>Classe:</b> '+escapeHtml(mat.classe||'\u2014')+' &nbsp;\u00b7&nbsp; <b>Giacenza attuale:</b> '+(state.armadietto[mat.codice]||0);
 }
 
 function salvaOrdine(){
@@ -1068,7 +1066,7 @@ function updateConsegnaInfo(){
   const mat=state.anagrafica.find(a=>a.id===matId);
   if(!mat){ info.textContent='Seleziona un materiale per vedere giacenza e dati.'; return; }
   const g=state.armadietto[mat.codice]||0;
-  info.innerHTML = '<b>Codice:</b> '+escapeHtml(mat.codice)+' &nbsp;\u00b7&nbsp; <b>Classe:</b> '+escapeHtml(mat.classe||'\u2014')+' &nbsp;\u00b7&nbsp; <b>Giacenza:</b> <span style="color:'+(g>0?'var(--green)':'var(--red)')+';font-weight:800;">'+g+'</span>';
+  info.innerHTML = '<b>Codice conto:</b> '+escapeHtml(mat.codice)+' &nbsp;\u00b7&nbsp; <b>Classe:</b> '+escapeHtml(mat.classe||'\u2014')+' &nbsp;\u00b7&nbsp; <b>Giacenza:</b> <span style="color:'+(g>0?'var(--green)':'var(--red)')+';font-weight:800;">'+g+'</span>';
 }
 
 function salvaConsegna(){
@@ -1200,8 +1198,8 @@ function renderAnagrafica(){
           '<button class="btn-edit" onclick="modificaAnagrafica('+a.id+')" title="Modifica">\u270f\ufe0f</button><button class="btn-danger" onclick="eliminaAnagrafica('+a.id+')" style="margin-left:6px;vertical-align:middle;" title="Elimina">\u00d7</button>'+
         '</td>'+
         '<td style="font-weight:700;">'+escapeHtml(a.tipologia)+'</td>'+
-        '<td><code class="codice">'+escapeHtml(a.codice)+'</code></td>'+
         '<td>'+escapeHtml(a.classe||'\u2014')+'</td>'+
+        '<td><code class="codice">'+escapeHtml(a.codice)+'</code></td>'+
         '<td class="suppliers-cell">'+forn+'</td>'+
       '</tr>';
     }).join('');
@@ -1303,9 +1301,6 @@ function renderConsegne(){
       '<td><span class="badge badge-blue">'+c.qta+'</span></td>'+
     '</tr>').join('');
   }
-
-  document.getElementById('kpi-consegne-count').textContent=state.consegne.length;
-  document.getElementById('kpi-consegne-pezzi').textContent=state.consegne.reduce((s,c)=>s+c.qta,0);
 
   const byL={};
   state.consegne.forEach(c=>{ byL[c.linea]=(byL[c.linea]||0)+c.qta; });
