@@ -179,6 +179,8 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
 .status-card .status-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
 .status-card .dot-yellow{background:#f5ff00;box-shadow:0 0 8px #f5ff00,0 0 16px rgba(245,255,0,0.6),inset 0 0 4px rgba(255,255,255,0.5);}
 .status-card .dot-green{background:#00ff88;box-shadow:0 0 8px #00ff88,0 0 16px rgba(0,255,136,0.6),inset 0 0 4px rgba(255,255,255,0.5);}
+.status-card.neon-yellow .status-val{background:#f5ff00;color:#1a1a2e;padding:4px 14px;border-radius:10px;box-shadow:0 0 8px #f5ff00,0 0 16px rgba(245,255,0,0.6),inset 0 0 4px rgba(255,255,255,0.5);}
+.status-card.neon-green .status-val{background:#00ff88;color:#1a1a2e;padding:4px 14px;border-radius:10px;box-shadow:0 0 8px #00ff88,0 0 16px rgba(0,255,136,0.6),inset 0 0 4px rgba(255,255,255,0.5);}
 .summary-card.green{background:linear-gradient(135deg,#059669,#10b981);box-shadow:0 4px 20px rgba(5,150,105,0.4);}
 .summary-card.blue{background:linear-gradient(135deg,#3b82f6,#1d4ed8);box-shadow:0 4px 20px rgba(59,130,246,0.4);}
 .summary-card .lbl{color:#fff;font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;}
@@ -363,12 +365,12 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
         <span class="status-lbl">Totale Ordini</span>
         <span class="status-val" id="kpi-ordini-count">0</span>
       </div>
-      <div class="status-card">
+      <div class="status-card neon-yellow">
         <span class="status-dot dot-yellow"></span>
         <span class="status-lbl">Ordini Aperti</span>
         <span class="status-val" id="kpi-ordini-aperti">0</span>
       </div>
-      <div class="status-card">
+      <div class="status-card neon-green">
         <span class="status-dot dot-green"></span>
         <span class="status-lbl">Ordini Chiusi</span>
         <span class="status-val" id="kpi-ordini-chiusi">0</span>
