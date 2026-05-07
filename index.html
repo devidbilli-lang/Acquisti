@@ -73,6 +73,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:20p
 
 /* LAYOUT — main content with right sidebar */
 .layout{display:grid;grid-template-columns:1fr 280px;gap:18px;align-items:start;margin-bottom:40px;}
+.layout.full{grid-template-columns:1fr;}
 @media(max-width:1100px){.layout{grid-template-columns:1fr;}}
 
 /* TABLE */
@@ -114,6 +115,17 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
 .dual-card .dual-lbl{color:#fff;font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;opacity:0.9;}
 .dual-card .dual-val{color:#fff;font-size:18px;font-weight:900;letter-spacing:0.3px;line-height:1;}
 .dual-card .dual-divider{width:1px;background:rgba(255,255,255,0.4);align-self:stretch;}
+
+/* Compact status cards (Ordini sidebar) */
+.status-card{background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 8px rgba(0,0,0,0.04);}
+.status-card.cyan{background:linear-gradient(135deg,#39e0f4,#0ea5b8);border-color:transparent;box-shadow:0 4px 14px rgba(57,224,244,0.35);}
+.status-card.cyan .status-lbl{color:#fff;opacity:0.95;}
+.status-card.cyan .status-val{color:#fff;}
+.status-card .status-lbl{flex:1;font-size:11px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-muted);}
+.status-card .status-val{font-size:22px;font-weight:900;letter-spacing:0.5px;color:var(--text);line-height:1;}
+.status-card .status-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+.status-card .dot-yellow{background:#f5ff00;box-shadow:0 0 8px #f5ff00,0 0 16px rgba(245,255,0,0.6),inset 0 0 4px rgba(255,255,255,0.5);}
+.status-card .dot-green{background:#00ff88;box-shadow:0 0 8px #00ff88,0 0 16px rgba(0,255,136,0.6),inset 0 0 4px rgba(255,255,255,0.5);}
 .summary-card.green{background:linear-gradient(135deg,#059669,#10b981);box-shadow:0 4px 20px rgba(5,150,105,0.4);}
 .summary-card.blue{background:linear-gradient(135deg,#3b82f6,#1d4ed8);box-shadow:0 4px 20px rgba(59,130,246,0.4);}
 .summary-card .lbl{color:#fff;font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;}
@@ -249,7 +261,7 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
     </div>
   </div>
 
-  <div class="layout">
+  <div class="layout full">
     <div class="table-wrap">
       <table>
         <thead><tr>
@@ -261,13 +273,6 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
         </tr></thead>
         <tbody id="tb-anagrafica"><tr><td colspan="5" class="empty">Nessun materiale registrato</td></tr></tbody>
       </table>
-    </div>
-    <div class="right-sticky">
-      <div class="summary-card"><span class="lbl">Materiali</span><span class="val" id="kpi-anagrafica">0</span></div>
-      <div class="right-card">
-        <div class="right-card-title">📊 Per Classe</div>
-        <div id="anagrafica-classes" class="right-card-list"></div>
-      </div>
     </div>
   </div>
 </div>
@@ -306,8 +311,20 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
       </table>
     </div>
     <div class="right-sticky">
-      <div class="summary-card"><span class="lbl">Ordini Tot.</span><span class="val" id="kpi-ordini-count">0</span></div>
-      <div class="summary-card green"><span class="lbl">Valore €</span><span class="val" id="kpi-ordini-valore">0</span></div>
+      <div class="status-card cyan">
+        <span class="status-lbl">Totale Ordini</span>
+        <span class="status-val" id="kpi-ordini-count">0</span>
+      </div>
+      <div class="status-card">
+        <span class="status-dot dot-yellow"></span>
+        <span class="status-lbl">Ordini Aperti</span>
+        <span class="status-val" id="kpi-ordini-aperti">0</span>
+      </div>
+      <div class="status-card">
+        <span class="status-dot dot-green"></span>
+        <span class="status-lbl">Ordini Chiusi</span>
+        <span class="status-val" id="kpi-ordini-chiusi">0</span>
+      </div>
       <div class="right-card">
         <div class="right-card-title">🏭 Per Fornitore</div>
         <div id="ordini-fornitori" class="right-card-list"></div>
@@ -1131,19 +1148,6 @@ function renderAnagrafica(){
       </tr>`;
     }).join('');
   }
-  document.getElementById('kpi-anagrafica').textContent=state.anagrafica.length;
-
-  // classes breakdown
-  const byClass={};
-  state.anagrafica.forEach(a=>{
-    const c=a.classe||'(senza classe)';
-    byClass[c]=(byClass[c]||0)+1;
-  });
-  const cd=document.getElementById('anagrafica-classes');
-  const entries=Object.entries(byClass).sort((a,b)=>b[1]-a[1]);
-  cd.innerHTML = entries.length
-    ? entries.map(([k,v])=>`<div class="list-row"><div class="info"><div class="nm">${escapeHtml(k)}</div></div><span class="qt">${v}</span></div>`).join('')
-    : '<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:10px;">Nessun dato</div>';
 }
 
 function renderOrdini(){
@@ -1196,8 +1200,17 @@ function renderOrdini(){
   }
 
   document.getElementById('kpi-ordini-count').textContent=state.ordini.length;
-  const valore=state.ordini.reduce((s,o)=>s+o.totale,0);
-  document.getElementById('kpi-ordini-valore').textContent=valore.toFixed(0);
+
+  // Apertura/chiusura ordini in base ai DDT
+  let aperti = 0, chiusi = 0;
+  state.ordini.forEach(o => {
+    const ddtList = Array.isArray(o.ddt) ? o.ddt : [];
+    const arrivata = ddtList.reduce((s,d)=>s+(parseFloat(d.qta)||0),0);
+    if(arrivata >= o.qta && o.qta > 0) chiusi++;
+    else aperti++;
+  });
+  document.getElementById('kpi-ordini-aperti').textContent = aperti;
+  document.getElementById('kpi-ordini-chiusi').textContent = chiusi;
 
   const byF={};
   state.ordini.forEach(o=>{ byF[o.fornitore]=(byF[o.fornitore]||0)+o.totale; });
