@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gestionale Acquisti</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDUxMiA1MTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJiZyIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+PHN0b3Agb2Zmc2V0PSIwJSIgc3R5bGU9InN0b3AtY29sb3I6IzM5ZTBmNCIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6IzBlYTViOCIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iOTYiIGZpbGw9InVybCgjYmcpIi8+PHBhdGggZD0iTSAyNTYgMjU2IG0gMCAwIGEgMTQgMTQgMCAxIDEgMTQgLTE0IGEgMzggMzggMCAxIDEgLTM4IDM4IGEgNjIgNjIgMCAxIDEgNjIgLTYyIGEgODYgODYgMCAxIDEgLTg2IDg2IGEgMTEwIDExMCAwIDEgMSAxMTAgLTExMCBhIDEzNCAxMzQgMCAxIDEgLTEzNCAxMzQgYSAxNTggMTU4IDAgMSAxIDE1OCAtMTU4IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIwIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48L3N2Zz4=">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f0f0f5;--surface:#fff;--border:#e0e0ec;
+  --accent:#39e0f4;--accent2:#0ea5b8;--accent-glow:rgba(57,224,244,0.15);
+  --green:#059669;--red:#dc2626;--blue:#3b82f6;--amber:#d97706;
+  --text:#1a1a2e;--text-muted:#6b6b8a;--text-dim:#b0b0c8;
+  --shadow:0 2px 12px rgba(57,224,244,0.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Montserrat',sans-serif;}
+input,select,textarea,button,code,kbd,samp,pre{font-family:'Montserrat',sans-serif !important;}
+body{background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;}
+.full-wrap{width:100%;padding:0 20px;}
+.inner{max-width:1600px;margin:0 auto;}
+
+/* HEADER */
+header{display:flex;align-items:center;justify-content:space-between;padding:20px 0 18px;border-bottom:2px solid var(--border);}
+.brand{display:flex;align-items:center;gap:14px;}
+.brand-icon{width:52px;height:52px;border-radius:14px;overflow:hidden;box-shadow:0 4px 16px rgba(57,224,244,0.3);flex-shrink:0;}
+.brand-name{font-size:24px;font-weight:900;letter-spacing:2px;}
+.brand-sub{font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;margin-top:3px;}
+.header-right{display:flex;align-items:center;gap:12px;}
+.clock{font-size:20px;font-weight:800;letter-spacing:2px;color:var(--accent);background:var(--surface);border:2px solid var(--accent);padding:6px 16px;border-radius:10px;}
+.conn-pill{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:20px;font-size:12px;font-weight:700;background:var(--surface);border:1.5px solid var(--border);}
+.conn-pill.ok{border-color:#86efac;color:var(--green);}
+.conn-pill.ok::before{content:"●";color:#86efac;}
+
+/* TABS */
+.tabs{display:flex;gap:6px;padding:14px 0 0;flex-wrap:wrap;}
+.tab-btn{display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1.5px solid var(--border);color:var(--text-muted);padding:10px 18px;border-radius:10px 10px 0 0;font-size:13px;font-weight:800;letter-spacing:1px;text-transform:uppercase;cursor:pointer;font-family:'Montserrat',sans-serif;border-bottom:none;transition:all .15s;}
+.tab-btn:hover{color:var(--accent);}
+.tab-btn.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-color:var(--accent);box-shadow:0 -2px 12px rgba(57,224,244,0.3);}
+.tab-ico{width:18px;height:18px;flex-shrink:0;}
+
+/* FILTERS */
+.filters{display:flex;gap:12px;flex-wrap:wrap;align-items:center;background:var(--bg);padding:14px 0;border-bottom:1.5px solid var(--border);margin-bottom:16px;}
+.filters input[type=text],.filters input[type=date]{padding:10px 14px;font-size:13px;font-weight:600;background:#fff;border:1.5px solid rgba(57,224,244,0.35);border-radius:10px;font-family:'Montserrat',sans-serif;text-transform:uppercase;}
+.filters input[type=text]::placeholder{text-transform:none;}
+.filters input[type=text]:focus,.filters input[type=date]:focus{outline:none;border-color:var(--accent);}
+.search-wrap{position:relative;}
+.search-wrap input{padding-right:28px;}
+.clear-btn{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:14px;}
+.dropdown-list{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1.5px solid var(--accent);border-radius:10px;max-height:220px;overflow-y:auto;z-index:100;display:none;box-shadow:0 8px 24px rgba(57,224,244,0.12);}
+.dropdown-list.open{display:block;}
+.dropdown-item{padding:10px 14px;font-size:13px;font-weight:500;cursor:pointer;}
+.dropdown-item:hover{background:#f0f0ff;color:var(--accent);}
+.catalog-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .15s;}
+.catalog-item:last-child{border-bottom:none;}
+.catalog-item:hover{background:#e6fafd;}
+
+/* BUTTONS */
+.btn-green{background:linear-gradient(135deg,#059669,#10b981);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;padding:10px 18px;font-family:'Montserrat',sans-serif;}
+.btn-green:hover{opacity:0.9;}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;padding:10px 18px;font-family:'Montserrat',sans-serif;letter-spacing:.5px;}
+.btn-primary:hover{opacity:0.9;}
+.btn-blue{background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;padding:10px 18px;font-family:'Montserrat',sans-serif;letter-spacing:.5px;}
+.btn-blue:hover{opacity:0.9;}
+.btn-secondary{background:#fff;border:1.5px solid var(--border);color:var(--text-muted);border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;padding:10px 18px;font-family:'Montserrat',sans-serif;}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent);}
+.btn-danger{background:#fee2e2;color:var(--red);border:1.5px solid #fca5a5;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;padding:5px 10px;font-family:'Montserrat',sans-serif;}
+.btn-danger:hover{background:#fca5a5;color:#fff;}
+.btn-edit{background:#fff;color:#333;border:2px solid #1a1a2e;border-radius:8px;font-size:14px;cursor:pointer;padding:4px 9px;line-height:1;box-shadow:0 2px 8px rgba(57,224,244,0.15);}
+.btn-edit:hover{background:#c4b5fd;color:#fff;}
+.btn-link{background:none;border:1.5px dashed rgba(57,224,244,0.4);color:var(--accent);font-weight:800;cursor:pointer;padding:8px 14px;border-radius:10px;font-size:12px;letter-spacing:1px;text-transform:uppercase;font-family:'Montserrat',sans-serif;}
+.btn-link:hover{background:rgba(57,224,244,0.05);}
+
+/* LAYOUT — main content with right sidebar */
+.layout{display:grid;grid-template-columns:1fr 280px;gap:18px;align-items:start;margin-bottom:40px;}
+@media(max-width:1100px){.layout{grid-template-columns:1fr;}}
+
+/* TABLE */
+.table-wrap{border-radius:12px;overflow:auto;border:1.5px solid var(--border);width:100%;box-shadow:var(--shadow);background:#fff;}
+table{width:100%;border-collapse:collapse;}
+thead th{background:linear-gradient(135deg,var(--accent),var(--accent2));padding:11px 8px;text-align:center;font-size:11px;font-weight:800;letter-spacing:0.5px;color:#fff;text-transform:uppercase;white-space:nowrap;}
+thead th.th-tot{background:#86efac;color:#1a1a2e;}
+thead th.th-act{background:#1a1a2e;color:#fff;width:100px;min-width:100px;}
+tbody td{padding:10px 8px;text-align:center;border-bottom:1px solid var(--border);color:var(--text);font-weight:500;font-size:13px;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:nth-child(even){background:#f8f8fd;}
+tbody tr:hover{background:#eeeeff;}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:800;background:#86efac;color:#1a1a2e;}
+.badge-blue{background:#cdf6fb;color:#0c6b78;}
+.badge-pink{background:#cdf6fb;color:#0c6b78;}
+.badge-amber{background:#cdf6fb;color:#0c6b78;}
+.empty{text-align:center;padding:48px;color:var(--text-muted);font-size:15px;font-weight:600;}
+code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6fb;color:#0c6b78;padding:2px 7px;border-radius:4px;font-weight:700;letter-spacing:0.5px;}
+.suppliers-cell{text-align:center;padding:10px 12px !important;}
+.supp-line{display:inline-block;margin-right:10px;margin-bottom:2px;padding:2px 8px;background:rgba(57,224,244,0.08);border-radius:6px;font-size:12px;}
+.supp-name{font-weight:700;color:var(--text);}
+.supp-price{color:var(--accent2);font-weight:600;margin-left:4px;}
+.stock-cell{cursor:pointer;display:inline-block;min-width:60px;padding:5px 12px;border-radius:8px;font-weight:800;font-size:15px;background:#86efac;color:#1a1a2e;transition:all .15s;}
+.stock-cell:hover{background:#5fdc8a;transform:scale(1.05);}
+.stock-cell.zero{background:#86efac;color:#1a1a2e;}
+.stock-cell.low{background:#86efac;color:#1a1a2e;}
+.stock-input{width:90px;padding:6px 10px;font-size:14px;font-weight:700;text-align:center;border:2px solid var(--accent);border-radius:8px;font-family:'Montserrat',sans-serif;}
+
+/* RIGHT SIDEBAR */
+.right-sticky{display:flex;flex-direction:column;gap:16px;position:sticky;top:16px;}
+.summary-card{background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:16px;padding:16px 20px;box-shadow:0 4px 20px rgba(57,224,244,0.4);display:flex;align-items:center;justify-content:space-between;}
+.summary-card.green{background:linear-gradient(135deg,#059669,#10b981);box-shadow:0 4px 20px rgba(5,150,105,0.4);}
+.summary-card.blue{background:linear-gradient(135deg,#3b82f6,#1d4ed8);box-shadow:0 4px 20px rgba(59,130,246,0.4);}
+.summary-card .lbl{color:#fff;font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;}
+.summary-card .val{color:#fff;font-size:28px;font-weight:900;letter-spacing:1px;}
+.right-card{background:var(--surface);border:2px solid var(--accent);border-radius:16px;padding:18px;box-shadow:0 0 16px 4px rgba(57,224,244,0.3),0 0 48px 12px rgba(57,224,244,0.1);}
+.right-card.blue{border-color:#3b82f6;box-shadow:0 0 16px 4px rgba(59,130,246,0.3),0 0 48px 12px rgba(59,130,246,0.1);}
+.right-card-title{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px;font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);}
+.right-card.blue .right-card-title{color:#3b82f6;}
+.right-card-list{max-height:280px;overflow-y:auto;}
+.list-row{display:flex;justify-content:space-between;align-items:center;padding:6px 4px;border-bottom:1px solid var(--border);}
+.list-row:last-child{border-bottom:none;}
+.list-row .info{flex:1;min-width:0;padding-right:6px;}
+.list-row .nm{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.list-row .ds{font-size:10px;color:var(--text-muted);}
+.list-row .qt{background:var(--accent);color:#fff;font-size:12px;font-weight:800;padding:2px 10px;border-radius:20px;flex-shrink:0;}
+.list-row .qt.blue{background:#3b82f6;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:500;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal{background:#fff;border-radius:20px;padding:28px;width:100%;max-width:680px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(57,224,244,0.3);border:2px solid rgba(57,224,244,0.4);}
+.modal-title{font-size:18px;font-weight:900;letter-spacing:1px;margin-bottom:18px;color:var(--text);}
+.modal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:16px;}
+.fg label{display:block;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;}
+.fg input,.fg select,.fg textarea{width:100%;padding:10px 12px;border:1.5px solid rgba(57,224,244,0.35);border-radius:8px;font-size:13px;font-weight:600;font-family:'Montserrat',sans-serif;color:var(--text);background:#fff;text-transform:uppercase;}
+.fg input::placeholder,.fg textarea::placeholder{text-transform:none;}
+.fg input[type=number]{text-transform:none;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--accent);}
+.suppliers-section{border-top:1.5px solid var(--border);padding-top:14px;margin-bottom:14px;}
+.suppliers-section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.suppliers-section-head .lbl{font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--accent);}
+.supplier-block{position:relative;border:1.5px dashed rgba(57,224,244,0.25);border-radius:12px;padding:14px 14px 10px;margin-bottom:12px;background:rgba(57,224,244,0.02);}
+.supplier-block .sup-num{position:absolute;top:-9px;left:14px;background:#fff;padding:0 8px;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--accent);}
+.supplier-block .rm-btn{position:absolute;top:8px;right:8px;background:#fee2e2;color:var(--red);border:1.5px solid #fca5a5;border-radius:8px;width:28px;height:28px;cursor:pointer;font-size:16px;font-weight:700;font-family:'Montserrat',sans-serif;line-height:1;display:flex;align-items:center;justify-content:center;padding:0;}
+.supplier-block .rm-btn:hover{background:#fca5a5;color:#fff;}
+.supplier-block .rm-btn:disabled{opacity:0.3;cursor:not-allowed;}
+.supplier-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;}
+.modal-info{background:#f8f8fd;border-radius:10px;padding:10px 14px;font-size:12px;color:var(--text-muted);margin-bottom:14px;border:1.5px solid var(--border);min-height:38px;}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;}
+
+/* FAB */
+.fab-add{position:fixed;bottom:32px;left:32px;z-index:200;background:rgba(97,255,169,0.38);color:#00c96b;border:4px solid #61ffa9;border-radius:50px;padding:14px 26px;font-size:14px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;box-shadow:0 4px 20px rgba(97,255,169,0.35);display:flex;align-items:center;gap:8px;transition:all 0.2s;backdrop-filter:blur(12px);font-family:'Montserrat',sans-serif;}
+.fab-add:hover{background:rgba(97,255,169,0.4);box-shadow:0 6px 28px rgba(97,255,169,0.5);transform:translateY(-2px);}
+
+/* TOASTS */
+.saving-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:9000;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;}
+.saving-overlay.open{display:flex;}
+.spinner{width:48px;height:48px;border:5px solid rgba(57,224,244,0.2);border-top-color:#39e0f4;border-radius:50%;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.saving-msg{color:#fff;font-size:15px;font-weight:800;letter-spacing:1px;}
+.success-toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border:3px solid #00c853;border-radius:20px;padding:28px 40px;text-align:center;z-index:9001;display:none;box-shadow:0 20px 60px rgba(0,200,83,0.25);}
+.success-toast.open{display:block;}
+.success-toast .check{font-size:48px;display:block;margin-bottom:8px;color:#00c853;}
+.success-toast .msg{font-size:16px;font-weight:800;color:#1a1a2e;}
+.alert-box{position:fixed;top:24px;right:24px;padding:14px 24px;border-radius:12px;font-size:14px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,0.12);z-index:9999;display:none;max-width:320px;}
+.alert-box.ok{background:#ecfdf5;color:#059669;border:1.5px solid #86efac;}
+.alert-box.err{background:#fef2f2;color:#dc2626;border:1.5px solid #fca5a5;}
+
+/* PIE CHART */
+.pie-card{background:var(--surface);border:2px solid var(--accent);border-radius:16px;padding:18px;text-align:center;box-shadow:0 0 16px 4px rgba(57,224,244,0.3),0 0 48px 12px rgba(57,224,244,0.1);}
+
+/* hidden tab panels */
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+</style>
+</head>
+<body>
+
+<div id="alert-box" class="alert-box"></div>
+<div class="saving-overlay" id="saving-overlay">
+  <div class="spinner"></div>
+  <div class="saving-msg" id="saving-msg">Salvataggio in corso...</div>
+</div>
+<div class="success-toast" id="success-toast">
+  <span class="check">✓</span>
+  <div class="msg" id="success-msg">Salvato!</div>
+</div>
+
+<div class="full-wrap"><div class="inner">
+
+<!-- HEADER -->
+<header>
+  <div class="brand">
+    <div class="brand-icon">
+      <svg viewBox="0 0 512 512" width="52" height="52" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="lg1" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#39e0f4"/><stop offset="100%" style="stop-color:#0ea5b8"/>
+        </linearGradient></defs>
+        <rect width="512" height="512" rx="96" fill="url(#lg1)"/>
+        <path d="M 256 256
+                 m 0 0
+                 a 14 14 0 1 1 14 -14
+                 a 38 38 0 1 1 -38 38
+                 a 62 62 0 1 1 62 -62
+                 a 86 86 0 1 1 -86 86
+                 a 110 110 0 1 1 110 -110
+                 a 134 134 0 1 1 -134 134
+                 a 158 158 0 1 1 158 -158"
+              fill="none" stroke="white" stroke-width="20" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div>
+      <div class="brand-name">GESTIONALE ACQUISTI</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="clock" id="clk">--:--</div>
+    <div class="conn-pill ok">Locale</div>
+  </div>
+</header>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab-btn active" data-tab="anagrafica">
+    <svg class="tab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><path d="M9 10h6M9 14h6M9 18h4"/></svg>
+    Anagrafica
+  </button>
+  <button class="tab-btn" data-tab="ordini">
+    <svg class="tab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.2a2 2 0 0 0 2-1.5L20 8H6"/><circle cx="9.5" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/></svg>
+    Ordini
+  </button>
+  <button class="tab-btn" data-tab="consegne">
+    <svg class="tab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7h11v10H2zM13 10h5l3 3v4h-8z"/><circle cx="6" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></svg>
+    Consegne
+  </button>
+  <button class="tab-btn" data-tab="armadietto">
+    <svg class="tab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M12 3v18"/><path d="M9 11v2"/><path d="M15 11v2"/><path d="M5 21l-1 1.5M19 21l1 1.5"/></svg>
+    Armadietto
+  </button>
+</div>
+
+<!-- ============ ANAGRAFICA ============ -->
+<div id="tab-anagrafica" class="tab-panel active">
+  <div class="filters">
+    <div class="search-wrap">
+      <input type="text" id="f-a-tipologia" placeholder="Cerca tipologia..." style="width:200px;" oninput="filtra()"/>
+      <button class="clear-btn" onclick="document.getElementById('f-a-tipologia').value='';filtra()">×</button>
+    </div>
+    <div class="search-wrap">
+      <input type="text" id="f-a-codice" placeholder="Cerca codice..." style="width:160px;" oninput="filtra()"/>
+      <button class="clear-btn" onclick="document.getElementById('f-a-codice').value='';filtra()">×</button>
+    </div>
+    <div class="search-wrap">
+      <input type="text" id="f-a-classe" placeholder="Classe..." style="width:140px;" oninput="filtra()"/>
+      <button class="clear-btn" onclick="document.getElementById('f-a-classe').value='';filtra()">×</button>
+    </div>
+    <div class="search-wrap">
+      <input type="text" id="f-a-fornitore" placeholder="Fornitore..." style="width:160px;" oninput="filtra()"/>
+      <button class="clear-btn" onclick="document.getElementById('f-a-fornitore').value='';filtra()">×</button>
+    </div>
+    <button class="btn-secondary" onclick="exportCSV('anagrafica')">⬇ Esporta CSV</button>
+    <label class="btn-secondary" style="cursor:pointer;">⬆ Importa CSV<input type="file" accept=".csv" onchange="importCSV(event,'anagrafica')" hidden></label>
+  </div>
+
+  <div class="layout">
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th class="th-act">Azioni</th>
+          <th>Tipologia</th>
+          <th>Codice</th>
+          <th>Classe</th>
+          <th>Fornitori e prezzi</th>
+        </tr></thead>
+        <tbody id="tb-anagrafica"><tr><td colspan="5" class="empty">Nessun materiale registrato</td></tr></tbody>
+      </table>
+    </div>
+    <div class="right-sticky">
+      <div class="summary-card"><span class="lbl">Materiali</span><span class="val" id="kpi-anagrafica">0</span></div>
+      <div class="right-card">
+        <div class="right-card-title">📊 Per Classe</div>
+        <div id="anagrafica-classes" class="right-card-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ ORDINI ============ -->
+<div id="tab-ordini" class="tab-panel">
+  <div class="filters">
+    <div class="search-wrap">
+      <input type="text" id="f-o-numero" placeholder="N° Ordine..." style="width:140px;" oninput="filtra()"/>
+      <button class="clear-btn" onclick="document.getElementById('f-o-numero').value='';filtra()">×</button>
+    </div>
+    <div class="search-wrap">
+      <input type="text" id="f-o-materiale" placeholder="Materiale..." style="width:180px;" oninput="filtra()"/>
+      <button class="clear-btn" onclick="document.getElementById('f-o-materiale').value='';filtra()">×</button>
+    </div>
+    <div class="search-wrap">
+      <input type="text" id="f-o-destinatario" placeholder="Destinatario..." style="width:160px;" oninput="filtra()"/>
+      <button class="clear-btn" onclick="document.getElementById('f-o-destinatario').value='';filtra()">×</button>
+    </div>
+    <div class="search-wrap">
+      <input type="text" id="f-o-fornitore" placeholder="Fornitore..." style="width:160px;" oninput="filtra()"/>
+      <button class="clear-btn" onclick="document.getElementById('f-o-fornitore').value='';filtra()">×</button>
+    </div>
+    <button class="btn-secondary" onclick="exportCSV('ordini')">⬇ Esporta CSV</button>
+  </div>
+
+  <div class="layout">
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th class="th-act">Azioni</th>
+          <th>N°</th><th>Data</th><th>Materiale</th><th>Destinatario</th>
+          <th>Fornitore</th><th>Qtà</th><th>Prezzo</th><th class="th-tot">Totale</th>
+        </tr></thead>
+        <tbody id="tb-ordini"><tr><td colspan="9" class="empty">Nessun ordine registrato</td></tr></tbody>
+      </table>
+    </div>
+    <div class="right-sticky">
+      <div class="summary-card"><span class="lbl">Ordini Tot.</span><span class="val" id="kpi-ordini-count">0</span></div>
+      <div class="summary-card green"><span class="lbl">Valore €</span><span class="val" id="kpi-ordini-valore">0</span></div>
+      <div class="right-card">
+        <div class="right-card-title">🏭 Per Fornitore</div>
+        <div id="ordini-fornitori" class="right-card-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ CONSEGNE ============ -->
+<div id="tab-consegne" class="tab-panel">
+  <div class="filters">
+    <div class="search-wrap">
+      <input type="text" id="f-c-linea" placeholder="Linea..." style="width:160px;" oninput="filtra()"/>
+      <button class="clear-btn" onclick="document.getElementById('f-c-linea').value='';filtra()">×</button>
+    </div>
+    <div class="search-wrap">
+      <input type="text" id="f-c-materiale" placeholder="Materiale..." style="width:180px;" oninput="filtra()"/>
+      <button class="clear-btn" onclick="document.getElementById('f-c-materiale').value='';filtra()">×</button>
+    </div>
+    <button class="btn-secondary" onclick="exportCSV('consegne')">⬇ Esporta CSV</button>
+  </div>
+
+  <div class="layout">
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th class="th-act">Azioni</th>
+          <th>Data</th><th>Linea</th><th>Materiale</th><th>Codice</th><th>Qtà</th>
+        </tr></thead>
+        <tbody id="tb-consegne"><tr><td colspan="6" class="empty">Nessuna consegna registrata</td></tr></tbody>
+      </table>
+    </div>
+    <div class="right-sticky">
+      <div class="summary-card blue"><span class="lbl">Consegne</span><span class="val" id="kpi-consegne-count">0</span></div>
+      <div class="summary-card"><span class="lbl">Pezzi Tot.</span><span class="val" id="kpi-consegne-pezzi">0</span></div>
+      <div class="right-card blue">
+        <div class="right-card-title">🚚 Per Linea</div>
+        <div id="consegne-linee" class="right-card-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ ARMADIETTO ============ -->
+<div id="tab-armadietto" class="tab-panel">
+  <div class="filters">
+    <div class="search-wrap">
+      <input type="text" id="f-arm-tipologia" placeholder="Cerca materiale..." style="width:240px;" oninput="filtra()"/>
+      <button class="clear-btn" onclick="document.getElementById('f-arm-tipologia').value='';filtra()">×</button>
+    </div>
+    <button class="btn-secondary" onclick="exportCSV('armadietto')">⬇ Esporta CSV</button>
+  </div>
+
+  <div class="layout">
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Materiale</th><th>Codice</th><th>Classe</th><th class="th-tot">Giacenza</th>
+        </tr></thead>
+        <tbody id="tb-armadietto"><tr><td colspan="4" class="empty">Aggiungi materiali in Anagrafica</td></tr></tbody>
+      </table>
+    </div>
+    <div class="right-sticky">
+      <div class="summary-card green"><span class="lbl">Pezzi Tot.</span><span class="val" id="kpi-arm-tot">0</span></div>
+      <div class="summary-card"><span class="lbl">Materiali</span><span class="val" id="kpi-arm-mat">0</span></div>
+      <div class="pie-card">
+        <canvas id="pieChart" width="200" height="200"></canvas>
+        <div id="pie-legend" style="margin-top:10px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div></div>
+
+<!-- MODAL ANAGRAFICA -->
+<div class="modal-overlay" id="modal-anagrafica">
+  <div class="modal">
+    <div class="modal-title" id="modal-anag-title">Aggiungi Materiale</div>
+    <div class="modal-grid">
+      <div class="fg" style="position:relative;">
+        <label>Tipologia *</label>
+        <input type="text" id="m-a-tipologia" placeholder="Inizia a scrivere per i suggerimenti..." autocomplete="off" oninput="searchCatalog()" onfocus="searchCatalog()" onblur="hideCatalog()">
+        <div class="dropdown-list" id="catalog-dropdown" style="position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1.5px solid var(--accent);border-radius:10px;max-height:260px;overflow-y:auto;z-index:200;display:none;box-shadow:0 8px 24px rgba(57,224,244,0.15);"></div>
+      </div>
+      <div class="fg"><label>Codice Conto *</label><input type="text" id="m-a-codice" placeholder="Es. 12345"></div>
+      <div class="fg"><label>Classe</label><input type="text" id="m-a-classe" placeholder="Es. Ferramenta"></div>
+    </div>
+    <div class="suppliers-section">
+      <div class="suppliers-section-head">
+        <span class="lbl">Fornitori e prezzi</span>
+        <button class="btn-link" onclick="addSupplierRow()">＋ Aggiungi fornitore</button>
+      </div>
+      <div id="supplier-rows"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('modal-anagrafica')">Annulla</button>
+      <button class="btn-primary" onclick="salvaAnagrafica()">Salva Materiale</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ORDINE -->
+<div class="modal-overlay" id="modal-ordine">
+  <div class="modal">
+    <div class="modal-title" id="modal-ord-title">Nuovo Ordine</div>
+    <div class="modal-grid">
+      <div class="fg"><label>N° Ordine *</label><input type="text" id="m-o-numero" placeholder="Es. ORD-001"></div>
+      <div class="fg"><label>Data *</label><input type="date" id="m-o-data"></div>
+      <div class="fg"><label>Destinatario *</label><input type="text" id="m-o-destinatario" placeholder="Es. Reparto A"></div>
+    </div>
+    <div class="modal-grid">
+      <div class="fg"><label>Materiale *</label>
+        <select id="m-o-materiale" onchange="updateOrdineFornitori()"><option value="">Seleziona...</option></select>
+      </div>
+      <div class="fg"><label>Fornitore *</label>
+        <select id="m-o-fornitore"><option value="">Seleziona...</option></select>
+      </div>
+      <div class="fg"><label>Quantità *</label><input type="number" min="1" id="m-o-qta" placeholder="0"></div>
+    </div>
+    <div class="modal-info" id="m-o-info">Seleziona un materiale per vedere fornitori e prezzi disponibili.</div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('modal-ordine')">Annulla</button>
+      <button class="btn-primary" onclick="salvaOrdine()">Registra Ordine</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONSEGNA -->
+<div class="modal-overlay" id="modal-consegna">
+  <div class="modal">
+    <div class="modal-title" id="modal-cons-title">Nuova Consegna</div>
+    <div class="modal-grid">
+      <div class="fg"><label>Data *</label><input type="date" id="m-c-data"></div>
+      <div class="fg"><label>Linea *</label><input type="text" id="m-c-linea" placeholder="Es. Linea 1"></div>
+      <div class="fg"><label>Materiale *</label>
+        <select id="m-c-materiale" onchange="updateConsegnaInfo()"><option value="">Seleziona...</option></select>
+      </div>
+      <div class="fg"><label>Quantità *</label><input type="number" min="1" id="m-c-qta" placeholder="0"></div>
+    </div>
+    <div class="modal-info" id="m-c-info">Seleziona un materiale per vedere giacenza e dati.</div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('modal-consegna')">Annulla</button>
+      <button class="btn-blue" onclick="salvaConsegna()">Registra Consegna</button>
+    </div>
+  </div>
+</div>
+
+<!-- FAB -->
+<button class="fab-add" id="fab" onclick="apriFab()">＋ Aggiungi</button>
+
+<script>
+// ===========================================================
+// STATE & PERSISTENCE
+// ===========================================================
+const STORAGE_KEY = 'gestionale_magazzino_v3';
+
+// ===========================================================
+// CATALOGO MATERIALI (database storico, sola lettura)
+// ===========================================================
+const CATALOGO = [{"tipologia":"01033041 PUNTA","codice":"AUTO_001","classe":"MATERIALE PER TAGLIO","fornitori":[{"nome":"ATOM","prezzo":0}]},{"tipologia":"01033405 PUNZONE DIAMETRO 4 MM","codice":"AUTO_002","classe":"MATERIALE PER TAGLIO","fornitori":[{"nome":"ATOM","prezzo":0}]},{"tipologia":"01046290 PUNZONE 3MM DENTATO L25","codice":"AUTO_003","classe":"MATERIALE PER TAGLIO","fornitori":[{"nome":"ATOM","prezzo":17.55}]},{"tipologia":"01046291 PUNZONE 4MM DENTATO L25","codice":"AUTO_004","classe":"MATERIALE PER TAGLIO","fornitori":[{"nome":"ATOM","prezzo":17.55}]},{"tipologia":"01046292 PUNZONE 5MM DENTATO L25","codice":"AUTO_005","classe":"MATERIALE PER TAGLIO","fornitori":[{"nome":"ATOM","prezzo":17.55}]},{"tipologia":"015016.0036.60 FIL SERAFIL 60 GRIS CLAIR","codice":"AUTO_006","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.0350.60 FIL SERAFIL 60 BLUE","codice":"AUTO_007","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.085.30 FIL SERAFIL 30 ROSE","codice":"AUTO_008","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.13}]},{"tipologia":"015016.097.60 FIL SERAFIL 60 ROSE","codice":"AUTO_009","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.1000.30 FIL SERAFIL 30 BIANCO","codice":"AUTO_010","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.13}]},{"tipologia":"015016.1000.40 FIL SERAFIL 40 BIANCO","codice":"AUTO_011","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.34}]},{"tipologia":"015016.1000.60 FIL SERAFIL 60 BLANC","codice":"AUTO_012","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.104.60 FIL SERAFIL 60 ROSE","codice":"AUTO_013","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.105.60 FIL SERAFIL 60 BORDEAUX","codice":"AUTO_014","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.1095.60 FIL SERAFIL VERT","codice":"AUTO_015","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.113.60 FIL SERAFIL 60 JAUNE","codice":"AUTO_016","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.114.30 FIL SERAFIL 30 JAUNE CLAIR","codice":"AUTO_017","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.13}]},{"tipologia":"015016.114.60 FIL SERAFIL 60 JAUNE","codice":"AUTO_018","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.1185.60 FIL SERAFIL 60 GRIS","codice":"AUTO_019","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.1411.60 FIL SERAFIL 60 ROSE","codice":"AUTO_020","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.1429.60 FIL SERAFIL 60 ROSE","codice":"AUTO_021","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.1452.60 FIL SERAFIL 60 GRIS","codice":"AUTO_022","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.15330.60 FIL SERAFIL 60 VIOLET","codice":"AUTO_023","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.156.30 FIL SERAFIL 30 ROSE","codice":"AUTO_024","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.13}]},{"tipologia":"015016.156.60 FIL SERAFIL 60","codice":"AUTO_025","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.166.60 FIL SERAFIL 60 BORDEAUX","codice":"AUTO_026","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.168.60 FIL SERAFIL 60 MARRON","codice":"AUTO_027","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.196.60 FIL SERAFIL 60 MARRON","codice":"AUTO_028","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.265.60 FIL SERAFIL 60 BEIGE","codice":"AUTO_029","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.2755.60 FIL SERAFIL 60 VERDE PATIO","codice":"AUTO_030","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.287.60 FIL SERAFIL 60 BEIGE","codice":"AUTO_031","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.3000.60 FIL SERAFIL 60 BEIGE CLAIR","codice":"AUTO_032","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.318.60 FIL SERAFIL 60 GRIS","codice":"AUTO_033","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.340.60 FIL SERAFIL 60 GRIS","codice":"AUTO_034","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.3525.60 FIL SERAFIL 60 GRIS CLAIR","codice":"AUTO_035","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.399.60 FIL SERAFIL 60 GRIS","codice":"AUTO_036","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.4000.40 FIL SERAFIL 40 NERO","codice":"AUTO_037","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.34}]},{"tipologia":"015016.4000.60 FIL SERAFIL 60 NOIR","codice":"AUTO_038","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.411.60 FIL SERAFIL 60 BLUE CLAIR","codice":"AUTO_039","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.416.60 FIL SERAFIL 60 GRIS","codice":"AUTO_040","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.465.60 FIL SERAFIL 60 BEIGE","codice":"AUTO_041","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.55.50 VIOLET","codice":"AUTO_042","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.578.60 FIL SERAFIL 60","codice":"AUTO_043","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.600.60 FIL SERAFIL 60","codice":"AUTO_044","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.637.60 FIL SERAFIL 60","codice":"AUTO_045","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.638.60 FIL SERAFIL 60","codice":"AUTO_046","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.70029.60 FIL SERAFIL 60 BLEU","codice":"AUTO_047","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.70115.30 FIL SERAFIL 30 GRIS","codice":"AUTO_048","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.13}]},{"tipologia":"015016.70115.60 FIL SERAFIL 60 GRIS","codice":"AUTO_049","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.70188.60 FIL SERAFIL 60","codice":"AUTO_050","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.70240.60 FIL SERAFIL 60 VIOLET","codice":"AUTO_051","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.71612.60 FIL SERAFIL 60 ROSE","codice":"AUTO_052","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.72127.60 FIL SERAFIL 60 LAVANDE","codice":"AUTO_053","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.72866.60 FIL SERAFIL 60","codice":"AUTO_054","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.7292.60 FIL SERAFIL 60 JAUNE","codice":"AUTO_055","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.73323.60 FIL SERAFIL 60","codice":"AUTO_056","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.73338.60 FIL SERAFIL 60 COUCHER DE SOLEIL","codice":"AUTO_057","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.73391.60 FIL SERAFIL 60 BEIGE FONCE","codice":"AUTO_058","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.73398.60 FIL SERAFIL 60 ROSE CLAIR","codice":"AUTO_059","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.7498.60 FIL SERAFIL 60 VERT","codice":"AUTO_060","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.7768.60 FIL SERAFIL 60 MARRON","codice":"AUTO_061","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.7769.60 FIL SERAFIL 60","codice":"AUTO_062","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.779.30 FIL SERAFIL 30 BEIGE","codice":"AUTO_063","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.13}]},{"tipologia":"015016.779.60 FIL SERAFIL 60 BEIGE","codice":"AUTO_064","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.7834.60 FIL SERAFIL 60","codice":"AUTO_065","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.788.60 FIL SERAFIL 60 BORDEAUX","codice":"AUTO_066","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.8038.60 FIL SERAFIL 60 VIOLET","codice":"AUTO_067","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.8073.60 FIL SERAFIL 60 BEIGE","codice":"AUTO_068","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.827.30 FIL SERAFIL 30 BLUE MARINE","codice":"AUTO_069","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.13}]},{"tipologia":"015016.827.60 FIL SERAFIL 60 MARINE","codice":"AUTO_070","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.8292.60 FIL SERAFIL 60 BORDEAUX","codice":"AUTO_071","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.85.60 FIL SERAFIL 60 ROSE","codice":"AUTO_072","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.867.60 FIL SERAFIL 60","codice":"AUTO_073","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.8845.60 FIL SERAFIL 60 GRIS","codice":"AUTO_074","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015016.8929.30 FIL SERAFIL 30 BORDEAUX","codice":"AUTO_075","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.13}]},{"tipologia":"015016.923.60 FIL SERAFIL 60 BLEU FONCE ACIER","codice":"AUTO_076","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"015021.000.30 FIL GUTERMANN MARA 30 NOIR","codice":"AUTO_077","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.0003.30 FIL GUTERMANN MARA 30 JAUNE","codice":"AUTO_078","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.075.30 FIL GUTERMANN MARA 30","codice":"AUTO_079","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.1036.30 FIL GUTERMANN MARA 30 VERT CLAIR","codice":"AUTO_080","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.111.30 FIL GUTERMANN MARA 30 BLANC","codice":"AUTO_081","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.1218.30 FIL GUTERMANN MARA 30 BEIGE","codice":"AUTO_082","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.1246.30 FIL GUTERMANN MARA 30","codice":"AUTO_083","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.1328.30 FIL GUTERMANN MARA 30","codice":"AUTO_084","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.158.30 FIL GUTERMANN MARA 30","codice":"AUTO_085","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.1643.30 FIL GUTERMANN MARA 30","codice":"AUTO_086","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.170.30 FIL GUTERMANN MARA 30 BEIGE","codice":"AUTO_087","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.192.30 FIL GUTERMANN MARA 30","codice":"AUTO_088","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.213.30 FIL GUTERMANN MARA 30 BLEU","codice":"AUTO_089","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.216.30 FIL GUTERMANN MARA 30","codice":"AUTO_090","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.2243.30 FIL GUTERMANN MARA 30 ROUGE","codice":"AUTO_091","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.230.30 FIL GUTERMANN MARA 30 MARRON","codice":"AUTO_092","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.237.30 FIL GUTERMANN MARA 30 VERT","codice":"AUTO_093","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.276.30 FIL GUTERMANN MARA 30 BLEU CLAIR","codice":"AUTO_094","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.2762.30 FIL GUTERMANN MARA 30 MARRON","codice":"AUTO_095","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.2827.30 FIL GUTERMANN MARA 30","codice":"AUTO_096","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.320.30 FIL GUTERMANN MARA 30 ROSE CLAIR","codice":"AUTO_097","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.325.30 FIL GUTERMANN MARA 30","codice":"AUTO_098","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.327.30 FIL GUTERMANN MARA 30 JAUNE","codice":"AUTO_099","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.332.30 FIL GUTERMANN MARA 30","codice":"AUTO_100","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.339.30 FIL GUTERMANN MARA 30 BLUE MARINE","codice":"AUTO_101","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.3454.30 FIL GUTERMANN MARA 30 GRIS","codice":"AUTO_102","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.352.30 FIL GUTERMANN MARA 30","codice":"AUTO_103","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.3529.30 FIL GUTERMANN MARA 30","codice":"AUTO_104","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.369.30 FIL GUTERMANN MARA 30 BORDEAUX","codice":"AUTO_105","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.3772.30 FIL GUTERMANN MARA 30 JAUNE","codice":"AUTO_106","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.38.30 FIL GUTERMANN MARA 30 GRIS","codice":"AUTO_107","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.383.30 FIL GUTERMANN MARA 30 ROSE","codice":"AUTO_108","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.3895.30 FIL GUTERMANN MARA 30 BLEU","codice":"AUTO_109","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.4029.30 FIL GUTERMANN MARA 30 ORANGE CLAIR","codice":"AUTO_110","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.4064.30 FIL GUTERMANN MARA 30 ROSE","codice":"AUTO_111","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.442.30 FIL GUTERMANN MARA 30 VIOLET","codice":"AUTO_112","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.4534.30 FIL GUTERMANN MARA 30 GRIS FONCE","codice":"AUTO_113","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.4567.30 FIL GUTERMANN MARA 30 BEIGE","codice":"AUTO_114","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.568.30 FIL GUTERMANN MARA 30 VIOLET CLAIR","codice":"AUTO_115","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.578.30 FIL GUTERMANN MARA 30 JAUNE CLAIR","codice":"AUTO_116","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.5958.30 FIL GUTERMANN MARA 30 VIOLET","codice":"AUTO_117","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.633.30 FIL GUTERMANN MARA 30 GRIS CLAIR","codice":"AUTO_118","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.6747.30 FIL GUTERMANN MARA 30 ROSE","codice":"AUTO_119","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.76.30 FIL GUTERMANN MARA 30 BLEU","codice":"AUTO_120","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.80.30 FIL GUTERMANN MARA 30 ROSE","codice":"AUTO_121","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.842.30 FIL GUTERMANN MARA 30 BEIGE","codice":"AUTO_122","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.890.30 FIL GUTERMANN MARA 30","codice":"AUTO_123","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.913.30 FIL GUTERMANN MARA 30 VERT","codice":"AUTO_124","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.927.30 FIL GUTERMANN MARA 30 ROSE","codice":"AUTO_125","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.9444.30 FIL GUTERMANN MARA 30 KAKI CLAIR","codice":"AUTO_126","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.9508.30 FIL GUTERMANN MARA 30 GRIS CLAIR","codice":"AUTO_127","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.963.30 FIL GUTERMANN MARA 30 BLEU CLAIR","codice":"AUTO_128","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.984.30 FIL GUTERMANN MARA 30 ROSE","codice":"AUTO_129","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015021.999.30 FIL GUTERMANN MARA 30 NOIR","codice":"AUTO_130","classe":"FILO","fornitori":[{"nome":"EUROPELL","prezzo":1.92}]},{"tipologia":"015065.280.50 SABA","codice":"AUTO_131","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":3.63}]},{"tipologia":"1033461 PUNZONI DIAMETRO 2 MM","codice":"AUTO_132","classe":"MATERIALE PER TAGLIO","fornitori":[{"nome":"ATOM","prezzo":0}]},{"tipologia":"1033465 PUNZONI DIAMETRO 3 MM","codice":"AUTO_133","classe":"MATERIALE PER TAGLIO","fornitori":[{"nome":"ATOM","prezzo":0}]},{"tipologia":"1046289 PUNZONE 2MM DENTATO L25","codice":"AUTO_134","classe":"MATERIALE PER TAGLIO","fornitori":[{"nome":"ATOM","prezzo":17.55}]},{"tipologia":"1R33405 PUNZONI PER DRILL DIM 4","codice":"AUTO_135","classe":"MATERIALE PER TAGLIO","fornitori":[{"nome":"ATOM","prezzo":18.9}]},{"tipologia":"2X TAPPETO (PER MOD.CZ+/L MATR. CZ+L100H040)","codice":"AUTO_136","classe":"MATERIALE PER TAGLIO","fornitori":[{"nome":"COMELZ","prezzo":860.0}]},{"tipologia":"9999.6499/T -NOIR","codice":"AUTO_137","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999. 22CHA297","codice":"AUTO_138","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999. 22CHA299","codice":"AUTO_139","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999. 2MR128","codice":"AUTO_140","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999. 2MR131","codice":"AUTO_141","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999. NADOE ROSE CLAIR LITCHI","codice":"AUTO_142","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999. NAGEK BEIGE 25MR205","codice":"AUTO_143","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999. NAGEO ROSE CLAIR DRAGEE 25MR201","codice":"AUTO_144","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999. NAGEP BLEU CLAIR AQUARELLE 25MR202","codice":"AUTO_145","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999. NAGES VIOLET CLAIR PARME 24CHA256","codice":"AUTO_146","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999. NAGEU BLEU FONCE ACIER 24CHA288","codice":"AUTO_147","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999. NF288 CARMIN 21CHA116","codice":"AUTO_148","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999. NQ337","codice":"AUTO_149","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999. NQ389","codice":"AUTO_150","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999. NR644","codice":"AUTO_151","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999. NR647","codice":"AUTO_152","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999. NR649","codice":"AUTO_153","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999. NR651","codice":"AUTO_154","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999. NS835","codice":"AUTO_155","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999. NS837","codice":"AUTO_156","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999. NT139","codice":"AUTO_157","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999. NU903 GRIS 23CHA219","codice":"AUTO_158","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999. T549","codice":"AUTO_159","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999.6460/A554 ARAGOSTA","codice":"AUTO_160","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999.NAAUC BEIGE SABLE","codice":"AUTO_161","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999.NAAUD JAUNE MAIS","codice":"AUTO_162","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999.NAAUG BLEU CANEBRIERE","codice":"AUTO_163","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999.NAAUH GRIS TOURTELLE","codice":"AUTO_164","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999.NAAUI ROSE CORAIL 24CHA169","codice":"AUTO_165","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999.NAAUK JAUNE CLAIR CITRON","codice":"AUTO_166","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999.NAAYZ KAKI SAVON 25MR196","codice":"AUTO_167","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999.NADKE CREMA","codice":"AUTO_168","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999.NADOF GRIS ATTIER","codice":"AUTO_169","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999.NM369 VERT CLAIR CELADON 23MR119","codice":"AUTO_170","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999.NM371 -BLANC VIVIENNE","codice":"AUTO_171","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999.NQ338 VIOLET CYCLAMEN","codice":"AUTO_172","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999.NQ388-ROSE","codice":"AUTO_173","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999.NR652-GRIS DE FER 23MR139","codice":"AUTO_174","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999.NU908-BLEU MARINE 24MR151","codice":"AUTO_175","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999.NVZ47 BEIGE DEAUVILLE","codice":"AUTO_176","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999.NW778 -VERT CLAIR PATIO","codice":"AUTO_177","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999.NW779-JAUNE MIMOSA","codice":"AUTO_178","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999.NW780-ROSE CLAIR EAU DE ROSE","codice":"AUTO_179","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999.NW782-ORANGE FONCE TUILE","codice":"AUTO_180","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999.NW784-VIOLET CLAIR LAVANDE","codice":"AUTO_181","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999.NW785-ORANGE COUCHER DE SOLEIL","codice":"AUTO_182","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999.NW786-GRIS CLAIR CIMENT","codice":"AUTO_183","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999.NW787-ROUGE FONCE PIMENT","codice":"AUTO_184","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999.NY558-ROSE MOLLY 24MR170","codice":"AUTO_185","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999.NY561 ROUGE FONCE CLOVER-24MR166","codice":"AUTO_186","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999.NY562-MARRON MANCHESTER 23CHA256","codice":"AUTO_187","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999.NY563-MARRON FONCE ANDY 24MR168","codice":"AUTO_188","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999.NY565-JAUNE THE SMITHS 24MR165","codice":"AUTO_189","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999.NY566-VERT GREEN 24MR169","codice":"AUTO_190","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999.NY567-FUSHIA ABBIE 23CHA253","codice":"AUTO_191","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999.NY569-BLEU FONCE FACTORY 24MR164","codice":"AUTO_192","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999.NZG75-BEIGE BISCOTTO","codice":"AUTO_193","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999.NZG77-BEIGE FONCE BILLY","codice":"AUTO_194","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999.NZG78-BLEU FONCE SIMONE","codice":"AUTO_195","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999.NZV46 GRIS PERLE","codice":"AUTO_196","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999.NZV47 BEIGE DEAUVILLE","codice":"AUTO_197","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"99999.NZV57 BLEU PARIS","codice":"AUTO_198","classe":"TINTA","fornitori":[{"nome":"PRATIKA","prezzo":15.4}]},{"tipologia":"ACCENDINI CORTI","codice":"AUTO_199","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"BRICOPESCI","prezzo":0.6}]},{"tipologia":"ACCENDINI LUNGHI","codice":"AUTO_200","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"BRICOPESCI","prezzo":1.9}]},{"tipologia":"ACCENDINI MEDI","codice":"AUTO_201","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"BRICOPESCI","prezzo":1.2}]},{"tipologia":"ACQUA DISTILLATA DA 4 LT","codice":"AUTO_202","classe":"PRODOTTI PER PULIZIA","fornitori":[{"nome":"BRICOPESCI","prezzo":3.6}]},{"tipologia":"ACQUA DISTILLATA DA 5 LT (BRICO)","codice":"AUTO_203","classe":"PRODOTTI PER PULIZIA","fornitori":[{"nome":"BRICOPESCI","prezzo":2.1}]},{"tipologia":"ACQUA DISTILLATA DA 5 LT (P)","codice":"AUTO_204","classe":"PRODOTTI PER PULIZIA","fornitori":[{"nome":"PRATIKA","prezzo":2.5}]},{"tipologia":"ACQUA DISTILLATA LT 5 (M)","codice":"AUTO_205","classe":"PRODOTTI PER PULIZIA","fornitori":[{"nome":"MAGINI","prezzo":1.95}]},{"tipologia":"ADATTATORE INSERTI MM 1/4 4MM","codice":"AUTO_206","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"PRATIKA","prezzo":11.487}]},{"tipologia":"ADESIVO PR20 PER GOMME PLASTICHE 20CC","codice":"AUTO_207","classe":"MATERIALE PER TAGLIO","fornitori":[{"nome":"ATOM","prezzo":0}]},{"tipologia":"ADH NITTO 5015P 35MMX50ML H48683 TERAMO","codice":"AUTO_208","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"TERAMO","prezzo":0}]},{"tipologia":"AEROGRAFO TAZZA > 500 CC UGELLO 1.5","codice":"AUTO_209","classe":"MATERIALE PER TINGITURA","fornitori":[{"nome":"FCR MACCHINE","prezzo":70.0}]},{"tipologia":"AEROGRAFO TAZZA >250CC/100CC UGELLO 1,2","codice":"AUTO_210","classe":"MATERIALE PER TINGITURA","fornitori":[{"nome":"FCR MACCHINE","prezzo":109.0}]},{"tipologia":"AGHI A MANO MIS 1","codice":"AUTO_211","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.2}]},{"tipologia":"AGHI A MANO MIS 1 (P)","codice":"AUTO_212","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.285}]},{"tipologia":"AGHI A MANO MIS 3","codice":"AUTO_213","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.2}]},{"tipologia":"AGHI A MANO N. 3 SADDLER'S NEEDLES","codice":"AUTO_214","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.285}]},{"tipologia":"AGHI A MANO N. 5 SADDLER'S NEEDLES (P)","codice":"AUTO_215","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.75}]},{"tipologia":"AGHI FG /SAN 160","codice":"AUTO_216","classe":"AGHI","fornitori":[{"nome":"ARMADIETTO","prezzo":0.5}]},{"tipologia":"AGHI FG/SAN 140","codice":"AUTO_217","classe":"AGHI","fornitori":[{"nome":"ARMADIETTO","prezzo":0.5}]},{"tipologia":"AGHI LR SAN 110","codice":"AUTO_218","classe":"AGHI","fornitori":[{"nome":"ARMADIETTO","prezzo":0.5}]},{"tipologia":"AGHI ORGAN NEEDLES 120/19 M- LR (M)","codice":"AUTO_219","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0}]},{"tipologia":"AGHI RG/SAN 140","codice":"AUTO_220","classe":"AGHI","fornitori":[{"nome":"ARMADIETTO","prezzo":0.5}]},{"tipologia":"AGHI RG/SAN 160","codice":"AUTO_221","classe":"AGHI","fornitori":[{"nome":"ARMADIETTO","prezzo":0.5}]},{"tipologia":"AGHI SVETHIA NEEDLES MIS.9","codice":"AUTO_222","classe":"AGHI","fornitori":[{"nome":"BACCETTI","prezzo":0}]},{"tipologia":"AGHI SYSTEM-S MIS 3","codice":"AUTO_223","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.64}]},{"tipologia":"AGHI SYSTEM-S MIS 5","codice":"AUTO_224","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.37}]},{"tipologia":"AGHI SYSTEM-S MIS 7","codice":"AUTO_225","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.37}]},{"tipologia":"AGO 100 R (M)","codice":"AUTO_226","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.41}]},{"tipologia":"AGO 100 R (P)","codice":"AUTO_227","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.24}]},{"tipologia":"AGO 110 R (M)","codice":"AUTO_228","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.41}]},{"tipologia":"AGO 110 R (P)","codice":"AUTO_229","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.25}]},{"tipologia":"AGO 120 R (M)","codice":"AUTO_230","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.41}]},{"tipologia":"AGO 120 R (P)","codice":"AUTO_231","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.24}]},{"tipologia":"AGO 130 R (M)","codice":"AUTO_232","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.41}]},{"tipologia":"AGO 130 R (P)","codice":"AUTO_233","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.24}]},{"tipologia":"AGO 140 R (M)","codice":"AUTO_234","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.41}]},{"tipologia":"AGO 140 R (P)","codice":"AUTO_235","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.27}]},{"tipologia":"AGO 150 R (M)","codice":"AUTO_236","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.41}]},{"tipologia":"AGO 150 R (P)","codice":"AUTO_237","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.24}]},{"tipologia":"AGO 160 R (M)","codice":"AUTO_238","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.41}]},{"tipologia":"AGO 160 R (P)","codice":"AUTO_239","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.24}]},{"tipologia":"AGO 170 R (P)","codice":"AUTO_240","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.24}]},{"tipologia":"AGO 180 R (P)","codice":"AUTO_241","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.24}]},{"tipologia":"AGO 60 R (M)","codice":"AUTO_242","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.41}]},{"tipologia":"AGO 60 R (P)","codice":"AUTO_243","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.25}]},{"tipologia":"AGO 70 R (M)","codice":"AUTO_244","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.41}]},{"tipologia":"AGO 70 R (P)","codice":"AUTO_245","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.24}]},{"tipologia":"AGO 80 R (M)","codice":"AUTO_246","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.41}]},{"tipologia":"AGO 80 R (P)","codice":"AUTO_247","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.24}]},{"tipologia":"AGO 90 R (M)","codice":"AUTO_248","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.41}]},{"tipologia":"AGO 90 R (P)","codice":"AUTO_249","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.24}]},{"tipologia":"AGO CURVO MM 45-50","codice":"AUTO_250","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":1.15}]},{"tipologia":"AGO CURVO MM 50-55","codice":"AUTO_251","classe":"FILO","fornitori":[{"nome":"PRATIKA","prezzo":1.15}]},{"tipologia":"AGO D 100 (M)","codice":"AUTO_252","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.34}]},{"tipologia":"AGO D 100 (P)","codice":"AUTO_253","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.31}]},{"tipologia":"AGO D 110 (M)","codice":"AUTO_254","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.34}]},{"tipologia":"AGO D 110 (P)","codice":"AUTO_255","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.31}]},{"tipologia":"AGO D 120 (M)","codice":"AUTO_256","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.34}]},{"tipologia":"AGO D 120 (P)","codice":"AUTO_257","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.31}]},{"tipologia":"AGO D 130 (M)","codice":"AUTO_258","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.34}]},{"tipologia":"AGO D 130 (P)","codice":"AUTO_259","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.31}]},{"tipologia":"AGO D 140 (M)","codice":"AUTO_260","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.34}]},{"tipologia":"AGO D 140 (P)","codice":"AUTO_261","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.31}]},{"tipologia":"AGO D 150 (M)","codice":"AUTO_262","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.34}]},{"tipologia":"AGO D 150 (P)","codice":"AUTO_263","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.31}]},{"tipologia":"AGO D 160 (M)","codice":"AUTO_264","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.34}]},{"tipologia":"AGO D 160 (P)","codice":"AUTO_265","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.31}]},{"tipologia":"AGO D 90 (M)","codice":"AUTO_266","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.34}]},{"tipologia":"AGO D 90 (P)","codice":"AUTO_267","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.31}]},{"tipologia":"AGO LR 100 (M)","codice":"AUTO_268","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.42}]},{"tipologia":"AGO LR 100 (P)","codice":"AUTO_269","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.27}]},{"tipologia":"AGO LR 110 (M)","codice":"AUTO_270","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.42}]},{"tipologia":"AGO LR 110 (P)","codice":"AUTO_271","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.27}]},{"tipologia":"AGO LR 120 (M)","codice":"AUTO_272","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.42}]},{"tipologia":"AGO LR 120 (P)","codice":"AUTO_273","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.27}]},{"tipologia":"AGO LR 130 (M)","codice":"AUTO_274","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.42}]},{"tipologia":"AGO LR 130 (P)","codice":"AUTO_275","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.27}]},{"tipologia":"AGO LR 140 (M)","codice":"AUTO_276","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.42}]},{"tipologia":"AGO LR 140 (P)","codice":"AUTO_277","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.27}]},{"tipologia":"AGO LR 150 (M)","codice":"AUTO_278","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.42}]},{"tipologia":"AGO LR 150 (P)","codice":"AUTO_279","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.27}]},{"tipologia":"AGO LR 160 (M)","codice":"AUTO_280","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.42}]},{"tipologia":"AGO LR 160 (P)","codice":"AUTO_281","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.27}]},{"tipologia":"AGO LR 170 (M)","codice":"AUTO_282","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.42}]},{"tipologia":"AGO LR 170 (P)","codice":"AUTO_283","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.27}]},{"tipologia":"AGO LR 180 (M)","codice":"AUTO_284","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.42}]},{"tipologia":"AGO LR 180 (P)","codice":"AUTO_285","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.27}]},{"tipologia":"AGO LR 80 (M)","codice":"AUTO_286","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.42}]},{"tipologia":"AGO LR 80 (P)","codice":"AUTO_287","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.27}]},{"tipologia":"AGO LR 90 (M)","codice":"AUTO_288","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.42}]},{"tipologia":"AGO LR 90 (P)","codice":"AUTO_289","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.27}]},{"tipologia":"AGO LR ORO 100 (M)","codice":"AUTO_290","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.62}]},{"tipologia":"AGO LR ORO 100 (P)","codice":"AUTO_291","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.35}]},{"tipologia":"AGO LR ORO 110 (M)","codice":"AUTO_292","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.62}]},{"tipologia":"AGO LR ORO 110 (P)","codice":"AUTO_293","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.35}]},{"tipologia":"AGO LR ORO 120 (M)","codice":"AUTO_294","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.62}]},{"tipologia":"AGO LR ORO 120 (P)","codice":"AUTO_295","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.35}]},{"tipologia":"AGO LR ORO 130 (M)","codice":"AUTO_296","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.62}]},{"tipologia":"AGO LR ORO 130 (P)","codice":"AUTO_297","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.35}]},{"tipologia":"AGO LR ORO 140 (M)","codice":"AUTO_298","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.62}]},{"tipologia":"AGO LR ORO 140 (P)","codice":"AUTO_299","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.35}]},{"tipologia":"AGO LR ORO 150 (M)","codice":"AUTO_300","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.62}]},{"tipologia":"AGO LR ORO 150 (P)","codice":"AUTO_301","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.35}]},{"tipologia":"AGO LR ORO 160 (M)","codice":"AUTO_302","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.62}]},{"tipologia":"AGO LR ORO 160 (P)","codice":"AUTO_303","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.35}]},{"tipologia":"AGO MILWARD N. 1","codice":"AUTO_304","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0}]},{"tipologia":"AGO MILWARD N. 2","codice":"AUTO_305","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0}]},{"tipologia":"AGO MILWARD N. 3","codice":"AUTO_306","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0}]},{"tipologia":"AGO MILWARD N. 4","codice":"AUTO_307","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0}]},{"tipologia":"AGO MILWARD N. 5","codice":"AUTO_308","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0}]},{"tipologia":"AGO MOCASSINO SELLAIO B/N N. 1","codice":"AUTO_309","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.285}]},{"tipologia":"AGO MOCASSINO SELLAIO B/N N. 3","codice":"AUTO_310","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.285}]},{"tipologia":"AGO PER APPLICAZIONE COLLA","codice":"AUTO_311","classe":"MATERIALE PER TAGLIO","fornitori":[{"nome":"ATOM","prezzo":0}]},{"tipologia":"AGO R ORO 100 (M)","codice":"AUTO_312","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.62}]},{"tipologia":"AGO R ORO 100 (P)","codice":"AUTO_313","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.37}]},{"tipologia":"AGO R ORO 110 (M)","codice":"AUTO_314","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.62}]},{"tipologia":"AGO R ORO 110 (P)","codice":"AUTO_315","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.37}]},{"tipologia":"AGO R ORO 120 (M)","codice":"AUTO_316","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.62}]},{"tipologia":"AGO R ORO 120 (P)","codice":"AUTO_317","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.37}]},{"tipologia":"AGO R ORO 130 (M)","codice":"AUTO_318","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.62}]},{"tipologia":"AGO R ORO 130 (P)","codice":"AUTO_319","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.37}]},{"tipologia":"AGO R ORO 140 (M)","codice":"AUTO_320","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.62}]},{"tipologia":"AGO R ORO 140 (P)","codice":"AUTO_321","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.37}]},{"tipologia":"AGO R ORO 80 (P)","codice":"AUTO_322","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.401}]},{"tipologia":"AGO R ORO 90 (M)","codice":"AUTO_323","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.62}]},{"tipologia":"AGO R ORO 90 (P)","codice":"AUTO_324","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.37}]},{"tipologia":"AGO S 100 (M)","codice":"AUTO_325","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.42}]},{"tipologia":"AGO S 110 (M)","codice":"AUTO_326","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.42}]},{"tipologia":"AGO S 120 (M)","codice":"AUTO_327","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.42}]},{"tipologia":"AGO S 130 (M)","codice":"AUTO_328","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.42}]},{"tipologia":"AGO S 140 (M)","codice":"AUTO_329","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.42}]},{"tipologia":"AGO S 150 (M)","codice":"AUTO_330","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.42}]},{"tipologia":"AGO S 180 (M)","codice":"AUTO_331","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.42}]},{"tipologia":"AGO S 90 (M)","codice":"AUTO_332","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.42}]},{"tipologia":"AGO S ORO 120 (M)","codice":"AUTO_333","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.5}]},{"tipologia":"AGO SD 100 (P)","codice":"AUTO_334","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.3}]},{"tipologia":"AGO SD 110 (P)","codice":"AUTO_335","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.3}]},{"tipologia":"AGO SD 120 (P)","codice":"AUTO_336","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.3}]},{"tipologia":"AGO SD 130 (P)","codice":"AUTO_337","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.3}]},{"tipologia":"AGO SD 140 (P)","codice":"AUTO_338","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.3}]},{"tipologia":"AGO SD 150 (P)","codice":"AUTO_339","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.3}]},{"tipologia":"AGO SD 160 (P)","codice":"AUTO_340","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.3}]},{"tipologia":"AGO SD 90 (P)","codice":"AUTO_341","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.3}]},{"tipologia":"AGO VR 100 (M)","codice":"AUTO_342","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.5}]},{"tipologia":"AGO VR 100 (P)","codice":"AUTO_343","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.35}]},{"tipologia":"AGO VR 110 (M)","codice":"AUTO_344","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.5}]},{"tipologia":"AGO VR 110 (P)","codice":"AUTO_345","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.35}]},{"tipologia":"AGO VR 120 (M)","codice":"AUTO_346","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.5}]},{"tipologia":"AGO VR 120 (P)","codice":"AUTO_347","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.35}]},{"tipologia":"AGO VR 130 (M)","codice":"AUTO_348","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.5}]},{"tipologia":"AGO VR 130 (P)","codice":"AUTO_349","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.35}]},{"tipologia":"AGO VR 140 (M)","codice":"AUTO_350","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.5}]},{"tipologia":"AGO VR 140 (P)","codice":"AUTO_351","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.35}]},{"tipologia":"AGO VR 150 (M)","codice":"AUTO_352","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.5}]},{"tipologia":"AGO VR 150 (P)","codice":"AUTO_353","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.35}]},{"tipologia":"AGO VR 160 (M)","codice":"AUTO_354","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.5}]},{"tipologia":"AGO VR 160 (P)","codice":"AUTO_355","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.35}]},{"tipologia":"AGO VR 90 (M)","codice":"AUTO_356","classe":"AGHI","fornitori":[{"nome":"MAGINI","prezzo":0.5}]},{"tipologia":"AGO VR 90 (P)","codice":"AUTO_357","classe":"AGHI","fornitori":[{"nome":"PRATIKA","prezzo":0.35}]},{"tipologia":"ALCOOL LT 1","codice":"AUTO_358","classe":"PRODOTTI PER PULIZIA","fornitori":[{"nome":"MAGINI","prezzo":3.03}]},{"tipologia":"ANELLO RASAFILO","codice":"AUTO_359","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"MAGINI","prezzo":1.5}]},{"tipologia":"ATTACK (P)","codice":"AUTO_360","classe":"COLLE","fornitori":[{"nome":"PRATIKA","prezzo":7.05}]},{"tipologia":"AVVITATORE","codice":"AUTO_361","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"BRICOPESCI","prezzo":44.0}]},{"tipologia":"BIADESIVO GIALLO 5MM (M)","codice":"AUTO_362","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"MAGINI","prezzo":0.9}]},{"tipologia":"BIADESIVO NITTO 10 MM TERAMO H00236","codice":"AUTO_363","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"TERAMO","prezzo":5.13}]},{"tipologia":"BIADESIVO NITTO 10 MM X 50 MT (P)","codice":"AUTO_364","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"PRATIKA","prezzo":5.52}]},{"tipologia":"BIADESIVO NITTO 10 MM X 50 MT (S)","codice":"AUTO_365","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"SERAFINI","prezzo":5.13}]},{"tipologia":"BIADESIVO NITTO 19 MM X 50 MT","codice":"AUTO_366","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"MAGINI","prezzo":0}]},{"tipologia":"BIADESIVO NITTO 2MMX50MT","codice":"AUTO_367","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"MAGINI","prezzo":1.53}]},{"tipologia":"BIADESIVO NITTO 3 MM TERAMO","codice":"AUTO_368","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"TERAMO","prezzo":1.64}]},{"tipologia":"BIADESIVO NITTO 3 MM X 50 MT (P)","codice":"AUTO_369","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"PRATIKA","prezzo":1.66}]},{"tipologia":"BIADESIVO NITTO 3MMX50MT (M)","codice":"AUTO_370","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"MAGINI","prezzo":1.37}]},{"tipologia":"BIADESIVO NITTO 3MMX50MT (S)","codice":"AUTO_371","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"SERAFINI","prezzo":1.53}]},{"tipologia":"BIADESIVO NITTO 4 MM TERAMO H80267","codice":"AUTO_372","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"TERAMO","prezzo":2.05}]},{"tipologia":"BIADESIVO NITTO 4 MM X 50 MT (M)","codice":"AUTO_373","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"MAGINI","prezzo":1.82}]},{"tipologia":"BIADESIVO NITTO 4 MM X 50 MT (P)","codice":"AUTO_374","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"PRATIKA","prezzo":2.21}]},{"tipologia":"BIADESIVO NITTO 4 MM X 50 MT (S)","codice":"AUTO_375","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"SERAFINI","prezzo":2.05}]},{"tipologia":"BIADESIVO NITTO 5 MM TERAMO H48682","codice":"AUTO_376","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"TERAMO","prezzo":1.72}]},{"tipologia":"BIADESIVO NITTO 5 MM X 50 MT","codice":"AUTO_377","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"SERAFINI","prezzo":2.57}]},{"tipologia":"BIADESIVO NITTO 5 MM X 50 MT (P)","codice":"AUTO_378","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"PRATIKA","prezzo":2.76}]},{"tipologia":"BIADESIVO NITTO 6 MM TERAMO L00081","codice":"AUTO_379","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"TERAMO","prezzo":3.08}]},{"tipologia":"BIADESIVO NITTO 6 MM X 50 MT (P)","codice":"AUTO_380","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"PRATIKA","prezzo":3.312}]},{"tipologia":"BIADESIVO NITTO 6 MM X 50MT (M)","codice":"AUTO_381","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"MAGINI","prezzo":2.73}]},{"tipologia":"BIADESIVO NITTO 6 MM X 50MT (S)","codice":"AUTO_382","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"SERAFINI","prezzo":2.68}]},{"tipologia":"BIADESIVO NITTO 8 MM TERAMO H48580","codice":"AUTO_383","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"TERAMO","prezzo":4.1}]},{"tipologia":"BIADESIVO NITTO 8 MM X 50 MT","codice":"AUTO_384","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"MAGINI","prezzo":6.24}]},{"tipologia":"BIADESIVO NITTO 8 MM X 50 MT (P)","codice":"AUTO_385","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"PRATIKA","prezzo":4.42}]},{"tipologia":"BIADESIVO NITTO 8 MM X 50 MT (S)","codice":"AUTO_386","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"SERAFINI","prezzo":4.1}]},{"tipologia":"BIADESIVO NITTO 9 MM X 50 MT (M)","codice":"AUTO_387","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"MAGINI","prezzo":4.1}]},{"tipologia":"BIADESIVO TESA 4914 50X12","codice":"AUTO_388","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"MAGINI","prezzo":10.6}]},{"tipologia":"BIADESIVO TESA 4914 50X03","codice":"AUTO_389","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"MAGINI","prezzo":3.01}]},{"tipologia":"BIADESIVO TESA 4914 50X04","codice":"AUTO_390","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"MAGINI","prezzo":3.99}]},{"tipologia":"BIADESIVO TESA 4914 50X06","codice":"AUTO_391","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"MAGINI","prezzo":5.3}]},{"tipologia":"BIADESIVO TESA 4965 50X06","codice":"AUTO_392","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"MAGINI","prezzo":5.79}]},{"tipologia":"BIADESIVO TIS 40/X 50X25","codice":"AUTO_393","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"MAGINI","prezzo":3.36}]},{"tipologia":"BIADESIVO TIS 40/Z 50X 38 (GIALLO)","codice":"AUTO_394","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"MAGINI","prezzo":6.21}]},{"tipologia":"BIADESIVO TIS.40/Z 50X19","codice":"AUTO_395","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"MAGINI","prezzo":3.04}]},{"tipologia":"BLOCCAPORTA -KB1E","codice":"AUTO_396","classe":"MATERIALE PER TAGLIO","fornitori":[{"nome":"COMELZ","prezzo":22.0}]},{"tipologia":"BOROTALCO","codice":"AUTO_397","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"MERCATISSIMO","prezzo":1.9}]},{"tipologia":"BRUCIAFILI BIANCO","codice":"AUTO_398","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"CFS","prezzo":26.9}]},{"tipologia":"BRUCIAFILI THREAD ZAP (GRIGIO)","codice":"AUTO_399","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"HOBBY PERLINE","prezzo":13.9}]},{"tipologia":"BRUGOLA MIS.1,5","codice":"AUTO_400","classe":"BRUGOLE/CACCIAVITI","fornitori":[{"nome":"MAGINI","prezzo":9.2}]},{"tipologia":"BRUGOLA MIS.2","codice":"AUTO_401","classe":"BRUGOLE/CACCIAVITI","fornitori":[{"nome":"MAGINI","prezzo":1.52}]},{"tipologia":"BRUGOLA MIS.3","codice":"AUTO_402","classe":"BRUGOLE/CACCIAVITI","fornitori":[{"nome":"MAGINI","prezzo":10.13}]},{"tipologia":"CACCIAVITE","codice":"AUTO_403","classe":"BRUGOLE/CACCIAVITI","fornitori":[{"nome":"MAGINI","prezzo":1.5}]},{"tipologia":"CACCIAVITE 1,5X60","codice":"AUTO_404","classe":"BRUGOLE/CACCIAVITI","fornitori":[{"nome":"MAGINI","prezzo":6.79}]},{"tipologia":"CACCIAVITE 2,5X60","codice":"AUTO_405","classe":"BRUGOLE/CACCIAVITI","fornitori":[{"nome":"MAGINI","prezzo":6.35}]},{"tipologia":"CACCIAVITE 2X60 (ESAGONALE)","codice":"AUTO_406","classe":"BRUGOLE/CACCIAVITI","fornitori":[{"nome":"MAGINI","prezzo":5.83}]},{"tipologia":"CACCIAVITE 3,5X100","codice":"AUTO_407","classe":"BRUGOLE/CACCIAVITI","fornitori":[{"nome":"MAGINI","prezzo":7.35}]},{"tipologia":"CACCIAVITE 3X60","codice":"AUTO_408","classe":"BRUGOLE/CACCIAVITI","fornitori":[{"nome":"MAGINI","prezzo":6.85}]},{"tipologia":"CACCIAVITE 4X100","codice":"AUTO_409","classe":"BRUGOLE/CACCIAVITI","fornitori":[{"nome":"MAGINI","prezzo":5.83}]},{"tipologia":"CACCIAVITE 5,5X125","codice":"AUTO_410","classe":"BRUGOLE/CACCIAVITI","fornitori":[{"nome":"MAGINI","prezzo":6.8}]},{"tipologia":"CACCIAVITE A STELLA","codice":"AUTO_411","classe":"BRUGOLE/CACCIAVITI","fornitori":[{"nome":"MAGINI","prezzo":4.74}]},{"tipologia":"CACCIAVITE BRUGOLA 0,9","codice":"AUTO_412","classe":"BRUGOLE/CACCIAVITI","fornitori":[{"nome":"MAGINI","prezzo":4.5}]},{"tipologia":"CACCIAVITE TORX T10 (P)","codice":"AUTO_413","classe":"BRUGOLE/CACCIAVITI","fornitori":[{"nome":"PRATIKA","prezzo":11.06}]},{"tipologia":"CACCIAVITE TORX T5","codice":"AUTO_414","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"MAGINI","prezzo":14.2}]},{"tipologia":"CACCIAVITE TORX T6","codice":"AUTO_415","classe":"BRUGOLE/CACCIAVITI","fornitori":[{"nome":"PRATIKA","prezzo":13.88}]},{"tipologia":"CACCIAVITE TORX T6 (D)","codice":"AUTO_416","classe":"BRUGOLE/CACCIAVITI","fornitori":[{"nome":"DATACOL","prezzo":6.77}]},{"tipologia":"CACCIAVITE TORX T6 (M)","codice":"AUTO_417","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"MAGINI","prezzo":14.2}]},{"tipologia":"CAMERA D'ARIA","codice":"AUTO_418","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"DECATHLON","prezzo":3.49}]},{"tipologia":"CARTA ABRASIVA 800 (STRAPPI)","codice":"AUTO_419","classe":"MATERIALE PER TINGITURA","fornitori":[{"nome":"DATACOL","prezzo":0.5}]},{"tipologia":"CARTA FORATA 110 GR. FOR41","codice":"AUTO_420","classe":"MATERIALE PER TAGLIO","fornitori":[{"nome":"STELMAR","prezzo":1.3}]},{"tipologia":"CARTA IN ROTOLO FORATA GR 60/80 H 152CM","codice":"AUTO_421","classe":"MATERIALE PER TAGLIO","fornitori":[{"nome":"STELMAR","prezzo":2.15}]},{"tipologia":"CARTA IN ROTOLO FORATA GR 60/80 H 162CM","codice":"AUTO_422","classe":"MATERIALE PER TAGLIO","fornitori":[{"nome":"STELMAR","prezzo":1.3}]},{"tipologia":"CARTA VETRATA ROSSA AD ANELLI (M)","codice":"AUTO_423","classe":"MATERIALE PER TINGITURA","fornitori":[{"nome":"MAGINI","prezzo":0.79}]},{"tipologia":"CARTA VETRATA ROSSA AD ANELLI (P)","codice":"AUTO_424","classe":"MATERIALE PER TINGITURA","fornitori":[{"nome":"PRATIKA","prezzo":0.5}]},{"tipologia":"CARTONE GRIGIO LISCIO","codice":"AUTO_425","classe":"MATERIALE PER TAGLIO","fornitori":[{"nome":"LAS","prezzo":1.35}]},{"tipologia":"CASSETTA METALLO","codice":"AUTO_426","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"MAGINI","prezzo":24.0}]},{"tipologia":"CASSETTIERA POSTI 9","codice":"AUTO_427","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"BRICOPESCI","prezzo":29.95}]},{"tipologia":"CASSETTIERA TERRY P. 16","codice":"AUTO_428","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"MAGINI","prezzo":17.6}]},{"tipologia":"CERA HOOCO","codice":"AUTO_429","classe":"CERETTE","fornitori":[{"nome":"MAGINI","prezzo":4.0}]},{"tipologia":"CERETTA NATURAL CUOIO N. 51","codice":"AUTO_430","classe":"CERETTE","fornitori":[{"nome":"PRATIKA","prezzo":2.5}]},{"tipologia":"CERETTA RETOUCHE 001 WHITE BIANCO","codice":"AUTO_431","classe":"CERETTE","fornitori":[{"nome":"MAGINI","prezzo":5.0}]},{"tipologia":"CERETTA RETOUCHE BLU MEZZANOTTE","codice":"AUTO_432","classe":"CERETTE","fornitori":[{"nome":"MAGINI","prezzo":5.0}]},{"tipologia":"CERETTA RETOUCHE BLU NAVY","codice":"AUTO_433","classe":"CERETTE","fornitori":[{"nome":"MAGINI","prezzo":5.0}]},{"tipologia":"CERETTA RETOUCHE NERA (M)","codice":"AUTO_434","classe":"CERETTE","fornitori":[{"nome":"MAGINI","prezzo":5.0}]},{"tipologia":"CERETTA COLONIT (M)","codice":"AUTO_435","classe":"CERETTE","fornitori":[{"nome":"MAGINI","prezzo":4.48}]},{"tipologia":"CERETTA COLONIT (P)","codice":"AUTO_436","classe":"CERETTE","fornitori":[{"nome":"PRATIKA","prezzo":4.2}]},{"tipologia":"CERETTA COLONIT NERA","codice":"AUTO_437","classe":"CERETTE","fornitori":[{"nome":"MAGINI","prezzo":4.48}]},{"tipologia":"CERETTA PATE DE LUXE BLUE MARINE","codice":"AUTO_438","classe":"CERETTE","fornitori":[{"nome":"MAGINI","prezzo":4.14}]},{"tipologia":"CERETTA RETOUCHE NERA COL 0009 (P)","codice":"AUTO_439","classe":"CERETTE","fornitori":[{"nome":"PRATIKA","prezzo":5.55}]},{"tipologia":"CERETTA SAPHIR","codice":"AUTO_440","classe":"CERETTE","fornitori":[{"nome":"PRATIKA","prezzo":7.78}]},{"tipologia":"CERETTA TARRAGO CREAM 50 ML COL.51","codice":"AUTO_441","classe":"CERETTE","fornitori":[{"nome":"PRATIKA","prezzo":2.5}]},{"tipologia":"CERETTA TOSTA COL.805 (BEIGE)","codice":"AUTO_442","classe":"CERETTE","fornitori":[{"nome":"PRATIKA","prezzo":3.79}]},{"tipologia":"CHIAVE APERTA E STELLA 10","codice":"AUTO_443","classe":"BRUGOLE/CACCIAVITI","fornitori":[{"nome":"MAGINI","prezzo":4.2}]},{"tipologia":"CHIAVE APERTA E STELLA 11","codice":"AUTO_444","classe":"BRUGOLE/CACCIAVITI","fornitori":[{"nome":"MAGINI","prezzo":4.3}]},{"tipologia":"CHIAVE APERTA E STELLA 12","codice":"AUTO_445","classe":"BRUGOLE/CACCIAVITI","fornitori":[{"nome":"MAGINI","prezzo":6.48}]},{"tipologia":"CHIAVE APERTA E STELLA 13","codice":"AUTO_446","classe":"BRUGOLE/CACCIAVITI","fornitori":[{"nome":"MAGINI","prezzo":6.56}]},{"tipologia":"CHIAVE APERTA E STELLA 14","codice":"AUTO_447","classe":"BRUGOLE/CACCIAVITI","fornitori":[{"nome":"MAGINI","prezzo":6.8}]},{"tipologia":"CHIAVE APERTA E STELLA 15","codice":"AUTO_448","classe":"BRUGOLE/CACCIAVITI","fornitori":[{"nome":"MAGINI","prezzo":6.95}]},{"tipologia":"CHIAVE APERTA E STELLA 16","codice":"AUTO_449","classe":"BRUGOLE/CACCIAVITI","fornitori":[{"nome":"MAGINI","prezzo":7.05}]},{"tipologia":"CHIAVE APERTA E STELLA 17","codice":"AUTO_450","classe":"BRUGOLE/CACCIAVITI","fornitori":[{"nome":"MAGINI","prezzo":7.18}]},{"tipologia":"CHIAVE APERTA E STELLA 18","codice":"AUTO_451","classe":"BRUGOLE/CACCIAVITI","fornitori":[{"nome":"MAGINI","prezzo":7.31}]},{"tipologia":"CHIAVE APERTA E STELLA 19","codice":"AUTO_452","classe":"BRUGOLE/CACCIAVITI","fornitori":[{"nome":"MAGINI","prezzo":7.38}]},{"tipologia":"CHIAVE APERTA E STELLA 20","codice":"AUTO_453","classe":"BRUGOLE/CACCIAVITI","fornitori":[{"nome":"MAGINI","prezzo":7.49}]},{"tipologia":"CHIAVE APERTA E STELLA 6","codice":"AUTO_454","classe":"BRUGOLE/CACCIAVITI","fornitori":[{"nome":"MAGINI","prezzo":2.33}]},{"tipologia":"CHIAVE APERTA E STELLA 7","codice":"AUTO_455","classe":"BRUGOLE/CACCIAVITI","fornitori":[{"nome":"MAGINI","prezzo":2.9}]},{"tipologia":"CHIAVE APERTA E STELLA 8","codice":"AUTO_456","classe":"BRUGOLE/CACCIAVITI","fornitori":[{"nome":"MAGINI","prezzo":4.08}]},{"tipologia":"CHIAVE APERTA E STELLA 9","codice":"AUTO_457","classe":"BRUGOLE/CACCIAVITI","fornitori":[{"nome":"MAGINI","prezzo":4.15}]},{"tipologia":"COLLA SPRAY 77 3M","codice":"AUTO_458","classe":"COLLE","fornitori":[{"nome":"PRATIKA","prezzo":21.0}]},{"tipologia":"COLLA VINILICA EXPRESS","codice":"AUTO_459","classe":"COLLE","fornitori":[{"nome":"MAGINI","prezzo":5.96}]},{"tipologia":"COLTELLO MOZART GUMMY 2515 (M)","codice":"AUTO_460","classe":"MATERIALE PER PREPARAZIONE","fornitori":[{"nome":"MAGINI","prezzo":12.9}]},{"tipologia":"COLTELLO MOZART GUMMY 2515 (P)","codice":"AUTO_461","classe":"MATERIALE PER PREPARAZIONE","fornitori":[{"nome":"PRATIKA","prezzo":12.9}]},{"tipologia":"COLTELLO OLFA L-1","codice":"AUTO_462","classe":"MATERIALE PER PREPARAZIONE","fornitori":[{"nome":"MAGINI","prezzo":8.7}]},{"tipologia":"COMPASSO","codice":"AUTO_463","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"ARMADIETTO","prezzo":10.0}]},{"tipologia":"CONTENITORE MEDIUM (M)","codice":"AUTO_464","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"MAGINI","prezzo":8.16}]},{"tipologia":"CONTENITORE MEDIUM (P)","codice":"AUTO_465","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"PRATIKA","prezzo":8.07}]},{"tipologia":"CONTENITORE MINOR (M)","codice":"AUTO_466","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"MAGINI","prezzo":6.31}]},{"tipologia":"CONTENITORE MINOR (P)","codice":"AUTO_467","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"PRATIKA","prezzo":5.56}]},{"tipologia":"COTTON FIOC -SCATOLA-","codice":"AUTO_468","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"MERCATISSIMO","prezzo":1.5}]},{"tipologia":"CREMA MANI LEOCREMA","codice":"AUTO_469","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"MERCATISSIMO","prezzo":1.99}]},{"tipologia":"CUOIOCOL (M)","codice":"AUTO_470","classe":"COLLE","fornitori":[{"nome":"MAGINI","prezzo":16.12}]},{"tipologia":"CUOIOCOL (P)","codice":"AUTO_471","classe":"COLLE","fornitori":[{"nome":"PRATIKA","prezzo":19.84}]},{"tipologia":"DATA REMOVE","codice":"AUTO_472","classe":"MATERIALE PER PREPARAZIONE","fornitori":[{"nome":"DATACOL","prezzo":10.71}]},{"tipologia":"DISTRIBUTORE BANCO PER LO SCOTCH","codice":"AUTO_473","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"MAGINI","prezzo":4.98}]},{"tipologia":"DISTRIBUTORE IMPUGNABILE 75","codice":"AUTO_474","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"MAGINI","prezzo":16.8}]},{"tipologia":"DITALI METALLO","codice":"AUTO_475","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"MAGINI","prezzo":10.92}]},{"tipologia":"ESTENSIBILE","codice":"AUTO_476","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"GRUPPO DM","prezzo":5.35}]},{"tipologia":"FAST CLEANER","codice":"AUTO_477","classe":"PRODOTTI PER PULIZIA","fornitori":[{"nome":"PRATIKA","prezzo":4.59}]},{"tipologia":"FORBICE GRANDI MIS 9","codice":"AUTO_478","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"MAGINI","prezzo":16.64}]},{"tipologia":"FORBICE RASAFILO (B)","codice":"AUTO_479","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"BACCETTI","prezzo":0.88}]},{"tipologia":"FORBICE RASAFILO (M)","codice":"AUTO_480","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"MAGINI","prezzo":1.16}]},{"tipologia":"FORBICE RASAFILO (P)","codice":"AUTO_481","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"PRATIKA","prezzo":1.1}]},{"tipologia":"FORBICE SCARPIERA 6 (M)","codice":"AUTO_482","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"MAGINI","prezzo":5.22}]},{"tipologia":"FORBICE SCARPIERA 6 (P)","codice":"AUTO_483","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"PRATIKA","prezzo":4.98}]},{"tipologia":"FORBICE SCARPIERA 7 (B)","codice":"AUTO_484","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"BACCETTI","prezzo":6.84}]},{"tipologia":"FORBICE SCARPIERA 7 (M)","codice":"AUTO_485","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"MAGINI","prezzo":5.68}]},{"tipologia":"FORBICE SCARPIERA 7 (P)","codice":"AUTO_486","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"PRATIKA","prezzo":5.45}]},{"tipologia":"FORBICE SCARPIERA 8","codice":"AUTO_487","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"PRATIKA","prezzo":4.63}]},{"tipologia":"FORBICI CAMPIONI DRABANT 6","codice":"AUTO_488","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"MAGINI","prezzo":15.65}]},{"tipologia":"FORBICI VIS FENNEK 8","codice":"AUTO_489","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"MAGINI","prezzo":9.5}]},{"tipologia":"GOMMA MAGICA","codice":"AUTO_490","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"MERCATISSIMO","prezzo":0.99}]},{"tipologia":"GUANTI IN LATTICE CONFEZIONE (P)","codice":"AUTO_491","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"PRATIKA","prezzo":14.21}]},{"tipologia":"GUANTI TG MEDIA UOMO 7COTONE","codice":"AUTO_492","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"GANT MAILLE","prezzo":4.1}]},{"tipologia":"LAME COMELZ HZ3B","codice":"AUTO_493","classe":"MATERIALE PER TAGLIO","fornitori":[{"nome":"COMELZ","prezzo":430.0}]},{"tipologia":"LAME COMELZ HZ5XL1P","codice":"AUTO_494","classe":"MATERIALE PER TAGLIO","fornitori":[{"nome":"COMELZ","prezzo":520.0}]},{"tipologia":"LOCTITE 638","codice":"AUTO_495","classe":"COLLE","fornitori":[{"nome":"MAGINI","prezzo":39.0}]},{"tipologia":"LOCTITE GR 20 ART 401","codice":"AUTO_496","classe":"COLLE","fornitori":[{"nome":"MAGINI","prezzo":6.7}]},{"tipologia":"MARTELLO PELLETTIERE (M)","codice":"AUTO_497","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"MAGINI","prezzo":8.65}]},{"tipologia":"MARTELLO DA PELLETTIERE (P)","codice":"AUTO_498","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"PRATIKA","prezzo":7.75}]},{"tipologia":"MARTELLO DATACOL","codice":"AUTO_499","classe":"MATERIALE PER PREPARAZIONE","fornitori":[{"nome":"DATACOL","prezzo":18.9}]},{"tipologia":"METRO AVVOLGIBILE DA 5 MT","codice":"AUTO_500","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"BRICOPESCI","prezzo":4.5}]},{"tipologia":"NASTRO AMERICANO","codice":"AUTO_501","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"DATACOL","prezzo":12.73}]},{"tipologia":"NASTRO CARTA 50X19 (B)","codice":"AUTO_502","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"BACCETTI","prezzo":1.45}]},{"tipologia":"NASTRO CARTA 50X19 (M)","codice":"AUTO_503","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"MAGINI","prezzo":1.62}]},{"tipologia":"NASTRO CARTA 50X19 (P)","codice":"AUTO_504","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"PRATIKA","prezzo":1.198}]},{"tipologia":"NASTRO CARTA 50X50 MM (B)","codice":"AUTO_505","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"BACCETTI","prezzo":3.3}]},{"tipologia":"NASTRO CARTA 50X50 MM (M)","codice":"AUTO_506","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"MAGINI","prezzo":4.17}]},{"tipologia":"NASTRO CARTA BLU 50X50","codice":"AUTO_507","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"LA PICENA","prezzo":4.51}]},{"tipologia":"PENNARELLO MARKEL INK CLEANER (M)","codice":"AUTO_508","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"MAGINI","prezzo":1.5}]},{"tipologia":"PENNE NERE COMELZ","codice":"AUTO_509","classe":"MATERIALE PER TAGLIO","fornitori":[{"nome":"COMELZ","prezzo":24.0}]},{"tipologia":"PENNE SEGNAPELLE ARGENTATA","codice":"AUTO_510","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"MAGINI","prezzo":0.73}]},{"tipologia":"PENNE SEGNAPELLE ARGENTATA (P)","codice":"AUTO_511","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"PRATIKA","prezzo":0.58}]},{"tipologia":"PENNE SEGNAPELLE BIANCA","codice":"AUTO_512","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"PORRINI","prezzo":1.6}]},{"tipologia":"PINZE A STRINGERE (M)","codice":"AUTO_513","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"MAGINI","prezzo":35.0}]},{"tipologia":"PINZE A STRINGERE (P)","codice":"AUTO_514","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"PRATIKA","prezzo":35.0}]},{"tipologia":"PINZE BLU BECCHI LUNGHI (M)","codice":"AUTO_515","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"MAGINI","prezzo":5.11}]},{"tipologia":"PINZE BLU BECCHI LUNGHI (P)","codice":"AUTO_516","classe":"PINZE","fornitori":[{"nome":"PRATIKA","prezzo":12.4}]},{"tipologia":"PINZE AD ALLARGARE PUNTA CURVA","codice":"AUTO_517","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"MAGINI","prezzo":16.13}]},{"tipologia":"PISTOLA TERMO INCOLLANTE (M)","codice":"AUTO_518","classe":"MATERIALE A CORRENTE","fornitori":[{"nome":"MAGINI","prezzo":12.42}]},{"tipologia":"PISTOLA TERMO INCOLLANTE(BRICO)","codice":"AUTO_519","classe":"MATERIALE A CORRENTE","fornitori":[{"nome":"BRICOPESCI","prezzo":9.9}]},{"tipologia":"PUNTERUOLI (B)","codice":"AUTO_520","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"BACCETTI","prezzo":2.7}]},{"tipologia":"PUNTERUOLI (M)","codice":"AUTO_521","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"MAGINI","prezzo":2.4}]},{"tipologia":"PUNTERUOLI (P)","codice":"AUTO_522","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"PRATIKA","prezzo":2.42}]},{"tipologia":"RIGHELLO METALLO 15CM (M)","codice":"AUTO_523","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"MAGINI","prezzo":1.8}]},{"tipologia":"RIGHELLO METALLO 15CM (P)","codice":"AUTO_524","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"PRATIKA","prezzo":6.81}]},{"tipologia":"RIGHELLO METALLO 30CM","codice":"AUTO_525","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"MAGINI","prezzo":9.5}]},{"tipologia":"RIGHELLO METALLO 50CM","codice":"AUTO_526","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"MAGINI","prezzo":5.6}]},{"tipologia":"SCOTCH MARRONE ALTEZZA 7,5 CM (M)","codice":"AUTO_527","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"MAGINI","prezzo":3.62}]},{"tipologia":"SCOTCH MARRONE ALTEZZA 7,5 CM (P)","codice":"AUTO_528","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"PRATIKA","prezzo":1.94}]},{"tipologia":"SCOTCH TRASPARENTE CM 2 (M)","codice":"AUTO_529","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"MAGINI","prezzo":1.41}]},{"tipologia":"SCOTCH TRASPARENTE CM 2 (P)","codice":"AUTO_530","classe":"NASTRI/BIADESIVI","fornitori":[{"nome":"PRATIKA","prezzo":1.09}]},{"tipologia":"SET BRUGOLE","codice":"AUTO_531","classe":"BRUGOLE/CACCIAVITI","fornitori":[{"nome":"MAGINI","prezzo":13.79}]},{"tipologia":"SET BRUGOLE (P)","codice":"AUTO_532","classe":"MATERIALE PER PREPARAZIONE","fornitori":[{"nome":"PRATIKA","prezzo":19.86}]},{"tipologia":"SIDOL","codice":"AUTO_533","classe":"PRODOTTI PER PULIZIA","fornitori":[{"nome":"BRICOPESCI","prezzo":2.9}]},{"tipologia":"SILICONE EXTRA BOMBOLETTA 500 ML (M)","codice":"AUTO_534","classe":"SILICONI","fornitori":[{"nome":"MAGINI","prezzo":2.75}]},{"tipologia":"SILICONE EXTRA BOMBOLETTA 500 ML (P)","codice":"AUTO_535","classe":"SILICONI","fornitori":[{"nome":"PRATIKA","prezzo":2.3}]},{"tipologia":"SILICONE EXTRA BOMBOLETTA 500 ML (B)","codice":"AUTO_536","classe":"SILICONI","fornitori":[{"nome":"BACCETTI","prezzo":2.94}]},{"tipologia":"SILICONE LIQUIDO -EMULSIL-","codice":"AUTO_537","classe":"SILICONI","fornitori":[{"nome":"MAGINI","prezzo":14.7}]},{"tipologia":"SILICON POLISH COLLONIL (M)","codice":"AUTO_538","classe":"SILICONI","fornitori":[{"nome":"MAGINI","prezzo":3.25}]},{"tipologia":"SILICON POLISH COLLONIL (P)","codice":"AUTO_539","classe":"SILICONI","fornitori":[{"nome":"PRATIKA","prezzo":3.5}]},{"tipologia":"TAGLIERINI GRANDI","codice":"AUTO_540","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"MAGINI","prezzo":2.2}]},{"tipologia":"TAGLIERINI GRANDI PLASTICA (P)","codice":"AUTO_541","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"PRATIKA","prezzo":11.6}]},{"tipologia":"TENAGLIE","codice":"AUTO_542","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"MAGINI","prezzo":15.12}]},{"tipologia":"TENAGLIE NERE","codice":"AUTO_543","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"PRATIKA","prezzo":9.0}]},{"tipologia":"TRINCETTO TINA PIATTO MM23X230","codice":"AUTO_544","classe":"MATERIALE PER PREPARAZIONE","fornitori":[{"nome":"BACCETTI","prezzo":45.0}]},{"tipologia":"VINAVIL 100 GR","codice":"AUTO_545","classe":"COLLE","fornitori":[{"nome":"BRICOPESCI","prezzo":2.9}]},{"tipologia":"WD40 SPRAY 290ML","codice":"AUTO_546","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"BRICOPESCI","prezzo":6.9}]},{"tipologia":"WD40 SPRAY 500 ML","codice":"AUTO_547","classe":"MATERIALE DA BANCO","fornitori":[{"nome":"BRICOPESCI","prezzo":10.0}]}];
+
+let lastSelectedCatalogItem = null;
+
+let state = { anagrafica: [], ordini: [], consegne: [], armadietto: {} };
+let activeTab = 'anagrafica';
+let editingAnagId = null;
+let editingOrdId = null;
+let editingConsId = null;
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const p = JSON.parse(raw);
+      state = {
+        anagrafica: p.anagrafica||[],
+        ordini: p.ordini||[],
+        consegne: p.consegne||[],
+        armadietto: p.armadietto||{}
+      };
+    }
+  }catch(e){console.error(e);}
+}
+function saveState(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  catch(e){ showAlert('Errore salvataggio: '+e.message,'err'); }
+}
+
+// ===========================================================
+// CLOCK
+// ===========================================================
+setInterval(()=>{
+  const n=new Date();
+  document.getElementById('clk').textContent = ('0'+n.getHours()).slice(-2)+':'+('0'+n.getMinutes()).slice(-2);
+},1000);
+
+// ===========================================================
+// TABS
+// ===========================================================
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+    activeTab = btn.dataset.tab;
+    filtra();
+  });
+});
+
+// ===========================================================
+// HELPERS
+// ===========================================================
+function escapeHtml(s){
+  return String(s==null?'':s).replace(/[&<>"']/g,c=>(
+    {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
+  ));
+}
+function todayLocal(){
+  const d=new Date();
+  return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);
+}
+// Convert ISO yyyy-mm-dd → gg/mm/aaaa for display
+function formatDataIT(iso){
+  if(!iso) return '';
+  const p = String(iso).split('-');
+  if(p.length !== 3) return iso;
+  return p[2]+'/'+p[1]+'/'+p[0];
+}
+function showAlert(msg,kind){
+  const e=document.getElementById('alert-box');
+  e.textContent=msg; e.className='alert-box '+kind; e.style.display='block';
+  setTimeout(()=>{e.style.display='none';},3500);
+}
+function showSpinner(msg){
+  document.getElementById('saving-msg').textContent=msg||'Salvataggio in corso...';
+  document.getElementById('saving-overlay').classList.add('open');
+}
+function hideSpinner(){ document.getElementById('saving-overlay').classList.remove('open'); }
+function showSuccess(msg){
+  hideSpinner();
+  const t=document.getElementById('success-toast');
+  document.getElementById('success-msg').textContent=msg||'Salvato!';
+  t.classList.add('open');
+  setTimeout(()=>t.classList.remove('open'),1500);
+}
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); editingAnagId=null; editingOrdId=null; editingConsId=null; }
+
+// ===========================================================
+// CATALOGO — autocomplete suggestions
+// ===========================================================
+function searchCatalog(){
+  const inp = document.getElementById('m-a-tipologia');
+  const dd = document.getElementById('catalog-dropdown');
+  if(!inp || !dd) return;
+  const q = inp.value.trim().toUpperCase();
+  if(!q || q.length < 2){
+    dd.style.display = 'none';
+    return;
+  }
+  const tokens = q.split(/\s+/).filter(Boolean);
+  const results = CATALOGO.filter(item => {
+    const hay = (item.tipologia + ' ' + item.classe + ' ' + item.fornitori.map(f=>f.nome).join(' ')).toUpperCase();
+    return tokens.every(t => hay.includes(t));
+  }).slice(0, 30);
+  if(!results.length){
+    dd.innerHTML = '<div style="padding:14px;text-align:center;color:var(--text-muted);font-size:12px;font-weight:600;">Nessun materiale trovato nel database</div>';
+    dd.style.display = 'block';
+    return;
+  }
+  dd.innerHTML = results.map((item, i) => {
+    const fornStr = item.fornitori.map(f => f.nome + (f.prezzo ? ' €'+f.prezzo.toFixed(2) : '')).join(' · ');
+    return `<div class="catalog-item" onmousedown="selectCatalogItem(${CATALOGO.indexOf(item)})">
+      <div style="font-weight:700;font-size:13px;color:var(--text);">${escapeHtml(item.tipologia)}</div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">
+        <span style="color:var(--accent2);font-weight:600;">${escapeHtml(item.classe||'')}</span>
+        ${fornStr ? ' · '+escapeHtml(fornStr) : ''}
+      </div>
+    </div>`;
+  }).join('');
+  dd.style.display = 'block';
+}
+
+function hideCatalog(){
+  setTimeout(() => {
+    const dd = document.getElementById('catalog-dropdown');
+    if(dd) dd.style.display = 'none';
+  }, 200);
+}
+
+function selectCatalogItem(idx){
+  const item = CATALOGO[idx];
+  if(!item) return;
+  lastSelectedCatalogItem = item;
+  document.getElementById('m-a-tipologia').value = item.tipologia;
+  document.getElementById('m-a-codice').value = item.codice;
+  document.getElementById('m-a-classe').value = item.classe || '';
+  // Replace supplier rows with the catalog ones
+  document.getElementById('supplier-rows').innerHTML = '';
+  supRowCount = 0;
+  if(item.fornitori && item.fornitori.length){
+    item.fornitori.forEach(f => addSupplierRow(f.nome, f.prezzo || ''));
+  } else {
+    addSupplierRow();
+  }
+  document.getElementById('catalog-dropdown').style.display = 'none';
+}
+
+// ===========================================================
+// ANAGRAFICA — multi-supplier
+// ===========================================================
+let supRowCount = 0;
+
+function addSupplierRow(nome='',prezzo=''){
+  supRowCount++;
+  const idx=supRowCount;
+  const c=document.getElementById('supplier-rows');
+  const div=document.createElement('div');
+  div.className='supplier-block'; div.dataset.idx=idx;
+  div.innerHTML = `
+    <span class="sup-num">Fornitore ${document.querySelectorAll('.supplier-block').length+1}</span>
+    <button class="rm-btn" onclick="removeSupplierRow(${idx})" title="Rimuovi fornitore">×</button>
+    <div class="supplier-grid">
+      <div class="fg"><label>Nome fornitore *</label><input type="text" class="sup-name" placeholder="Es. Acme Srl" value="${escapeHtml(nome)}"></div>
+      <div class="fg"><label>Prezzo €</label><input type="number" step="0.01" class="sup-price" placeholder="0.00" value="${escapeHtml(prezzo)}"></div>
+    </div>
+  `;
+  c.appendChild(div);
+  refreshRmBtns();
+  renumberSuppliers();
+}
+function removeSupplierRow(idx){
+  const r=document.querySelector(`.supplier-block[data-idx="${idx}"]`);
+  if(r) r.remove();
+  refreshRmBtns();
+  renumberSuppliers();
+}
+function refreshRmBtns(){
+  const rows=document.querySelectorAll('.supplier-block');
+  rows.forEach(r=>{ r.querySelector('.rm-btn').disabled = rows.length===1; });
+}
+function renumberSuppliers(){
+  document.querySelectorAll('.supplier-block').forEach((r,i)=>{
+    const lbl=r.querySelector('.sup-num');
+    if(lbl) lbl.textContent='Fornitore '+(i+1);
+  });
+}
+function resetSupplierRows(suppliers){
+  document.getElementById('supplier-rows').innerHTML='';
+  supRowCount=0;
+  if(suppliers && suppliers.length){
+    suppliers.forEach(s=>addSupplierRow(s.nome,s.prezzo));
+  } else {
+    addSupplierRow();
+  }
+}
+
+function apriAnagrafica(){
+  editingAnagId=null;
+  lastSelectedCatalogItem=null;
+  document.getElementById('modal-anag-title').textContent='Aggiungi Materiale';
+  ['m-a-tipologia','m-a-codice','m-a-classe'].forEach(id=>document.getElementById(id).value='');
+  const dd=document.getElementById('catalog-dropdown');
+  if(dd) dd.style.display='none';
+  resetSupplierRows();
+  openModal('modal-anagrafica');
+}
+
+function modificaAnagrafica(id){
+  const a=state.anagrafica.find(x=>x.id===id); if(!a) return;
+  editingAnagId=id;
+  document.getElementById('modal-anag-title').textContent='Modifica Materiale';
+  document.getElementById('m-a-tipologia').value=a.tipologia;
+  document.getElementById('m-a-codice').value=a.codice;
+  document.getElementById('m-a-classe').value=a.classe||'';
+  resetSupplierRows(a.fornitori);
+  openModal('modal-anagrafica');
+}
+
+function salvaAnagrafica(){
+  const tipologia=document.getElementById('m-a-tipologia').value.trim().toUpperCase();
+  const codice=document.getElementById('m-a-codice').value.trim().toUpperCase();
+  const classe=document.getElementById('m-a-classe').value.trim().toUpperCase();
+  if(!tipologia||!codice){ showAlert('Tipologia e codice sono obbligatori','err'); return; }
+
+  const fornitori=[];
+  document.querySelectorAll('.supplier-block').forEach(r=>{
+    const nome=r.querySelector('.sup-name').value.trim().toUpperCase();
+    const prezzo=parseFloat(r.querySelector('.sup-price').value);
+    if(nome && !isNaN(prezzo)) fornitori.push({nome,prezzo});
+  });
+  if(!fornitori.length){ showAlert('Aggiungi almeno un fornitore con prezzo','err'); return; }
+
+  showSpinner('Salvataggio...');
+  if(editingAnagId){
+    const a=state.anagrafica.find(x=>x.id===editingAnagId);
+    const oldCodice=a.codice;
+    a.tipologia=tipologia; a.codice=codice; a.classe=classe; a.fornitori=fornitori;
+    if(oldCodice!==codice && state.armadietto[oldCodice]!=null){
+      state.armadietto[codice]=state.armadietto[oldCodice];
+      delete state.armadietto[oldCodice];
+    }
+  } else {
+    const item={ id:Date.now(), tipologia, codice, classe, fornitori };
+    state.anagrafica.push(item);
+    if(!(codice in state.armadietto)) state.armadietto[codice]=0;
+  }
+  saveState();
+  closeModal('modal-anagrafica');
+  showSuccess(editingAnagId?'Modificato!':'Aggiunto!');
+  filtra();
+}
+
+function eliminaAnagrafica(id){
+  if(!confirm('Eliminare questo materiale? Ordini e consegne associate restano nello storico.')) return;
+  state.anagrafica = state.anagrafica.filter(a=>a.id!==id);
+  saveState();
+  showSuccess('Eliminato!');
+  filtra();
+}
+
+// ===========================================================
+// ORDINI
+// ===========================================================
+function fillSelects(){
+  ['m-o-materiale','m-c-materiale'].forEach(id=>{
+    const el=document.getElementById(id);
+    const cur=el.value;
+    el.innerHTML='<option value="">Seleziona...</option>'+
+      state.anagrafica.map(a=>`<option value="${a.id}">${escapeHtml(a.tipologia)} (${escapeHtml(a.codice)})</option>`).join('');
+    el.value=cur;
+  });
+}
+
+function apriOrdine(){
+  if(!state.anagrafica.length){ showAlert('Aggiungi prima un materiale in Anagrafica','err'); return; }
+  editingOrdId = null;
+  document.getElementById('modal-ord-title').textContent='Nuovo Ordine';
+  document.getElementById('m-o-numero').value='';
+  document.getElementById('m-o-data').value=todayLocal();
+  document.getElementById('m-o-destinatario').value='';
+  document.getElementById('m-o-materiale').value='';
+  document.getElementById('m-o-fornitore').innerHTML='<option value="">Seleziona...</option>';
+  document.getElementById('m-o-qta').value='';
+  document.getElementById('m-o-info').textContent='Seleziona un materiale per vedere fornitori e prezzi disponibili.';
+  openModal('modal-ordine');
+}
+
+function modificaOrdine(id){
+  const o = state.ordini.find(x=>x.id===id); if(!o) return;
+  editingOrdId = id;
+  document.getElementById('modal-ord-title').textContent='Modifica Ordine';
+  document.getElementById('m-o-numero').value=o.numero;
+  document.getElementById('m-o-data').value=o.data;
+  document.getElementById('m-o-destinatario').value=o.destinatario;
+  // Pre-select material
+  fillSelects();
+  document.getElementById('m-o-materiale').value=o.materialeId;
+  // Trigger fornitori update
+  updateOrdineFornitori();
+  // Try to match the supplier index
+  const mat = state.anagrafica.find(a=>a.id===o.materialeId);
+  if(mat){
+    const idx = mat.fornitori.findIndex(f=>f.nome===o.fornitore && f.prezzo===o.prezzo);
+    if(idx>=0) document.getElementById('m-o-fornitore').value = idx;
+  }
+  document.getElementById('m-o-qta').value=o.qta;
+  openModal('modal-ordine');
+}
+
+function updateOrdineFornitori(){
+  const matId=parseInt(document.getElementById('m-o-materiale').value);
+  const sel=document.getElementById('m-o-fornitore');
+  const info=document.getElementById('m-o-info');
+  const mat=state.anagrafica.find(a=>a.id===matId);
+  if(!mat){
+    sel.innerHTML='<option value="">Seleziona...</option>';
+    info.textContent='Seleziona un materiale per vedere fornitori e prezzi disponibili.';
+    return;
+  }
+  sel.innerHTML='<option value="">Seleziona...</option>'+
+    mat.fornitori.map((f,i)=>`<option value="${i}">${escapeHtml(f.nome)} — €${f.prezzo.toFixed(2)}</option>`).join('');
+  info.innerHTML = `<b>Codice:</b> ${escapeHtml(mat.codice)} &nbsp;·&nbsp; <b>Classe:</b> ${escapeHtml(mat.classe||'—')} &nbsp;·&nbsp; <b>Giacenza attuale:</b> ${state.armadietto[mat.codice]||0}`;
+}
+
+function salvaOrdine(){
+  const numero=document.getElementById('m-o-numero').value.trim().toUpperCase();
+  const data=document.getElementById('m-o-data').value;
+  const destinatario=document.getElementById('m-o-destinatario').value.trim().toUpperCase();
+  const matId=parseInt(document.getElementById('m-o-materiale').value);
+  const fornIdx=document.getElementById('m-o-fornitore').value;
+  const qta=parseInt(document.getElementById('m-o-qta').value);
+  if(!numero||!data||!destinatario||!matId||fornIdx===''||!qta||qta<1){
+    showAlert('Compila tutti i campi','err'); return;
+  }
+  const mat=state.anagrafica.find(a=>a.id===matId);
+  const f=mat.fornitori[parseInt(fornIdx)];
+  showSpinner('Salvataggio ordine...');
+
+  if(editingOrdId){
+    // Modifica: ripristina giacenza vecchia, applica la nuova
+    const old = state.ordini.find(x=>x.id===editingOrdId);
+    if(old) state.armadietto[old.codice] = (state.armadietto[old.codice]||0) - old.qta;
+    const updated = {
+      id: editingOrdId, numero, data, destinatario,
+      materialeId:matId, materiale:mat.tipologia, codice:mat.codice,
+      fornitore:f.nome, prezzo:f.prezzo, qta, totale:f.prezzo*qta
+    };
+    state.ordini = state.ordini.map(x => x.id===editingOrdId ? updated : x);
+    state.armadietto[mat.codice] = (state.armadietto[mat.codice]||0) + qta;
+  } else {
+    state.ordini.push({
+      id:Date.now(), numero, data, destinatario,
+      materialeId:matId, materiale:mat.tipologia, codice:mat.codice,
+      fornitore:f.nome, prezzo:f.prezzo, qta, totale:f.prezzo*qta
+    });
+    state.armadietto[mat.codice]=(state.armadietto[mat.codice]||0)+qta;
+  }
+
+  saveState();
+  closeModal('modal-ordine');
+  showSuccess(editingOrdId ? 'Ordine modificato!' : 'Ordine registrato!');
+  filtra();
+}
+
+function eliminaOrdine(id){
+  if(!confirm('Eliminare l\'ordine? La giacenza verrà ridotta.')) return;
+  const o=state.ordini.find(x=>x.id===id);
+  if(o) state.armadietto[o.codice]=(state.armadietto[o.codice]||0)-o.qta;
+  state.ordini=state.ordini.filter(x=>x.id!==id);
+  saveState(); showSuccess('Eliminato!'); filtra();
+}
+
+// ===========================================================
+// CONSEGNE
+// ===========================================================
+function apriConsegna(){
+  if(!state.anagrafica.length){ showAlert('Aggiungi prima un materiale in Anagrafica','err'); return; }
+  editingConsId = null;
+  document.getElementById('modal-cons-title').textContent='Nuova Consegna';
+  document.getElementById('m-c-data').value=todayLocal();
+  document.getElementById('m-c-linea').value='';
+  document.getElementById('m-c-materiale').value='';
+  document.getElementById('m-c-qta').value='';
+  document.getElementById('m-c-info').textContent='Seleziona un materiale per vedere giacenza e dati.';
+  openModal('modal-consegna');
+}
+
+function modificaConsegna(id){
+  const c = state.consegne.find(x=>x.id===id); if(!c) return;
+  editingConsId = id;
+  document.getElementById('modal-cons-title').textContent='Modifica Consegna';
+  document.getElementById('m-c-data').value=c.data;
+  document.getElementById('m-c-linea').value=c.linea;
+  fillSelects();
+  document.getElementById('m-c-materiale').value=c.materialeId;
+  updateConsegnaInfo();
+  document.getElementById('m-c-qta').value=c.qta;
+  openModal('modal-consegna');
+}
+
+function updateConsegnaInfo(){
+  const matId=parseInt(document.getElementById('m-c-materiale').value);
+  const info=document.getElementById('m-c-info');
+  const mat=state.anagrafica.find(a=>a.id===matId);
+  if(!mat){ info.textContent='Seleziona un materiale per vedere giacenza e dati.'; return; }
+  const g=state.armadietto[mat.codice]||0;
+  info.innerHTML = `<b>Codice:</b> ${escapeHtml(mat.codice)} &nbsp;·&nbsp; <b>Classe:</b> ${escapeHtml(mat.classe||'—')} &nbsp;·&nbsp; <b>Giacenza:</b> <span style="color:${g>0?'var(--green)':'var(--red)'};font-weight:800;">${g}</span>`;
+}
+
+function salvaConsegna(){
+  const data=document.getElementById('m-c-data').value;
+  const linea=document.getElementById('m-c-linea').value.trim().toUpperCase();
+  const matId=parseInt(document.getElementById('m-c-materiale').value);
+  const qta=parseInt(document.getElementById('m-c-qta').value);
+  if(!data||!linea||!matId||!qta||qta<1){ showAlert('Compila tutti i campi','err'); return; }
+  const mat=state.anagrafica.find(a=>a.id===matId);
+
+  if(editingConsId){
+    const old = state.consegne.find(x=>x.id===editingConsId);
+    if(old) state.armadietto[old.codice] = (state.armadietto[old.codice]||0) + old.qta;
+    const g=state.armadietto[mat.codice]||0;
+    if(qta>g && !confirm(`Giacenza attuale: ${g}. Vuoi comunque consegnare ${qta}? La giacenza diventerà negativa.`)){
+      // Rollback the temporary restore
+      if(old) state.armadietto[old.codice] = (state.armadietto[old.codice]||0) - old.qta;
+      return;
+    }
+    showSpinner('Salvataggio consegna...');
+    const updated = {
+      id: editingConsId, data, linea,
+      materialeId:matId, materiale:mat.tipologia, codice:mat.codice, qta
+    };
+    state.consegne = state.consegne.map(x => x.id===editingConsId ? updated : x);
+    state.armadietto[mat.codice] = g - qta;
+  } else {
+    const g=state.armadietto[mat.codice]||0;
+    if(qta>g && !confirm(`Giacenza attuale: ${g}. Vuoi comunque consegnare ${qta}? La giacenza diventerà negativa.`)) return;
+    showSpinner('Salvataggio consegna...');
+    state.consegne.push({
+      id:Date.now(), data, linea,
+      materialeId:matId, materiale:mat.tipologia, codice:mat.codice, qta
+    });
+    state.armadietto[mat.codice]=g-qta;
+  }
+
+  saveState();
+  closeModal('modal-consegna');
+  showSuccess(editingConsId ? 'Consegna modificata!' : 'Consegna registrata!');
+  filtra();
+}
+
+function eliminaConsegna(id){
+  if(!confirm('Eliminare la consegna? La giacenza verrà ripristinata.')) return;
+  const c=state.consegne.find(x=>x.id===id);
+  if(c) state.armadietto[c.codice]=(state.armadietto[c.codice]||0)+c.qta;
+  state.consegne=state.consegne.filter(x=>x.id!==id);
+  saveState(); showSuccess('Eliminato!'); filtra();
+}
+
+// ===========================================================
+// ARMADIETTO — edit stock inline
+// ===========================================================
+function editStock(codice){
+  const cell=document.getElementById('stock-'+CSS.escape(codice));
+  if(!cell) return;
+  const cur=state.armadietto[codice]||0;
+  cell.outerHTML = `<input type="number" class="stock-input" id="stock-${codice}" value="${cur}" onblur="saveStock('${codice.replace(/'/g,"\\'")}',this.value)" onkeypress="if(event.key==='Enter')this.blur()">`;
+  const inp=document.getElementById('stock-'+codice);
+  if(inp){ inp.focus(); inp.select(); }
+}
+function saveStock(codice,val){
+  const n=parseInt(val);
+  state.armadietto[codice]=isNaN(n)?0:n;
+  saveState(); filtra();
+}
+
+// ===========================================================
+// FAB — context-aware
+// ===========================================================
+function apriFab(){
+  if(activeTab==='anagrafica') apriAnagrafica();
+  else if(activeTab==='ordini') apriOrdine();
+  else if(activeTab==='consegne') apriConsegna();
+  else if(activeTab==='armadietto'){
+    document.querySelector('.tab-btn[data-tab="anagrafica"]').click();
+    setTimeout(apriAnagrafica,150);
+  }
+}
+
+// ===========================================================
+// FILTERS & RENDERING
+// ===========================================================
+function filtra(){
+  fillSelects();
+  if(activeTab==='anagrafica') renderAnagrafica();
+  else if(activeTab==='ordini') renderOrdini();
+  else if(activeTab==='consegne') renderConsegne();
+  else if(activeTab==='armadietto') renderArmadietto();
+}
+
+function renderAnagrafica(){
+  const fT=document.getElementById('f-a-tipologia').value.toLowerCase();
+  const fC=document.getElementById('f-a-codice').value.toLowerCase();
+  const fCl=document.getElementById('f-a-classe').value.toLowerCase();
+  const fF=document.getElementById('f-a-fornitore').value.toLowerCase();
+  const rows=state.anagrafica.filter(a=>{
+    if(fT && !a.tipologia.toLowerCase().includes(fT)) return false;
+    if(fC && !a.codice.toLowerCase().includes(fC)) return false;
+    if(fCl && !(a.classe||'').toLowerCase().includes(fCl)) return false;
+    if(fF && !a.fornitori.some(s=>s.nome.toLowerCase().includes(fF))) return false;
+    return true;
+  });
+
+  const tb=document.getElementById('tb-anagrafica');
+  if(!rows.length){
+    tb.innerHTML='<tr><td colspan="5" class="empty">Nessun materiale</td></tr>';
+  } else {
+    tb.innerHTML=rows.map(a=>{
+      const forn=a.fornitori.map(f=>
+        `<span class="supp-line"><span class="supp-name">${escapeHtml(f.nome)}</span><span class="supp-price">€${f.prezzo.toFixed(2)}</span></span>`
+      ).join('');
+      return `<tr>
+        <td style="white-space:nowrap;text-align:center;">
+          <button class="btn-edit" onclick="modificaAnagrafica(${a.id})" title="Modifica">✏️</button><button class="btn-danger" onclick="eliminaAnagrafica(${a.id})" style="margin-left:6px;vertical-align:middle;" title="Elimina">×</button>
+        </td>
+        <td style="font-weight:700;">${escapeHtml(a.tipologia)}</td>
+        <td><code class="codice">${escapeHtml(a.codice)}</code></td>
+        <td>${escapeHtml(a.classe||'—')}</td>
+        <td class="suppliers-cell">${forn}</td>
+      </tr>`;
+    }).join('');
+  }
+  document.getElementById('kpi-anagrafica').textContent=state.anagrafica.length;
+
+  // classes breakdown
+  const byClass={};
+  state.anagrafica.forEach(a=>{
+    const c=a.classe||'(senza classe)';
+    byClass[c]=(byClass[c]||0)+1;
+  });
+  const cd=document.getElementById('anagrafica-classes');
+  const entries=Object.entries(byClass).sort((a,b)=>b[1]-a[1]);
+  cd.innerHTML = entries.length
+    ? entries.map(([k,v])=>`<div class="list-row"><div class="info"><div class="nm">${escapeHtml(k)}</div></div><span class="qt">${v}</span></div>`).join('')
+    : '<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:10px;">Nessun dato</div>';
+}
+
+function renderOrdini(){
+  const fN=document.getElementById('f-o-numero').value.toLowerCase();
+  const fM=document.getElementById('f-o-materiale').value.toLowerCase();
+  const fD=document.getElementById('f-o-destinatario').value.toLowerCase();
+  const fF=document.getElementById('f-o-fornitore').value.toLowerCase();
+  const rows=state.ordini.filter(o=>{
+    if(fN && !o.numero.toLowerCase().includes(fN)) return false;
+    if(fM && !(o.materiale.toLowerCase().includes(fM)||o.codice.toLowerCase().includes(fM))) return false;
+    if(fD && !o.destinatario.toLowerCase().includes(fD)) return false;
+    if(fF && !o.fornitore.toLowerCase().includes(fF)) return false;
+    return true;
+  }).slice().reverse();
+
+  const tb=document.getElementById('tb-ordini');
+  if(!rows.length){
+    tb.innerHTML='<tr><td colspan="9" class="empty">Nessun ordine</td></tr>';
+  } else {
+    tb.innerHTML=rows.map(o=>`<tr>
+      <td style="white-space:nowrap;text-align:center;">
+        <button class="btn-edit" onclick="modificaOrdine(${o.id})" title="Modifica">✏️</button><button class="btn-danger" onclick="eliminaOrdine(${o.id})" style="margin-left:6px;vertical-align:middle;" title="Elimina">×</button>
+      </td>
+      <td><code class="codice">${escapeHtml(o.numero)}</code></td>
+      <td>${formatDataIT(o.data)}</td>
+      <td><b>${escapeHtml(o.materiale)}</b><br><code class="codice">${escapeHtml(o.codice)}</code></td>
+      <td>${escapeHtml(o.destinatario)}</td>
+      <td>${escapeHtml(o.fornitore)}</td>
+      <td><span class="badge badge-pink">${o.qta}</span></td>
+      <td>€${o.prezzo.toFixed(2)}</td>
+      <td><span class="badge">€${o.totale.toFixed(2)}</span></td>
+    </tr>`).join('');
+  }
+
+  document.getElementById('kpi-ordini-count').textContent=state.ordini.length;
+  const valore=state.ordini.reduce((s,o)=>s+o.totale,0);
+  document.getElementById('kpi-ordini-valore').textContent=valore.toFixed(0);
+
+  const byF={};
+  state.ordini.forEach(o=>{ byF[o.fornitore]=(byF[o.fornitore]||0)+o.totale; });
+  const e=Object.entries(byF).sort((a,b)=>b[1]-a[1]);
+  const c=document.getElementById('ordini-fornitori');
+  c.innerHTML = e.length
+    ? e.map(([k,v])=>`<div class="list-row"><div class="info"><div class="nm">${escapeHtml(k)}</div></div><span class="qt">€${v.toFixed(0)}</span></div>`).join('')
+    : '<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:10px;">Nessun ordine</div>';
+}
+
+function renderConsegne(){
+  const fL=document.getElementById('f-c-linea').value.toLowerCase();
+  const fM=document.getElementById('f-c-materiale').value.toLowerCase();
+  const rows=state.consegne.filter(c=>{
+    if(fL && !c.linea.toLowerCase().includes(fL)) return false;
+    if(fM && !(c.materiale.toLowerCase().includes(fM)||c.codice.toLowerCase().includes(fM))) return false;
+    return true;
+  }).slice().reverse();
+
+  const tb=document.getElementById('tb-consegne');
+  if(!rows.length){
+    tb.innerHTML='<tr><td colspan="6" class="empty">Nessuna consegna</td></tr>';
+  } else {
+    tb.innerHTML=rows.map(c=>`<tr>
+      <td style="white-space:nowrap;text-align:center;">
+        <button class="btn-edit" onclick="modificaConsegna(${c.id})" title="Modifica">✏️</button><button class="btn-danger" onclick="eliminaConsegna(${c.id})" style="margin-left:6px;vertical-align:middle;" title="Elimina">×</button>
+      </td>
+      <td>${formatDataIT(c.data)}</td>
+      <td><b>${escapeHtml(c.linea)}</b></td>
+      <td>${escapeHtml(c.materiale)}</td>
+      <td><code class="codice">${escapeHtml(c.codice)}</code></td>
+      <td><span class="badge badge-blue">${c.qta}</span></td>
+    </tr>`).join('');
+  }
+
+  document.getElementById('kpi-consegne-count').textContent=state.consegne.length;
+  document.getElementById('kpi-consegne-pezzi').textContent=state.consegne.reduce((s,c)=>s+c.qta,0);
+
+  const byL={};
+  state.consegne.forEach(c=>{ byL[c.linea]=(byL[c.linea]||0)+c.qta; });
+  const e=Object.entries(byL).sort((a,b)=>b[1]-a[1]);
+  const cont=document.getElementById('consegne-linee');
+  cont.innerHTML = e.length
+    ? e.map(([k,v])=>`<div class="list-row"><div class="info"><div class="nm">${escapeHtml(k)}</div></div><span class="qt blue">${v}</span></div>`).join('')
+    : '<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:10px;">Nessuna consegna</div>';
+}
+
+function renderArmadietto(){
+  const fT=document.getElementById('f-arm-tipologia').value.toLowerCase();
+  const rows=state.anagrafica.filter(a=>{
+    if(fT && !(a.tipologia.toLowerCase().includes(fT)||a.codice.toLowerCase().includes(fT))) return false;
+    return true;
+  });
+
+  const tb=document.getElementById('tb-armadietto');
+  if(!rows.length){
+    tb.innerHTML='<tr><td colspan="4" class="empty">Nessun materiale</td></tr>';
+  } else {
+    tb.innerHTML=rows.map(a=>{
+      const stock=state.armadietto[a.codice]||0;
+      let cls='';
+      if(stock===0) cls=' zero';
+      else if(stock<=5) cls=' low';
+      return `<tr>
+        <td style="font-weight:700;">${escapeHtml(a.tipologia)}</td>
+        <td><code class="codice">${escapeHtml(a.codice)}</code></td>
+        <td>${escapeHtml(a.classe||'—')}</td>
+        <td><span class="stock-cell${cls}" id="stock-${escapeHtml(a.codice)}" onclick="editStock('${a.codice.replace(/'/g,"\\'")}')">${stock}</span></td>
+      </tr>`;
+    }).join('');
+  }
+
+  const tot=state.anagrafica.reduce((s,a)=>s+(state.armadietto[a.codice]||0),0);
+  document.getElementById('kpi-arm-tot').textContent=tot;
+  document.getElementById('kpi-arm-mat').textContent=state.anagrafica.length;
+
+  renderPie();
+}
+
+// ===========================================================
+// PIE CHART (Armadietto, top 8)
+// ===========================================================
+function renderPie(){
+  const canvas=document.getElementById('pieChart');
+  const legend=document.getElementById('pie-legend');
+  if(!canvas||!legend) return;
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,200,200);
+
+  const data=state.anagrafica
+    .map(a=>({nome:a.tipologia,codice:a.codice,qta:state.armadietto[a.codice]||0}))
+    .filter(d=>d.qta>0).sort((a,b)=>b.qta-a.qta);
+
+  const top=data.slice(0,8);
+  const altre=data.slice(8).reduce((s,d)=>s+d.qta,0);
+  if(altre>0) top.push({nome:'Altri',codice:'',qta:altre});
+
+  const total=top.reduce((s,d)=>s+d.qta,0);
+  const COLORS=['#39e0f4','#0ea5b8','#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#a78bfa'];
+
+  if(!total){
+    ctx.fillStyle='#e8e8f0'; ctx.beginPath(); ctx.arc(100,100,90,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(100,100,44,0,Math.PI*2); ctx.fillStyle='#fff'; ctx.fill();
+    legend.innerHTML='<div style="font-size:12px;color:var(--text-muted);text-align:center">Nessuna giacenza</div>';
+    return;
+  }
+
+  let start=-Math.PI/2;
+  top.forEach((d,i)=>{
+    const slice=(d.qta/total)*Math.PI*2;
+    ctx.beginPath(); ctx.moveTo(100,100);
+    ctx.arc(100,100,90,start,start+slice);
+    ctx.closePath();
+    ctx.fillStyle=COLORS[i%COLORS.length];
+    ctx.fill();
+    ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.stroke();
+    start+=slice;
+  });
+  ctx.beginPath(); ctx.arc(100,100,44,0,Math.PI*2); ctx.fillStyle='#fff'; ctx.fill();
+  ctx.fillStyle='#1a1a2e';
+  ctx.font='bold 22px Montserrat,sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(total,100,100);
+
+  legend.innerHTML='<div style="display:flex;flex-direction:column;gap:4px;text-align:left;font-size:11px;">'+
+    top.map((d,i)=>`<div style="display:flex;align-items:center;gap:6px;">
+      <span style="width:12px;height:12px;border-radius:3px;background:${COLORS[i%COLORS.length]};flex-shrink:0;"></span>
+      <span style="flex:1;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(d.nome)}</span>
+      <span style="font-weight:800;">${d.qta}</span>
+    </div>`).join('')+'</div>';
+}
+
+// ===========================================================
+// CSV EXPORT/IMPORT
+// ===========================================================
+function csvEsc(v){
+  if(v==null) return '';
+  const s=String(v);
+  if(s.includes(',')||s.includes('"')||s.includes('\n')) return '"'+s.replace(/"/g,'""')+'"';
+  return s;
+}
+function downloadCSV(name,csv){
+  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=name; a.click();
+  URL.revokeObjectURL(url);
+}
+function exportCSV(sheet){
+  let csv='';
+  if(sheet==='anagrafica'){
+    const max=state.anagrafica.reduce((m,a)=>Math.max(m,a.fornitori.length),0)||1;
+    const h=['Tipologia','Codice','Classe'];
+    for(let i=1;i<=max;i++) h.push('Fornitore'+i,'Prezzo'+i);
+    csv=h.join(',')+'\n';
+    state.anagrafica.forEach(a=>{
+      const row=[csvEsc(a.tipologia),csvEsc(a.codice),csvEsc(a.classe||'')];
+      for(let i=0;i<max;i++){
+        row.push(csvEsc(a.fornitori[i]?a.fornitori[i].nome:''));
+        row.push(a.fornitori[i]?a.fornitori[i].prezzo:'');
+      }
+      csv+=row.join(',')+'\n';
+    });
+    downloadCSV('anagrafica.csv',csv);
+  } else if(sheet==='ordini'){
+    csv='Numero,Data,Materiale,Codice,Destinatario,Fornitore,Qta,Prezzo,Totale\n';
+    state.ordini.forEach(o=>{
+      csv+=[csvEsc(o.numero),csvEsc(o.data),csvEsc(o.materiale),csvEsc(o.codice),
+            csvEsc(o.destinatario),csvEsc(o.fornitore),o.qta,o.prezzo,o.totale].join(',')+'\n';
+    });
+    downloadCSV('ordini.csv',csv);
+  } else if(sheet==='consegne'){
+    csv='Data,Linea,Materiale,Codice,Qta\n';
+    state.consegne.forEach(c=>{
+      csv+=[csvEsc(c.data),csvEsc(c.linea),csvEsc(c.materiale),csvEsc(c.codice),c.qta].join(',')+'\n';
+    });
+    downloadCSV('consegne.csv',csv);
+  } else if(sheet==='armadietto'){
+    csv='Materiale,Codice,Classe,Giacenza\n';
+    state.anagrafica.forEach(a=>{
+      csv+=[csvEsc(a.tipologia),csvEsc(a.codice),csvEsc(a.classe||''),state.armadietto[a.codice]||0].join(',')+'\n';
+    });
+    downloadCSV('armadietto.csv',csv);
+  }
+}
+function parseCSVLine(line){
+  const r=[]; let cur='', inQ=false;
+  for(let i=0;i<line.length;i++){
+    const ch=line[i];
+    if(ch==='"'){
+      if(inQ && line[i+1]==='"'){ cur+='"'; i++; }
+      else inQ=!inQ;
+    } else if(ch===',' && !inQ){ r.push(cur); cur=''; }
+    else cur+=ch;
+  }
+  r.push(cur); return r;
+}
+function importCSV(event,sheet){
+  const file=event.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    let txt=e.target.result;
+    if(txt.charCodeAt(0)===0xFEFF) txt=txt.slice(1);
+    const lines=txt.split(/\r?\n/).filter(l=>l.trim());
+    if(lines.length<2){ showAlert('CSV vuoto','err'); return; }
+    const rows=lines.slice(1).map(parseCSVLine);
+    if(sheet==='anagrafica'){
+      if(!confirm('Sostituire l\'anagrafica corrente con il CSV?')){ event.target.value=''; return; }
+      state.anagrafica = rows.map((r,i)=>{
+        const fornitori=[];
+        for(let j=3;j<r.length;j+=2){
+          const nome=(r[j]||'').trim();
+          const prezzo=parseFloat(r[j+1]);
+          if(nome && !isNaN(prezzo)) fornitori.push({nome,prezzo});
+        }
+        return { id:Date.now()+i, tipologia:r[0]||'', codice:r[1]||'', classe:r[2]||'', fornitori };
+      }).filter(a=>a.tipologia && a.codice && a.fornitori.length);
+      state.anagrafica.forEach(a=>{ if(!(a.codice in state.armadietto)) state.armadietto[a.codice]=0; });
+      saveState(); filtra();
+      showSuccess('Importati '+state.anagrafica.length+' materiali');
+    }
+    event.target.value='';
+  };
+  reader.readAsText(file);
+}
+
+// ===========================================================
+// BOOT
+// ===========================================================
+loadState();
+filtra();
+</script>
+</body>
+</html>
