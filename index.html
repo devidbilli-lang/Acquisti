@@ -352,7 +352,6 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
       <input type="text" id="f-arm-tipologia" placeholder="Cerca materiale..." style="width:240px;" oninput="filtra()"/>
       <button class="clear-btn" onclick="document.getElementById('f-arm-tipologia').value='';filtra()">×</button>
     </div>
-    <button class="btn-secondary" onclick="ricalcolaArmadietto()" title="Ricalcola le giacenze come somma ordini meno consegne">🔄 Ricalcola da movimenti</button>
   </div>
 
   <div class="layout">
@@ -1060,31 +1059,6 @@ function saveStock(codice,val){
   const n=parseInt(val);
   state.armadietto[codice]=isNaN(n)?0:n;
   saveState(); filtra();
-}
-
-function ricalcolaArmadietto(){
-  if(!confirm('Ricalcolare TUTTE le giacenze dalla somma ordini − consegne?\n\nQuesto sovrascrive le rettifiche manuali. Continuare?')) return;
-  const newArm = {};
-  // Initialize all anagrafica codes to 0
-  state.anagrafica.forEach(a => { newArm[a.codice] = 0; });
-  // Add orders (resolve current codice via materialeId)
-  state.ordini.forEach(o => {
-    const mat = state.anagrafica.find(a => a.id === o.materialeId);
-    const cod = mat ? mat.codice : o.codice;
-    if(!(cod in newArm)) newArm[cod] = 0;
-    newArm[cod] += (parseInt(o.qta) || 0);
-  });
-  // Subtract deliveries (resolve current codice via materialeId)
-  state.consegne.forEach(c => {
-    const mat = state.anagrafica.find(a => a.id === c.materialeId);
-    const cod = mat ? mat.codice : c.codice;
-    if(!(cod in newArm)) newArm[cod] = 0;
-    newArm[cod] -= (parseInt(c.qta) || 0);
-  });
-  state.armadietto = newArm;
-  saveState();
-  filtra();
-  showSuccess('Giacenze ricalcolate!');
 }
 
 // ===========================================================
