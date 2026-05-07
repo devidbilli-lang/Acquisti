@@ -454,11 +454,11 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
     <div class="modal-grid">
       <div class="fg" style="position:relative;">
         <label>Materiale *</label>
-        <input type="text" id="m-a-tipologia" placeholder="Inizia a scrivere per i suggerimenti..." autocomplete="off" oninput="searchCatalog()" onfocus="searchCatalog()" onblur="hideCatalog()">
+        <input type="text" id="m-a-tipologia" autocomplete="off" oninput="searchCatalog()" onfocus="searchCatalog()" onblur="hideCatalog()">
         <div class="dropdown-list" id="catalog-dropdown" style="position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1.5px solid var(--accent);border-radius:10px;max-height:260px;overflow-y:auto;z-index:200;display:none;box-shadow:0 8px 24px rgba(57,224,244,0.15);"></div>
       </div>
-      <div class="fg"><label>Codice Conto *</label><input type="text" id="m-a-codice" placeholder="Es. 12345"></div>
-      <div class="fg"><label>Classe</label><input type="text" id="m-a-classe" placeholder="Es. Ferramenta"></div>
+      <div class="fg"><label>Codice Conto *</label><input type="text" id="m-a-codice"></div>
+      <div class="fg"><label>Classe</label><input type="text" id="m-a-classe"></div>
     </div>
     <div class="suppliers-section">
       <div class="suppliers-section-head">
@@ -482,9 +482,9 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
     <div style="border-top:1.5px solid var(--border);padding-top:14px;">
       <p style="font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--accent);margin-bottom:10px;">+ Aggiungi DDT</p>
       <div class="modal-grid" style="grid-template-columns:1.5fr 1fr 1fr;">
-        <div class="fg"><label>N° DDT *</label><input type="text" id="m-ddt-num" placeholder="DDT-001"></div>
+        <div class="fg"><label>N° DDT *</label><input type="text" id="m-ddt-num"></div>
         <div class="fg"><label>Data *</label><input type="date" id="m-ddt-data"></div>
-        <div class="fg"><label>Quantità *</label><input type="number" min="1" id="m-ddt-qta" placeholder="0"></div>
+        <div class="fg"><label>Quantità *</label><input type="number" min="1" id="m-ddt-qta"></div>
       </div>
       <button class="btn-primary" onclick="aggiungiDdt()" style="width:100%;">+ Aggiungi DDT</button>
     </div>
@@ -498,9 +498,9 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
   <div class="modal">
     <div class="modal-title" id="modal-ord-title">Nuovo Ordine</div>
     <div class="modal-grid">
-      <div class="fg"><label>N° Ordine *</label><input type="text" id="m-o-numero" placeholder="Es. ORD-001"></div>
+      <div class="fg"><label>N° Ordine *</label><input type="text" id="m-o-numero"></div>
       <div class="fg"><label>Data *</label><input type="date" id="m-o-data"></div>
-      <div class="fg"><label>Destinatario *</label><input type="text" id="m-o-destinatario" placeholder="Es. Reparto A"></div>
+      <div class="fg"><label>Destinatario *</label><input type="text" id="m-o-destinatario"></div>
     </div>
     <div class="modal-grid">
       <div class="fg"><label>Materiale *</label>
@@ -509,7 +509,7 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
       <div class="fg"><label>Fornitore *</label>
         <select id="m-o-fornitore"><option value="">Seleziona...</option></select>
       </div>
-      <div class="fg"><label>Quantità *</label><input type="number" min="1" id="m-o-qta" placeholder="0"></div>
+      <div class="fg"><label>Quantità *</label><input type="number" min="1" id="m-o-qta"></div>
     </div>
     <div class="modal-info" id="m-o-info">Seleziona un materiale per vedere fornitori e prezzi disponibili.</div>
     <div class="modal-actions">
@@ -524,11 +524,11 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
     <div class="modal-title" id="modal-cons-title">Nuova Consegna</div>
     <div class="modal-grid">
       <div class="fg"><label>Data *</label><input type="date" id="m-c-data"></div>
-      <div class="fg"><label>Linea *</label><input type="text" id="m-c-linea" placeholder="Es. Linea 1"></div>
+      <div class="fg"><label>Linea *</label><input type="text" id="m-c-linea"></div>
       <div class="fg"><label>Materiale *</label>
         <select id="m-c-materiale" onchange="updateConsegnaInfo()"><option value="">Seleziona...</option></select>
       </div>
-      <div class="fg"><label>Quantità *</label><input type="number" min="1" id="m-c-qta" placeholder="0"></div>
+      <div class="fg"><label>Quantità *</label><input type="number" min="1" id="m-c-qta"></div>
     </div>
     <div class="modal-info" id="m-c-info">Seleziona un materiale per vedere giacenza e dati.</div>
     <div class="modal-actions">
@@ -737,8 +737,8 @@ function addSupplierRow(nome,prezzo){
     '<span class="sup-num">Fornitore '+(document.querySelectorAll('.supplier-block').length+1)+'</span>'+
     '<button class="rm-btn" onclick="removeSupplierRow('+idx+')" title="Rimuovi fornitore">\u00d7</button>'+
     '<div class="supplier-grid">'+
-      '<div class="fg"><label>Nome fornitore *</label><input type="text" class="sup-name" placeholder="Es. Acme Srl" value="'+escapeHtml(nome)+'"></div>'+
-      '<div class="fg"><label>Prezzo \u20ac</label><input type="number" step="0.01" class="sup-price" placeholder="0.00" value="'+escapeHtml(prezzo)+'"></div>'+
+      '<div class="fg"><label>Nome fornitore *</label><input type="text" class="sup-name" value="'+escapeHtml(nome)+'"></div>'+
+      '<div class="fg"><label>Prezzo \u20ac</label><input type="number" step="0.01" class="sup-price" value="'+escapeHtml(prezzo)+'"></div>'+
     '</div>';
   c.appendChild(div);
   refreshRmBtns();
