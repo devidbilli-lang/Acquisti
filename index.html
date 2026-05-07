@@ -505,8 +505,11 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
       <div class="fg"><label>Destinatario *</label><input type="text" id="m-o-destinatario"></div>
     </div>
     <div class="modal-grid">
-      <div class="fg"><label>Materiale *</label>
-        <select id="m-o-materiale" onchange="updateOrdineFornitori()"><option value="">Seleziona...</option></select>
+      <div class="fg" style="position:relative;">
+        <label>Materiale *</label>
+        <input type="hidden" id="m-o-materiale-id" value="">
+        <input type="text" id="m-o-materiale" autocomplete="off" oninput="searchOrdineMateriale()" onfocus="searchOrdineMateriale()" onblur="hideOrdineMateriale()">
+        <div class="dropdown-list" id="ordine-mat-dropdown" style="position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1.5px solid var(--accent);border-radius:10px;max-height:220px;overflow-y:auto;z-index:200;display:none;box-shadow:0 8px 24px rgba(57,224,244,0.15);"></div>
       </div>
       <div class="fg"><label>Fornitore *</label>
         <select id="m-o-fornitore"><option value="">Seleziona...</option></select>
@@ -838,7 +841,7 @@ async function eliminaAnagrafica(id){
 // ORDINI
 // ===========================================================
 function fillSelects(){
-  ['m-o-materiale','m-c-materiale'].forEach(id=>{
+  ['m-c-materiale'].forEach(id=>{
     const el=document.getElementById(id);
     const cur=el.value;
     el.innerHTML='<option value="">Seleziona...</option>'+
@@ -854,6 +857,7 @@ function apriOrdine(){
   document.getElementById('m-o-data').value=todayLocal();
   document.getElementById('m-o-destinatario').value='';
   document.getElementById('m-o-materiale').value='';
+  document.getElementById('m-o-materiale-id').value='';
   document.getElementById('m-o-fornitore').innerHTML='<option value="">Seleziona...</option>';
   document.getElementById('m-o-qta').value='';
   document.getElementById('m-o-info').textContent='Seleziona un materiale per vedere fornitori e prezzi disponibili.';
@@ -867,7 +871,9 @@ function modificaOrdine(id){
   document.getElementById('m-o-data').value=o.data;
   document.getElementById('m-o-destinatario').value=o.destinatario;
   fillSelects();
-  document.getElementById('m-o-materiale').value=o.materialeId;
+  const mat = state.anagrafica.find(a=>a.id===o.materialeId);
+  document.getElementById('m-o-materiale').value = mat ? mat.tipologia : '';
+  document.getElementById('m-o-materiale-id').value = o.materialeId;
   updateOrdineFornitori();
   const mat = state.anagrafica.find(a=>a.id===o.materialeId);
   if(mat){
@@ -877,8 +883,69 @@ function modificaOrdine(id){
   document.getElementById('m-o-qta').value=o.qta;
   openModal('modal-ordine');
 }
+// Order material autocomplete
+function searchOrdineMateriale(){
+  const inp = document.getElementById('m-o-materiale');
+  const dd = document.getElementById('ordine-mat-dropdown');
+  if(!inp || !dd) return;
+  const q = inp.value.trim().toUpperCase();
+  // Clear selection if user edits text
+  document.getElementById('m-o-materiale-id').value = '';
+  document.getElementById('m-o-fornitore').innerHTML='<option value="">Seleziona...</option>';
+  document.getElementById('m-o-info').textContent='Seleziona un materiale per vedere fornitori e prezzi disponibili.';
+  if(!q || q.length < 1){
+    // Show all materials if input is empty on focus
+    if(document.activeElement === inp && state.anagrafica.length){
+      dd.innerHTML = state.anagrafica.map(a =>
+        '<div class="catalog-item" onmousedown="selectOrdineMateriale('+a.id+')">'+
+        '<div style="font-weight:700;font-size:13px;color:var(--text);">'+escapeHtml(a.tipologia)+'</div>'+
+        '<div style="font-size:11px;color:var(--text-muted);margin-top:2px;">'+
+        '<code class="codice">'+escapeHtml(a.codice)+'</code>'+
+        (a.classe?' \u00b7 '+escapeHtml(a.classe):'')+
+        '</div></div>'
+      ).join('');
+      dd.style.display = 'block';
+    } else {
+      dd.style.display = 'none';
+    }
+    return;
+  }
+  const tokens = q.split(/\s+/).filter(Boolean);
+  const results = state.anagrafica.filter(a => {
+    const hay = (a.tipologia+' '+a.codice+' '+(a.classe||'')+' '+a.fornitori.map(f=>f.nome).join(' ')).toUpperCase();
+    return tokens.every(t => hay.includes(t));
+  });
+  if(!results.length){
+    dd.innerHTML = '<div style="padding:14px;text-align:center;color:var(--text-muted);font-size:12px;font-weight:600;">Nessun materiale trovato</div>';
+    dd.style.display = 'block';
+    return;
+  }
+  dd.innerHTML = results.map(a =>
+    '<div class="catalog-item" onmousedown="selectOrdineMateriale('+a.id+')">'+
+    '<div style="font-weight:700;font-size:13px;color:var(--text);">'+escapeHtml(a.tipologia)+'</div>'+
+    '<div style="font-size:11px;color:var(--text-muted);margin-top:2px;">'+
+    '<code class="codice">'+escapeHtml(a.codice)+'</code>'+
+    (a.classe?' \u00b7 '+escapeHtml(a.classe):'')+
+    ' \u00b7 '+a.fornitori.map(f=>escapeHtml(f.nome)+' \u20ac'+f.prezzo.toFixed(2)).join(' \u00b7 ')+
+    '</div></div>'
+  ).join('');
+  dd.style.display = 'block';
+}
+function hideOrdineMateriale(){
+  setTimeout(()=>{
+    const dd = document.getElementById('ordine-mat-dropdown');
+    if(dd) dd.style.display = 'none';
+  }, 200);
+}
+function selectOrdineMateriale(id){
+  const a = state.anagrafica.find(x=>x.id===id); if(!a) return;
+  document.getElementById('m-o-materiale').value = a.tipologia;
+  document.getElementById('m-o-materiale-id').value = id;
+  document.getElementById('ordine-mat-dropdown').style.display = 'none';
+  updateOrdineFornitori();
+}
 function updateOrdineFornitori(){
-  const matId=parseInt(document.getElementById('m-o-materiale').value);
+  const matId=parseInt(document.getElementById('m-o-materiale-id').value);
   const sel=document.getElementById('m-o-fornitore');
   const info=document.getElementById('m-o-info');
   const mat=state.anagrafica.find(a=>a.id===matId);
@@ -895,7 +962,7 @@ function salvaOrdine(){
   const numero=document.getElementById('m-o-numero').value.trim().toUpperCase();
   const data=document.getElementById('m-o-data').value;
   const destinatario=document.getElementById('m-o-destinatario').value.trim().toUpperCase();
-  const matId=parseInt(document.getElementById('m-o-materiale').value);
+  const matId=parseInt(document.getElementById('m-o-materiale-id').value);
   const fornIdx=document.getElementById('m-o-fornitore').value;
   const qta=parseInt(document.getElementById('m-o-qta').value);
   if(!numero||!data||!destinatario||!matId||fornIdx===''||!qta||qta<1){
