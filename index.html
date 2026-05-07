@@ -451,12 +451,12 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
     <div class="right-sticky">
       <div class="dual-card">
         <div class="dual-half">
-          <span class="dual-lbl">Pcs</span>
+          <span class="dual-lbl">Pezzi</span>
           <span class="dual-val" id="kpi-arm-tot">0</span>
         </div>
         <div class="dual-divider"></div>
         <div class="dual-half">
-          <span class="dual-lbl">€</span>
+          <span class="dual-lbl">Valore €</span>
           <span class="dual-val" id="kpi-arm-valore">0</span>
         </div>
       </div>
@@ -1344,7 +1344,7 @@ function renderArmadietto(){
     const prezzo = (a.fornitori && a.fornitori.length) ? (parseFloat(a.fornitori[0].prezzo)||0) : 0;
     return s + stock * prezzo;
   }, 0);
-  document.getElementById('kpi-arm-valore').textContent = valore.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('kpi-arm-valore').textContent = Math.round(valore).toLocaleString('it-IT');
 
   renderPie();
 }
