@@ -875,7 +875,6 @@ function modificaOrdine(id){
   document.getElementById('m-o-materiale').value = mat ? mat.tipologia : '';
   document.getElementById('m-o-materiale-id').value = o.materialeId;
   updateOrdineFornitori();
-  const mat = state.anagrafica.find(a=>a.id===o.materialeId);
   if(mat){
     const idx = mat.fornitori.findIndex(f=>f.nome===o.fornitore && f.prezzo===o.prezzo);
     if(idx>=0) document.getElementById('m-o-fornitore').value = idx;
