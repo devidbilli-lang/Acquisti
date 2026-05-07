@@ -89,6 +89,11 @@ tbody tr:hover{background:#eeeeff;}
 .badge-blue{background:#cdf6fb;color:#0c6b78;}
 .badge-pink{background:#cdf6fb;color:#0c6b78;}
 .badge-amber{background:#cdf6fb;color:#0c6b78;}
+.ddt-cell{cursor:pointer;display:inline-block;padding:5px 12px;border-radius:8px;font-weight:700;font-size:12px;background:#fff7ed;color:#9a3412;border:1.5px solid #fed7aa;transition:all .15s;white-space:nowrap;}
+.ddt-cell:hover{background:#ffedd5;border-color:#fdba74;}
+.ddt-cell.complete{background:#86efac;color:#1a1a2e;border-color:#22c55e;}
+.ddt-cell.partial{background:#fef3c7;color:#92400e;border-color:#fcd34d;}
+.ddt-cell.empty-ddt{background:#f1efe8;color:#6b6b8a;border-color:#d3d1c7;font-style:italic;}
 .empty{text-align:center;padding:48px;color:var(--text-muted);font-size:15px;font-weight:600;}
 code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6fb;color:#0c6b78;padding:2px 7px;border-radius:4px;font-weight:700;letter-spacing:0.5px;}
 .suppliers-cell{text-align:center;padding:10px 12px !important;}
@@ -237,8 +242,6 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
       <input type="text" id="f-a-fornitore" placeholder="Fornitore..." style="width:160px;" oninput="filtra()"/>
       <button class="clear-btn" onclick="document.getElementById('f-a-fornitore').value='';filtra()">×</button>
     </div>
-    <button class="btn-secondary" onclick="exportCSV('anagrafica')">⬇ Esporta CSV</button>
-    <label class="btn-secondary" style="cursor:pointer;">⬆ Importa CSV<input type="file" accept=".csv" onchange="importCSV(event,'anagrafica')" hidden></label>
   </div>
 
   <div class="layout">
@@ -283,7 +286,6 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
       <input type="text" id="f-o-fornitore" placeholder="Fornitore..." style="width:160px;" oninput="filtra()"/>
       <button class="clear-btn" onclick="document.getElementById('f-o-fornitore').value='';filtra()">×</button>
     </div>
-    <button class="btn-secondary" onclick="exportCSV('ordini')">⬇ Esporta CSV</button>
   </div>
 
   <div class="layout">
@@ -293,8 +295,9 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
           <th class="th-act">Azioni</th>
           <th>N°</th><th>Data</th><th>Materiale</th><th>Destinatario</th>
           <th>Fornitore</th><th>Qtà</th><th>Prezzo</th><th class="th-tot">Totale</th>
+          <th>DDT</th>
         </tr></thead>
-        <tbody id="tb-ordini"><tr><td colspan="9" class="empty">Nessun ordine registrato</td></tr></tbody>
+        <tbody id="tb-ordini"><tr><td colspan="10" class="empty">Nessun ordine registrato</td></tr></tbody>
       </table>
     </div>
     <div class="right-sticky">
@@ -319,7 +322,6 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
       <input type="text" id="f-c-materiale" placeholder="Materiale..." style="width:180px;" oninput="filtra()"/>
       <button class="clear-btn" onclick="document.getElementById('f-c-materiale').value='';filtra()">×</button>
     </div>
-    <button class="btn-secondary" onclick="exportCSV('consegne')">⬇ Esporta CSV</button>
   </div>
 
   <div class="layout">
@@ -350,7 +352,7 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
       <input type="text" id="f-arm-tipologia" placeholder="Cerca materiale..." style="width:240px;" oninput="filtra()"/>
       <button class="clear-btn" onclick="document.getElementById('f-arm-tipologia').value='';filtra()">×</button>
     </div>
-    <button class="btn-secondary" onclick="exportCSV('armadietto')">⬇ Esporta CSV</button>
+    <button class="btn-secondary" onclick="ricalcolaArmadietto()" title="Ricalcola le giacenze come somma ordini meno consegne">🔄 Ricalcola da movimenti</button>
   </div>
 
   <div class="layout">
@@ -403,6 +405,27 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
 </div>
 
 <!-- MODAL ORDINE -->
+<!-- MODAL DDT -->
+<div class="modal-overlay" id="modal-ddt">
+  <div class="modal" style="max-width:560px;">
+    <div class="modal-title">Documenti di Trasporto (DDT)</div>
+    <div class="modal-info" id="m-ddt-info">—</div>
+    <div id="m-ddt-list" style="margin-bottom:14px;"></div>
+    <div style="border-top:1.5px solid var(--border);padding-top:14px;">
+      <p style="font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--accent);margin-bottom:10px;">＋ Aggiungi DDT</p>
+      <div class="modal-grid" style="grid-template-columns:1.5fr 1fr 1fr;">
+        <div class="fg"><label>N° DDT *</label><input type="text" id="m-ddt-num" placeholder="DDT-001"></div>
+        <div class="fg"><label>Data *</label><input type="date" id="m-ddt-data"></div>
+        <div class="fg"><label>Quantità *</label><input type="number" min="1" id="m-ddt-qta" placeholder="0"></div>
+      </div>
+      <button class="btn-primary" onclick="aggiungiDdt()" style="width:100%;">＋ Aggiungi DDT</button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('modal-ddt')">Chiudi</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-ordine">
   <div class="modal">
     <div class="modal-title" id="modal-ord-title">Nuovo Ordine</div>
@@ -481,6 +504,8 @@ function loadState(){
         consegne: p.consegne||[],
         armadietto: p.armadietto||{}
       };
+      // Migration: ensure each order has a ddt array
+      state.ordini.forEach(o => { if(!Array.isArray(o.ddt)) o.ddt = []; });
     }
   }catch(e){console.error(e);}
 }
@@ -804,11 +829,16 @@ function salvaOrdine(){
   if(editingOrdId){
     // Modifica: ripristina giacenza vecchia, applica la nuova
     const old = state.ordini.find(x=>x.id===editingOrdId);
-    if(old) state.armadietto[old.codice] = (state.armadietto[old.codice]||0) - old.qta;
+    if(old){
+      const oldMat = state.anagrafica.find(a => a.id === old.materialeId);
+      const oldCod = oldMat ? oldMat.codice : old.codice;
+      state.armadietto[oldCod] = (state.armadietto[oldCod]||0) - old.qta;
+    }
     const updated = {
       id: editingOrdId, numero, data, destinatario,
       materialeId:matId, materiale:mat.tipologia, codice:mat.codice,
-      fornitore:f.nome, prezzo:f.prezzo, qta, totale:f.prezzo*qta
+      fornitore:f.nome, prezzo:f.prezzo, qta, totale:f.prezzo*qta,
+      ddt: (old && Array.isArray(old.ddt)) ? old.ddt : []
     };
     state.ordini = state.ordini.map(x => x.id===editingOrdId ? updated : x);
     state.armadietto[mat.codice] = (state.armadietto[mat.codice]||0) + qta;
@@ -816,7 +846,8 @@ function salvaOrdine(){
     state.ordini.push({
       id:Date.now(), numero, data, destinatario,
       materialeId:matId, materiale:mat.tipologia, codice:mat.codice,
-      fornitore:f.nome, prezzo:f.prezzo, qta, totale:f.prezzo*qta
+      fornitore:f.nome, prezzo:f.prezzo, qta, totale:f.prezzo*qta,
+      ddt: []
     });
     state.armadietto[mat.codice]=(state.armadietto[mat.codice]||0)+qta;
   }
@@ -830,9 +861,86 @@ function salvaOrdine(){
 function eliminaOrdine(id){
   if(!confirm('Eliminare l\'ordine? La giacenza verrà ridotta.')) return;
   const o=state.ordini.find(x=>x.id===id);
-  if(o) state.armadietto[o.codice]=(state.armadietto[o.codice]||0)-o.qta;
+  if(o){
+    // Resolve current codice via materialeId (codice may have changed in anagrafica)
+    const mat = state.anagrafica.find(a => a.id === o.materialeId);
+    const cod = mat ? mat.codice : o.codice;
+    state.armadietto[cod] = (state.armadietto[cod]||0) - o.qta;
+  }
   state.ordini=state.ordini.filter(x=>x.id!==id);
   saveState(); showSuccess('Eliminato!'); filtra();
+}
+
+// ===========================================================
+// DDT — gestione documenti di trasporto per ordine
+// ===========================================================
+let currentDdtOrdId = null;
+
+function apriDdtModal(ordId){
+  const o = state.ordini.find(x=>x.id===ordId); if(!o) return;
+  currentDdtOrdId = ordId;
+  if(!Array.isArray(o.ddt)) o.ddt = [];
+  document.getElementById('m-ddt-info').innerHTML =
+    `<b>${escapeHtml(o.numero)}</b> · ${escapeHtml(o.materiale)} · ` +
+    `<span style="color:var(--text);">Qtà ordinata: <b>${o.qta}</b></span>`;
+  document.getElementById('m-ddt-num').value = '';
+  document.getElementById('m-ddt-data').value = todayLocal();
+  document.getElementById('m-ddt-qta').value = '';
+  renderDdtList();
+  openModal('modal-ddt');
+}
+
+function renderDdtList(){
+  const o = state.ordini.find(x=>x.id===currentDdtOrdId); if(!o) return;
+  const list = o.ddt || [];
+  const arrivata = list.reduce((s,d)=>s+(parseFloat(d.qta)||0),0);
+  const completo = arrivata >= o.qta;
+  const div = document.getElementById('m-ddt-list');
+  if(!list.length){
+    div.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px;font-weight:600;background:#f8f8fd;border-radius:10px;">Nessun DDT registrato</div>';
+    return;
+  }
+  let html = '<div style="background:#f8f8fd;border-radius:10px;padding:10px;">';
+  html += '<div style="display:grid;grid-template-columns:1.5fr 1fr 1fr 36px;gap:8px;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);padding:0 8px 8px;border-bottom:1px solid var(--border);">';
+  html += '<div>N° DDT</div><div>Data</div><div style="text-align:center;">Qtà</div><div></div></div>';
+  list.forEach((d,i)=>{
+    html += `<div style="display:grid;grid-template-columns:1.5fr 1fr 1fr 36px;gap:8px;align-items:center;padding:8px;border-bottom:1px solid var(--border);font-size:13px;">
+      <div><code class="codice">${escapeHtml(d.numero)}</code></div>
+      <div>${formatDataIT(d.data)}</div>
+      <div style="text-align:center;font-weight:700;">${d.qta}</div>
+      <button class="btn-danger" onclick="rimuoviDdt(${i})" style="padding:4px 8px;font-size:14px;">×</button>
+    </div>`;
+  });
+  html += `<div style="padding:10px 8px 0;text-align:right;font-size:13px;font-weight:800;color:${completo?'var(--green)':'var(--amber)'};">`;
+  html += `Totale arrivato: ${arrivata} / ${o.qta} ${completo?'✓ COMPLETO':''}</div>`;
+  html += '</div>';
+  div.innerHTML = html;
+}
+
+function aggiungiDdt(){
+  const o = state.ordini.find(x=>x.id===currentDdtOrdId); if(!o) return;
+  const num = document.getElementById('m-ddt-num').value.trim().toUpperCase();
+  const data = document.getElementById('m-ddt-data').value;
+  const qta = parseFloat(document.getElementById('m-ddt-qta').value);
+  if(!num || !data || !qta || qta<=0){ showAlert('Compila tutti i campi del DDT','err'); return; }
+  if(!Array.isArray(o.ddt)) o.ddt = [];
+  o.ddt.push({ numero: num, data: data, qta: qta });
+  saveState();
+  document.getElementById('m-ddt-num').value = '';
+  document.getElementById('m-ddt-qta').value = '';
+  renderDdtList();
+  filtra(); // refresh table
+  showSuccess('DDT aggiunto!');
+}
+
+function rimuoviDdt(idx){
+  if(!confirm('Eliminare questo DDT?')) return;
+  const o = state.ordini.find(x=>x.id===currentDdtOrdId); if(!o) return;
+  if(!Array.isArray(o.ddt)) return;
+  o.ddt.splice(idx, 1);
+  saveState();
+  renderDdtList();
+  filtra();
 }
 
 // ===========================================================
@@ -879,32 +987,44 @@ function salvaConsegna(){
   const qta=parseInt(document.getElementById('m-c-qta').value);
   if(!data||!linea||!matId||!qta||qta<1){ showAlert('Compila tutti i campi','err'); return; }
   const mat=state.anagrafica.find(a=>a.id===matId);
+  if(!mat){ showAlert('Materiale non trovato','err'); return; }
+  const newCod = mat.codice;
 
   if(editingConsId){
+    // Modifica consegna: ripristina la qta vecchia sul codice originale, poi sottrai la nuova sul codice attuale
     const old = state.consegne.find(x=>x.id===editingConsId);
-    if(old) state.armadietto[old.codice] = (state.armadietto[old.codice]||0) + old.qta;
-    const g=state.armadietto[mat.codice]||0;
-    if(qta>g && !confirm(`Giacenza attuale: ${g}. Vuoi comunque consegnare ${qta}? La giacenza diventerà negativa.`)){
-      // Rollback the temporary restore
-      if(old) state.armadietto[old.codice] = (state.armadietto[old.codice]||0) - old.qta;
+    if(old){
+      const oldMat = state.anagrafica.find(a => a.id === old.materialeId);
+      const oldCod = oldMat ? oldMat.codice : old.codice;
+      state.armadietto[oldCod] = (state.armadietto[oldCod]||0) + old.qta;
+    }
+    const g = state.armadietto[newCod] || 0;
+    if(qta > g && !confirm(`Giacenza attuale di ${mat.tipologia}: ${g}. Vuoi comunque consegnare ${qta}? La giacenza diventerà negativa.`)){
+      // Rollback ripristino
+      if(old){
+        const oldMat = state.anagrafica.find(a => a.id === old.materialeId);
+        const oldCod = oldMat ? oldMat.codice : old.codice;
+        state.armadietto[oldCod] = (state.armadietto[oldCod]||0) - old.qta;
+      }
       return;
     }
     showSpinner('Salvataggio consegna...');
     const updated = {
       id: editingConsId, data, linea,
-      materialeId:matId, materiale:mat.tipologia, codice:mat.codice, qta
+      materialeId: matId, materiale: mat.tipologia, codice: newCod, qta
     };
     state.consegne = state.consegne.map(x => x.id===editingConsId ? updated : x);
-    state.armadietto[mat.codice] = g - qta;
+    state.armadietto[newCod] = g - qta;
   } else {
-    const g=state.armadietto[mat.codice]||0;
-    if(qta>g && !confirm(`Giacenza attuale: ${g}. Vuoi comunque consegnare ${qta}? La giacenza diventerà negativa.`)) return;
+    // Nuova consegna: scala la qta dalla giacenza del materiale selezionato
+    const g = state.armadietto[newCod] || 0;
+    if(qta > g && !confirm(`Giacenza attuale di ${mat.tipologia}: ${g}. Vuoi comunque consegnare ${qta}? La giacenza diventerà negativa.`)) return;
     showSpinner('Salvataggio consegna...');
     state.consegne.push({
-      id:Date.now(), data, linea,
-      materialeId:matId, materiale:mat.tipologia, codice:mat.codice, qta
+      id: Date.now(), data, linea,
+      materialeId: matId, materiale: mat.tipologia, codice: newCod, qta
     });
-    state.armadietto[mat.codice]=g-qta;
+    state.armadietto[newCod] = g - qta;
   }
 
   saveState();
@@ -915,9 +1035,13 @@ function salvaConsegna(){
 
 function eliminaConsegna(id){
   if(!confirm('Eliminare la consegna? La giacenza verrà ripristinata.')) return;
-  const c=state.consegne.find(x=>x.id===id);
-  if(c) state.armadietto[c.codice]=(state.armadietto[c.codice]||0)+c.qta;
-  state.consegne=state.consegne.filter(x=>x.id!==id);
+  const c = state.consegne.find(x=>x.id===id);
+  if(c){
+    const mat = state.anagrafica.find(a => a.id === c.materialeId);
+    const cod = mat ? mat.codice : c.codice;
+    state.armadietto[cod] = (state.armadietto[cod]||0) + c.qta;
+  }
+  state.consegne = state.consegne.filter(x=>x.id!==id);
   saveState(); showSuccess('Eliminato!'); filtra();
 }
 
@@ -936,6 +1060,31 @@ function saveStock(codice,val){
   const n=parseInt(val);
   state.armadietto[codice]=isNaN(n)?0:n;
   saveState(); filtra();
+}
+
+function ricalcolaArmadietto(){
+  if(!confirm('Ricalcolare TUTTE le giacenze dalla somma ordini − consegne?\n\nQuesto sovrascrive le rettifiche manuali. Continuare?')) return;
+  const newArm = {};
+  // Initialize all anagrafica codes to 0
+  state.anagrafica.forEach(a => { newArm[a.codice] = 0; });
+  // Add orders (resolve current codice via materialeId)
+  state.ordini.forEach(o => {
+    const mat = state.anagrafica.find(a => a.id === o.materialeId);
+    const cod = mat ? mat.codice : o.codice;
+    if(!(cod in newArm)) newArm[cod] = 0;
+    newArm[cod] += (parseInt(o.qta) || 0);
+  });
+  // Subtract deliveries (resolve current codice via materialeId)
+  state.consegne.forEach(c => {
+    const mat = state.anagrafica.find(a => a.id === c.materialeId);
+    const cod = mat ? mat.codice : c.codice;
+    if(!(cod in newArm)) newArm[cod] = 0;
+    newArm[cod] -= (parseInt(c.qta) || 0);
+  });
+  state.armadietto = newArm;
+  saveState();
+  filtra();
+  showSuccess('Giacenze ricalcolate!');
 }
 
 // ===========================================================
@@ -1024,9 +1173,25 @@ function renderOrdini(){
 
   const tb=document.getElementById('tb-ordini');
   if(!rows.length){
-    tb.innerHTML='<tr><td colspan="9" class="empty">Nessun ordine</td></tr>';
+    tb.innerHTML='<tr><td colspan="10" class="empty">Nessun ordine</td></tr>';
   } else {
-    tb.innerHTML=rows.map(o=>`<tr>
+    tb.innerHTML=rows.map(o=>{
+      const ddtList = Array.isArray(o.ddt) ? o.ddt : [];
+      const arrivata = ddtList.reduce((s,d)=>s+(parseFloat(d.qta)||0),0);
+      let ddtClass = 'empty-ddt';
+      let ddtText = '— DDT';
+      if(ddtList.length){
+        if(arrivata >= o.qta){
+          ddtClass = 'complete';
+          ddtText = `${ddtList.length} DDT · ${arrivata}/${o.qta} ✓`;
+        } else {
+          ddtClass = 'partial';
+          ddtText = `${ddtList.length} DDT · ${arrivata}/${o.qta}`;
+        }
+      } else {
+        ddtText = `0 DDT · 0/${o.qta}`;
+      }
+      return `<tr>
       <td style="white-space:nowrap;text-align:center;">
         <button class="btn-edit" onclick="modificaOrdine(${o.id})" title="Modifica">✏️</button><button class="btn-danger" onclick="eliminaOrdine(${o.id})" style="margin-left:6px;vertical-align:middle;" title="Elimina">×</button>
       </td>
@@ -1038,7 +1203,8 @@ function renderOrdini(){
       <td><span class="badge badge-pink">${o.qta}</span></td>
       <td>€${o.prezzo.toFixed(2)}</td>
       <td><span class="badge">€${o.totale.toFixed(2)}</span></td>
-    </tr>`).join('');
+      <td><span class="ddt-cell ${ddtClass}" onclick="apriDdtModal(${o.id})" title="Gestisci DDT">${ddtText}</span></td>
+    </tr>`;}).join('');
   }
 
   document.getElementById('kpi-ordini-count').textContent=state.ordini.length;
@@ -1209,10 +1375,15 @@ function exportCSV(sheet){
     });
     downloadCSV('anagrafica.csv',csv);
   } else if(sheet==='ordini'){
-    csv='Numero,Data,Materiale,Codice,Destinatario,Fornitore,Qta,Prezzo,Totale\n';
+    csv='Numero,Data,Materiale,Codice,Destinatario,Fornitore,Qta,Prezzo,Totale,DDT_Count,Qta_Arrivata,Stato_DDT,DDT_Dettaglio\n';
     state.ordini.forEach(o=>{
+      const ddtList = Array.isArray(o.ddt) ? o.ddt : [];
+      const arrivata = ddtList.reduce((s,d)=>s+(parseFloat(d.qta)||0),0);
+      const stato = !ddtList.length ? 'In attesa' : (arrivata>=o.qta ? 'Completo' : 'Parziale');
+      const dett = ddtList.map(d=>`${d.numero}|${d.data}|${d.qta}`).join(' ; ');
       csv+=[csvEsc(o.numero),csvEsc(o.data),csvEsc(o.materiale),csvEsc(o.codice),
-            csvEsc(o.destinatario),csvEsc(o.fornitore),o.qta,o.prezzo,o.totale].join(',')+'\n';
+            csvEsc(o.destinatario),csvEsc(o.fornitore),o.qta,o.prezzo,o.totale,
+            ddtList.length,arrivata,csvEsc(stato),csvEsc(dett)].join(',')+'\n';
     });
     downloadCSV('ordini.csv',csv);
   } else if(sheet==='consegne'){
