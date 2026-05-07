@@ -109,6 +109,11 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
 /* RIGHT SIDEBAR */
 .right-sticky{display:flex;flex-direction:column;gap:16px;position:sticky;top:16px;}
 .summary-card{background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:16px;padding:16px 20px;box-shadow:0 4px 20px rgba(57,224,244,0.4);display:flex;align-items:center;justify-content:space-between;}
+.dual-card{background:linear-gradient(135deg,#39e0f4,#0ea5b8);box-shadow:0 2px 10px rgba(57,224,244,0.3);display:flex;align-items:stretch;justify-content:center;padding:10px 8px;gap:0;border-radius:12px;}
+.dual-card .dual-half{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:0 8px;}
+.dual-card .dual-lbl{color:#fff;font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;opacity:0.9;}
+.dual-card .dual-val{color:#fff;font-size:18px;font-weight:900;letter-spacing:0.3px;line-height:1;}
+.dual-card .dual-divider{width:1px;background:rgba(255,255,255,0.4);align-self:stretch;}
 .summary-card.green{background:linear-gradient(135deg,#059669,#10b981);box-shadow:0 4px 20px rgba(5,150,105,0.4);}
 .summary-card.blue{background:linear-gradient(135deg,#3b82f6,#1d4ed8);box-shadow:0 4px 20px rgba(59,130,246,0.4);}
 .summary-card .lbl{color:#fff;font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;}
@@ -364,8 +369,17 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
       </table>
     </div>
     <div class="right-sticky">
-      <div class="summary-card green"><span class="lbl">Pezzi Tot.</span><span class="val" id="kpi-arm-tot">0</span></div>
-      <div class="summary-card"><span class="lbl">Materiali</span><span class="val" id="kpi-arm-mat">0</span></div>
+      <div class="dual-card">
+        <div class="dual-half">
+          <span class="dual-lbl">Pcs</span>
+          <span class="dual-val" id="kpi-arm-tot">0</span>
+        </div>
+        <div class="dual-divider"></div>
+        <div class="dual-half">
+          <span class="dual-lbl">€</span>
+          <span class="dual-val" id="kpi-arm-valore">0</span>
+        </div>
+      </div>
       <div class="pie-card">
         <canvas id="pieChart" width="200" height="200"></canvas>
         <div id="pie-legend" style="margin-top:10px;"></div>
@@ -1258,7 +1272,14 @@ function renderArmadietto(){
 
   const tot=state.anagrafica.reduce((s,a)=>s+(state.armadietto[a.codice]||0),0);
   document.getElementById('kpi-arm-tot').textContent=tot;
-  document.getElementById('kpi-arm-mat').textContent=state.anagrafica.length;
+
+  // Valore totale magazzino: somma di (giacenza × prezzo del primo fornitore) per ogni materiale
+  const valore = state.anagrafica.reduce((s,a)=>{
+    const stock = state.armadietto[a.codice]||0;
+    const prezzo = (a.fornitori && a.fornitori.length) ? (parseFloat(a.fornitori[0].prezzo)||0) : 0;
+    return s + stock * prezzo;
+  }, 0);
+  document.getElementById('kpi-arm-valore').textContent = valore.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2});
 
   renderPie();
 }
