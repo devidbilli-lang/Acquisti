@@ -185,7 +185,7 @@ setTimeout(()=>{
   try {
     const orari = JSON.parse(localStorage.getItem('nexus_orari_fine_turno')||'{}');
     if(Object.keys(orari).length>0){
-      fetch(nexusUrl('salvaOrariFineTurno',{orari:encodeURIComponent(JSON.stringify(orari))}),{mode:'cors'}).catch(()=>{});
+      fetch(nexusUrl('salvaOrariFineTurno',{orari:JSON.stringify(orari)}),{mode:'cors'}).catch(()=>{});
     }
   } catch(e){}
 }, 5000);
