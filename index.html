@@ -370,6 +370,10 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
 <div id="tab-anagrafica" class="tab-panel active">
   <div class="filters">
     <div class="search-wrap">
+      <input type="text" id="f-a-numero-codifica" placeholder="N° Codifica..." style="width:160px;" oninput="filtra()"/>
+      <button class="clear-btn" onclick="document.getElementById('f-a-numero-codifica').value='';filtra()">×</button>
+    </div>
+    <div class="search-wrap">
       <input type="text" id="f-a-tipologia" placeholder="Cerca materiale..." style="width:200px;" oninput="filtra()"/>
       <button class="clear-btn" onclick="document.getElementById('f-a-tipologia').value='';filtra()">×</button>
     </div>
@@ -391,12 +395,13 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
       <table>
         <thead><tr>
           <th class="th-act">Azioni</th>
+          <th>N° Codifica</th>
           <th>Materiale</th>
           <th>Classe</th>
           <th>Codice conto</th>
           <th>Fornitore</th>
         </tr></thead>
-        <tbody id="tb-anagrafica"><tr><td colspan="5" class="empty">Nessun materiale registrato</td></tr></tbody>
+        <tbody id="tb-anagrafica"><tr><td colspan="6" class="empty">Nessun materiale registrato</td></tr></tbody>
       </table>
     </div>
   </div>
@@ -426,11 +431,11 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
       <table>
         <thead><tr>
           <th class="th-act">Azioni</th>
-          <th>N°</th><th>Data</th><th>Materiale</th><th>Destinatario</th>
+          <th>N°</th><th>Data</th><th>N° Codifica</th><th>Materiale</th><th>Destinatario</th>
           <th>Fornitore</th><th>Qtà</th><th>Prezzo</th><th class="th-tot">Totale</th>
           <th>DDT</th>
         </tr></thead>
-        <tbody id="tb-ordini"><tr><td colspan="10" class="empty">Nessun ordine registrato</td></tr></tbody>
+        <tbody id="tb-ordini"><tr><td colspan="11" class="empty">Nessun ordine registrato</td></tr></tbody>
       </table>
     </div>
     <div class="right-sticky">
@@ -472,9 +477,9 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
       <table>
         <thead><tr>
           <th class="th-act">Azioni</th>
-          <th>Data</th><th>Linea</th><th>Materiale</th><th>Codice conto</th><th>Qtà</th>
+          <th>Data</th><th>Linea</th><th>N° Codifica</th><th>Materiale</th><th>Codice conto</th><th>Qtà</th>
         </tr></thead>
-        <tbody id="tb-consegne"><tr><td colspan="6" class="empty">Nessuna consegna registrata</td></tr></tbody>
+        <tbody id="tb-consegne"><tr><td colspan="7" class="empty">Nessuna consegna registrata</td></tr></tbody>
       </table>
     </div>
     <div class="right-sticky">
@@ -498,9 +503,10 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
       <table>
         <thead><tr>
           <th class="th-act">Azioni</th>
+          <th>N° Codifica</th>
           <th>Materiale</th><th>Codice conto</th><th>Classe</th><th class="th-tot">Giacenza</th>
         </tr></thead>
-        <tbody id="tb-armadietto"><tr><td colspan="5" class="empty">Aggiungi materiali in Anagrafica</td></tr></tbody>
+        <tbody id="tb-armadietto"><tr><td colspan="6" class="empty">Aggiungi materiali in Anagrafica</td></tr></tbody>
       </table>
     </div>
     <div class="right-sticky">
@@ -528,6 +534,7 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
   <div class="modal">
     <div class="modal-title" id="modal-anag-title">Aggiungi Materiale</div>
     <div class="modal-grid">
+      <div class="fg"><label>N° Codifica</label><input type="text" id="m-a-numero-codifica"></div>
       <div class="fg" style="position:relative;">
         <label>Materiale *</label>
         <input type="text" id="m-a-tipologia" autocomplete="off" oninput="searchCatalog()" onfocus="searchCatalog()" onblur="hideCatalog()">
@@ -734,17 +741,18 @@ function doPost(e) {
 
     // === ANAGRAFICA ===
     const anagRows = (data.anagrafica || []).map(a => [
+      a.numeroCodifica || '',
       a.tipologia || '',
       a.codice || '',
       a.classe || '',
       (a.fornitori || []).map(f => f.nome + ' (€' + (f.prezzo||0).toFixed(2) + ')').join(' | ')
     ]);
     writeSheet_(ss, 'Anagrafica',
-      ['Materiale', 'Codice Conto', 'Classe', 'Fornitori'],
+      ['N° Codifica', 'Materiale', 'Codice Conto', 'Classe', 'Fornitori'],
       anagRows);
 
     // === ORDINI (una riga per DDT, o una riga sola se nessun DDT) ===
-    const ordHeaders = ['N° Ordine', 'Data Ordine', 'Materiale', 'Codice', 'Destinatario',
+    const ordHeaders = ['N° Ordine', 'Data Ordine', 'N° Codifica', 'Materiale', 'Codice', 'Destinatario',
                         'Fornitore', 'Qtà Ordinata', 'Prezzo', 'Totale',
                         'N° DDT', 'Data DDT', 'Qtà DDT', 'Arrivata Tot', 'Delta'];
     const ordRows = [];
@@ -753,7 +761,7 @@ function doPost(e) {
       const arrivata = ddt.reduce((s,d) => s + (parseFloat(d.qta)||0), 0);
       const delta = (o.qta || 0) - arrivata;
       if (ddt.length === 0) {
-        ordRows.push([o.numero||'', o.data||'', o.materiale||'', o.codice||'',
+        ordRows.push([o.numero||'', o.data||'', o.numeroCodifica||'', o.materiale||'', o.codice||'',
                       o.destinatario||'', o.fornitore||'', o.qta||0, o.prezzo||0, o.totale||0,
                       '', '', '', 0, delta]);
       } else {
@@ -761,6 +769,7 @@ function doPost(e) {
           ordRows.push([
             i === 0 ? (o.numero||'') : '',
             i === 0 ? (o.data||'') : '',
+            i === 0 ? (o.numeroCodifica||'') : '',
             i === 0 ? (o.materiale||'') : '',
             i === 0 ? (o.codice||'') : '',
             i === 0 ? (o.destinatario||'') : '',
@@ -779,20 +788,20 @@ function doPost(e) {
 
     // === CONSEGNE ===
     const consRows = (data.consegne || []).map(c => [
-      c.data || '', c.linea || '', c.materiale || '', c.codice || '', c.qta || 0
+      c.data || '', c.linea || '', c.numeroCodifica || '', c.materiale || '', c.codice || '', c.qta || 0
     ]);
     writeSheet_(ss, 'Consegne',
-      ['Data', 'Linea', 'Materiale', 'Codice', 'Quantità'],
+      ['Data', 'Linea', 'N° Codifica', 'Materiale', 'Codice', 'Quantità'],
       consRows);
 
     // === ARMADIETTO (giacenze + valore stimato) ===
     const armRows = (data.anagrafica || []).map(a => {
       const giacenza = (data.armadietto && data.armadietto[a.codice]) || 0;
       const prezzoBase = (a.fornitori && a.fornitori[0] && a.fornitori[0].prezzo) || 0;
-      return [a.tipologia||'', a.codice||'', a.classe||'', giacenza, prezzoBase, giacenza * prezzoBase];
+      return [a.numeroCodifica||'', a.tipologia||'', a.codice||'', a.classe||'', giacenza, prezzoBase, giacenza * prezzoBase];
     });
     writeSheet_(ss, 'Armadietto',
-      ['Materiale', 'Codice', 'Classe', 'Giacenza', 'Prezzo Base', 'Valore €'],
+      ['N° Codifica', 'Materiale', 'Codice', 'Classe', 'Giacenza', 'Prezzo Base', 'Valore €'],
       armRows);
 
     return ContentService
@@ -856,6 +865,10 @@ function loadState(){
       };
       // Migration: ensure each order has a ddt array
       state.ordini.forEach(o => { if(!Array.isArray(o.ddt)) o.ddt = []; });
+      // Migrazione: aggiungi campo numeroCodifica ai record esistenti
+      state.anagrafica.forEach(a => { if(a.numeroCodifica == null) a.numeroCodifica = ''; });
+      state.ordini.forEach(o => { if(o.numeroCodifica == null) o.numeroCodifica = ''; });
+      state.consegne.forEach(c => { if(c.numeroCodifica == null) c.numeroCodifica = ''; });
     }
   }catch(e){console.error(e);}
 }
@@ -1051,7 +1064,7 @@ function apriAnagrafica(){
   editingAnagId=null;
   lastSelectedCatalogItem=null;
   document.getElementById('modal-anag-title').textContent='Aggiungi Materiale';
-  ['m-a-tipologia','m-a-codice','m-a-classe'].forEach(id=>document.getElementById(id).value='');
+  ['m-a-numero-codifica','m-a-tipologia','m-a-codice','m-a-classe'].forEach(id=>document.getElementById(id).value='');
   const dd=document.getElementById('catalog-dropdown');
   if(dd) dd.style.display='none';
   resetSupplierRows();
@@ -1061,6 +1074,7 @@ function modificaAnagrafica(id){
   const a=state.anagrafica.find(x=>x.id===id); if(!a) return;
   editingAnagId=id;
   document.getElementById('modal-anag-title').textContent='Modifica Materiale';
+  document.getElementById('m-a-numero-codifica').value=a.numeroCodifica||'';
   document.getElementById('m-a-tipologia').value=a.tipologia;
   document.getElementById('m-a-codice').value=a.codice;
   document.getElementById('m-a-classe').value=a.classe||'';
@@ -1068,6 +1082,7 @@ function modificaAnagrafica(id){
   openModal('modal-anagrafica');
 }
 function salvaAnagrafica(){
+  const numeroCodifica=toTitleCase(document.getElementById('m-a-numero-codifica').value);
   const tipologia=toTitleCase(document.getElementById('m-a-tipologia').value);
   const codice=toTitleCase(document.getElementById('m-a-codice').value);
   const classe=toTitleCase(document.getElementById('m-a-classe').value);
@@ -1084,13 +1099,13 @@ function salvaAnagrafica(){
     if(editingAnagId){
       const a=state.anagrafica.find(x=>x.id===editingAnagId);
       const oldCodice=a.codice;
-      a.tipologia=tipologia; a.codice=codice; a.classe=classe; a.fornitori=fornitori;
+      a.numeroCodifica=numeroCodifica; a.tipologia=tipologia; a.codice=codice; a.classe=classe; a.fornitori=fornitori;
       if(oldCodice!==codice && state.armadietto[oldCodice]!=null){
         state.armadietto[codice]=state.armadietto[oldCodice];
         delete state.armadietto[oldCodice];
       }
     } else {
-      const item={ id:Date.now(), tipologia, codice, classe, fornitori };
+      const item={ id:Date.now(), numeroCodifica, tipologia, codice, classe, fornitori };
       state.anagrafica.push(item);
       if(!(codice in state.armadietto)) state.armadietto[codice]=0;
     }
@@ -1170,7 +1185,9 @@ function searchOrdineMateriale(){
     if(document.activeElement === inp && state.anagrafica.length){
       dd.innerHTML = state.anagrafica.map(a =>
         '<div class="catalog-item" onmousedown="selectOrdineMateriale('+a.id+')">'+
-        '<div style="font-weight:700;font-size:13px;color:var(--text);">'+escapeHtml(a.tipologia)+'</div>'+
+        '<div style="font-weight:700;font-size:13px;color:var(--text);">'+
+        (a.numeroCodifica ? '<span style="color:var(--accent2);margin-right:6px;">['+escapeHtml(a.numeroCodifica)+']</span>' : '')+
+        escapeHtml(a.tipologia)+'</div>'+
         '<div style="font-size:11px;color:var(--text-muted);margin-top:2px;">'+
         '<code class="codice">'+escapeHtml(a.codice)+'</code>'+
         (a.classe?' \u00b7 '+escapeHtml(a.classe):'')+
@@ -1184,7 +1201,7 @@ function searchOrdineMateriale(){
   }
   const tokens = q.split(/\s+/).filter(Boolean);
   const results = state.anagrafica.filter(a => {
-    const hay = (a.tipologia+' '+a.codice+' '+(a.classe||'')+' '+a.fornitori.map(f=>f.nome).join(' ')).toUpperCase();
+    const hay = ((a.numeroCodifica||'')+' '+a.tipologia+' '+a.codice+' '+(a.classe||'')+' '+a.fornitori.map(f=>f.nome).join(' ')).toUpperCase();
     return tokens.every(t => hay.includes(t));
   });
   if(!results.length){
@@ -1194,7 +1211,9 @@ function searchOrdineMateriale(){
   }
   dd.innerHTML = results.map(a =>
     '<div class="catalog-item" onmousedown="selectOrdineMateriale('+a.id+')">'+
-    '<div style="font-weight:700;font-size:13px;color:var(--text);">'+escapeHtml(a.tipologia)+'</div>'+
+    '<div style="font-weight:700;font-size:13px;color:var(--text);">'+
+    (a.numeroCodifica ? '<span style="color:var(--accent2);margin-right:6px;">['+escapeHtml(a.numeroCodifica)+']</span>' : '')+
+    escapeHtml(a.tipologia)+'</div>'+
     '<div style="font-size:11px;color:var(--text-muted);margin-top:2px;">'+
     '<code class="codice">'+escapeHtml(a.codice)+'</code>'+
     (a.classe?' \u00b7 '+escapeHtml(a.classe):'')+
@@ -1228,7 +1247,7 @@ function updateOrdineFornitori(){
   }
   sel.innerHTML='<option value="">Seleziona...</option>'+
     mat.fornitori.map((f,i)=>'<option value="'+i+'">'+escapeHtml(f.nome)+' \u2014 \u20ac'+f.prezzo.toFixed(2)+'</option>').join('');
-  info.innerHTML = '<b>Codice conto:</b> '+escapeHtml(mat.codice)+' &nbsp;\u00b7&nbsp; <b>Classe:</b> '+escapeHtml(mat.classe||'\u2014')+' &nbsp;\u00b7&nbsp; <b>Giacenza attuale:</b> '+(state.armadietto[mat.codice]||0);
+  info.innerHTML = '<b>N\u00b0 Codifica:</b> '+escapeHtml(mat.numeroCodifica||'\u2014')+' &nbsp;\u00b7&nbsp; <b>Codice conto:</b> '+escapeHtml(mat.codice)+' &nbsp;\u00b7&nbsp; <b>Classe:</b> '+escapeHtml(mat.classe||'\u2014')+' &nbsp;\u00b7&nbsp; <b>Giacenza attuale:</b> '+(state.armadietto[mat.codice]||0);
 }
 function salvaOrdine(){
   const numero=toTitleCase(document.getElementById('m-o-numero').value);
@@ -1253,7 +1272,7 @@ function salvaOrdine(){
       }
       const updated = {
         id: editingOrdId, numero, data, destinatario,
-        materialeId:matId, materiale:mat.tipologia, codice:mat.codice,
+        materialeId:matId, materiale:mat.tipologia, codice:mat.codice, numeroCodifica:mat.numeroCodifica||'',
         fornitore:f.nome, prezzo:f.prezzo, qta, totale:f.prezzo*qta,
         ddt: (old && Array.isArray(old.ddt)) ? old.ddt : []
       };
@@ -1262,7 +1281,7 @@ function salvaOrdine(){
     } else {
       state.ordini.push({
         id:Date.now(), numero, data, destinatario,
-        materialeId:matId, materiale:mat.tipologia, codice:mat.codice,
+        materialeId:matId, materiale:mat.tipologia, codice:mat.codice, numeroCodifica:mat.numeroCodifica||'',
         fornitore:f.nome, prezzo:f.prezzo, qta, totale:f.prezzo*qta,
         ddt: []
       });
@@ -1297,7 +1316,7 @@ function apriDdtModal(ordId){
   currentDdtOrdId = ordId;
   if(!Array.isArray(o.ddt)) o.ddt = [];
   document.getElementById('m-ddt-info').innerHTML =
-    '<b>'+escapeHtml(o.numero)+'</b> \u00b7 '+escapeHtml(o.materiale)+' \u00b7 '+
+    '<b>'+escapeHtml(o.numero)+'</b> \u00b7 <code class="codice">'+escapeHtml(o.numeroCodifica||'\u2014')+'</code> \u00b7 '+escapeHtml(o.materiale)+' \u00b7 '+
     '<span style="color:var(--text);">Qt\u00e0 ordinata: <b>'+o.qta+'</b></span>';
   document.getElementById('m-ddt-num').value = '';
   document.getElementById('m-ddt-data').value = todayLocal();
@@ -1392,7 +1411,7 @@ function updateConsegnaInfo(){
   const mat=state.anagrafica.find(a=>a.id===matId);
   if(!mat){ info.textContent='Seleziona un materiale per vedere giacenza e dati.'; return; }
   const g=state.armadietto[mat.codice]||0;
-  info.innerHTML = '<b>Codice conto:</b> '+escapeHtml(mat.codice)+' &nbsp;\u00b7&nbsp; <b>Classe:</b> '+escapeHtml(mat.classe||'\u2014')+' &nbsp;\u00b7&nbsp; <b>Giacenza:</b> <span style="color:'+(g>0?'var(--green)':'var(--red)')+';font-weight:800;">'+g+'</span>';
+  info.innerHTML = '<b>N\u00b0 Codifica:</b> '+escapeHtml(mat.numeroCodifica||'\u2014')+' &nbsp;\u00b7&nbsp; <b>Codice conto:</b> '+escapeHtml(mat.codice)+' &nbsp;\u00b7&nbsp; <b>Classe:</b> '+escapeHtml(mat.classe||'\u2014')+' &nbsp;\u00b7&nbsp; <b>Giacenza:</b> <span style="color:'+(g>0?'var(--green)':'var(--red)')+';font-weight:800;">'+g+'</span>';
 }
 async function salvaConsegna(){
   const data=document.getElementById('m-c-data').value;
@@ -1422,7 +1441,7 @@ async function salvaConsegna(){
     showSpinner('Salvataggio consegna...');
     const updated = {
       id: editingConsId, data, linea,
-      materialeId: matId, materiale: mat.tipologia, codice: newCod, qta
+      materialeId: matId, materiale: mat.tipologia, codice: newCod, numeroCodifica: mat.numeroCodifica||'', qta
     };
     state.consegne = state.consegne.map(x => x.id===editingConsId ? updated : x);
     state.armadietto[newCod] = g - qta;
@@ -1432,7 +1451,7 @@ async function salvaConsegna(){
     showSpinner('Salvataggio consegna...');
     state.consegne.push({
       id: Date.now(), data, linea,
-      materialeId: matId, materiale: mat.tipologia, codice: newCod, qta
+      materialeId: matId, materiale: mat.tipologia, codice: newCod, numeroCodifica: mat.numeroCodifica||'', qta
     });
     state.armadietto[newCod] = g - qta;
   }
@@ -1490,6 +1509,7 @@ function apriModificaGiacenza(matId){
   const cur = state.armadietto[a.codice] || 0;
   document.getElementById('m-g-info').innerHTML =
     '<b>'+escapeHtml(a.tipologia)+'</b> &nbsp;\u00b7&nbsp; '+
+    '<b>N\u00b0 Codifica:</b> <code class="codice">'+escapeHtml(a.numeroCodifica||'\u2014')+'</code> &nbsp;\u00b7&nbsp; '+
     '<code class="codice">'+escapeHtml(a.codice)+'</code> &nbsp;\u00b7&nbsp; '+
     '<b>Classe:</b> '+escapeHtml(a.classe||'\u2014');
   document.getElementById('m-g-attuale').value = cur;
@@ -1546,11 +1566,13 @@ function filtra(){
   else if(activeTab==='armadietto') renderArmadietto();
 }
 function renderAnagrafica(){
+  const fNC=document.getElementById('f-a-numero-codifica').value.toLowerCase();
   const fT=document.getElementById('f-a-tipologia').value.toLowerCase();
   const fC=document.getElementById('f-a-codice').value.toLowerCase();
   const fCl=document.getElementById('f-a-classe').value.toLowerCase();
   const fF=document.getElementById('f-a-fornitore').value.toLowerCase();
   const rows=state.anagrafica.filter(a=>{
+    if(fNC && !(a.numeroCodifica||'').toLowerCase().includes(fNC)) return false;
     if(fT && !a.tipologia.toLowerCase().includes(fT)) return false;
     if(fC && !a.codice.toLowerCase().includes(fC)) return false;
     if(fCl && !(a.classe||'').toLowerCase().includes(fCl)) return false;
@@ -1559,7 +1581,7 @@ function renderAnagrafica(){
   });
   const tb=document.getElementById('tb-anagrafica');
   if(!rows.length){
-    tb.innerHTML='<tr><td colspan="5" class="empty">Nessun materiale</td></tr>';
+    tb.innerHTML='<tr><td colspan="6" class="empty">Nessun materiale</td></tr>';
   } else {
     tb.innerHTML=rows.map(a=>{
       const forn=a.fornitori.map(f=>
@@ -1569,6 +1591,7 @@ function renderAnagrafica(){
         '<td style="white-space:nowrap;text-align:center;">'+
           '<button class="btn-edit" onclick="modificaAnagrafica('+a.id+')" title="Modifica">\u270f\ufe0f</button><button class="btn-danger" onclick="eliminaAnagrafica('+a.id+')" style="margin-left:6px;vertical-align:middle;" title="Elimina">\u00d7</button>'+
         '</td>'+
+        '<td><code class="codice">'+escapeHtml(a.numeroCodifica||'\u2014')+'</code></td>'+
         '<td style="font-weight:700;">'+escapeHtml(a.tipologia)+'</td>'+
         '<td>'+escapeHtml(a.classe||'\u2014')+'</td>'+
         '<td><code class="codice">'+escapeHtml(a.codice)+'</code></td>'+
@@ -1584,14 +1607,14 @@ function renderOrdini(){
   const fF=document.getElementById('f-o-fornitore').value.toLowerCase();
   const rows=state.ordini.filter(o=>{
     if(fN && !o.numero.toLowerCase().includes(fN)) return false;
-    if(fM && !(o.materiale.toLowerCase().includes(fM)||o.codice.toLowerCase().includes(fM))) return false;
+    if(fM && !(o.materiale.toLowerCase().includes(fM)||o.codice.toLowerCase().includes(fM)||(o.numeroCodifica||'').toLowerCase().includes(fM))) return false;
     if(fD && !o.destinatario.toLowerCase().includes(fD)) return false;
     if(fF && !o.fornitore.toLowerCase().includes(fF)) return false;
     return true;
   }).slice().reverse();
   const tb=document.getElementById('tb-ordini');
   if(!rows.length){
-    tb.innerHTML='<tr><td colspan="10" class="empty">Nessun ordine</td></tr>';
+    tb.innerHTML='<tr><td colspan="11" class="empty">Nessun ordine</td></tr>';
   } else {
     tb.innerHTML=rows.map(o=>{
       const ddtList = Array.isArray(o.ddt) ? o.ddt : [];
@@ -1612,6 +1635,7 @@ function renderOrdini(){
       '</td>'+
       '<td><code class="codice">'+escapeHtml(o.numero)+'</code></td>'+
       '<td>'+formatDataIT(o.data)+'</td>'+
+      '<td><code class="codice">'+escapeHtml(o.numeroCodifica||'\u2014')+'</code></td>'+
       '<td><b>'+escapeHtml(o.materiale)+'</b><br><code class="codice">'+escapeHtml(o.codice)+'</code></td>'+
       '<td>'+escapeHtml(o.destinatario)+'</td>'+
       '<td>'+escapeHtml(o.fornitore)+'</td>'+
@@ -1645,12 +1669,12 @@ function renderConsegne(){
   const fM=document.getElementById('f-c-materiale').value.toLowerCase();
   const rows=state.consegne.filter(c=>{
     if(fL && !c.linea.toLowerCase().includes(fL)) return false;
-    if(fM && !(c.materiale.toLowerCase().includes(fM)||c.codice.toLowerCase().includes(fM))) return false;
+    if(fM && !(c.materiale.toLowerCase().includes(fM)||c.codice.toLowerCase().includes(fM)||(c.numeroCodifica||'').toLowerCase().includes(fM))) return false;
     return true;
   }).slice().reverse();
   const tb=document.getElementById('tb-consegne');
   if(!rows.length){
-    tb.innerHTML='<tr><td colspan="6" class="empty">Nessuna consegna</td></tr>';
+    tb.innerHTML='<tr><td colspan="7" class="empty">Nessuna consegna</td></tr>';
   } else {
     tb.innerHTML=rows.map(c=>'<tr>'+
       '<td style="white-space:nowrap;text-align:center;">'+
@@ -1658,6 +1682,7 @@ function renderConsegne(){
       '</td>'+
       '<td>'+formatDataIT(c.data)+'</td>'+
       '<td><b>'+escapeHtml(c.linea)+'</b></td>'+
+      '<td><code class="codice">'+escapeHtml(c.numeroCodifica||'\u2014')+'</code></td>'+
       '<td>'+escapeHtml(c.materiale)+'</td>'+
       '<td><code class="codice">'+escapeHtml(c.codice)+'</code></td>'+
       '<td><span class="badge badge-blue">'+c.qta+'</span></td>'+
@@ -1674,12 +1699,12 @@ function renderConsegne(){
 function renderArmadietto(){
   const fT=document.getElementById('f-arm-tipologia').value.toLowerCase();
   const rows=state.anagrafica.filter(a=>{
-    if(fT && !(a.tipologia.toLowerCase().includes(fT)||a.codice.toLowerCase().includes(fT))) return false;
+    if(fT && !(a.tipologia.toLowerCase().includes(fT)||a.codice.toLowerCase().includes(fT)||(a.numeroCodifica||'').toLowerCase().includes(fT))) return false;
     return true;
   });
   const tb=document.getElementById('tb-armadietto');
   if(!rows.length){
-    tb.innerHTML='<tr><td colspan="5" class="empty">Nessun materiale</td></tr>';
+    tb.innerHTML='<tr><td colspan="6" class="empty">Nessun materiale</td></tr>';
   } else {
     tb.innerHTML=rows.map(a=>{
       const stock=state.armadietto[a.codice]||0;
@@ -1690,6 +1715,7 @@ function renderArmadietto(){
         '<td style="white-space:nowrap;text-align:center;">'+
           '<button class="btn-edit" onclick="apriModificaGiacenza('+a.id+')" title="Modifica giacenza">\u270f\ufe0f</button>'+
         '</td>'+
+        '<td><code class="codice">'+escapeHtml(a.numeroCodifica||'\u2014')+'</code></td>'+
         '<td style="font-weight:700;">'+escapeHtml(a.tipologia)+'</td>'+
         '<td><code class="codice">'+escapeHtml(a.codice)+'</code></td>'+
         '<td>'+escapeHtml(a.classe||'\u2014')+'</td>'+
@@ -2028,6 +2054,10 @@ async function bootCloudFirst(){
         armadietto: data.armadietto || {}
       };
       state.ordini.forEach(o => { if(!Array.isArray(o.ddt)) o.ddt = []; });
+      // Migrazione: aggiungi campo numeroCodifica ai record esistenti
+      state.anagrafica.forEach(a => { if(a.numeroCodifica == null) a.numeroCodifica = ''; });
+      state.ordini.forEach(o => { if(o.numeroCodifica == null) o.numeroCodifica = ''; });
+      state.consegne.forEach(c => { if(c.numeroCodifica == null) c.numeroCodifica = ''; });
       try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
       filtra();
     } else {
