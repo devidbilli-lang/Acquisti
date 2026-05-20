@@ -259,8 +259,11 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:13px;background:#cdf6f
 .g-input-block input{font-weight:900 !important;font-size:36px !important;text-align:center !important;height:90px !important;}
 @media(max-width:600px){.g-modal-grid{grid-template-columns:1fr;}}
 /* FAB */
-.fab-add{position:fixed;bottom:32px;left:32px;z-index:200;background:rgba(97,255,169,0.38);color:#00c96b;border:4px solid #61ffa9;border-radius:50px;padding:14px 26px;font-size:14px;font-weight:900;letter-spacing:1.5px;cursor:pointer;box-shadow:0 4px 20px rgba(97,255,169,0.35);display:flex;align-items:center;gap:8px;transition:all 0.2s;backdrop-filter:blur(12px);font-family:'Montserrat',sans-serif;}
+.fab-host{display:flex;justify-content:flex-start;margin:24px 0 80px 0;}
+.fab-add{position:relative;background:rgba(97,255,169,0.38);color:#00c96b;border:4px solid #61ffa9;border-radius:50px;padding:14px 26px;font-size:14px;font-weight:900;letter-spacing:1.5px;cursor:grab;box-shadow:0 4px 20px rgba(97,255,169,0.35);display:inline-flex;align-items:center;gap:8px;transition:all 0.2s;backdrop-filter:blur(12px);font-family:'Montserrat',sans-serif;user-select:none;-webkit-user-select:none;touch-action:none;}
 .fab-add:hover{background:rgba(97,255,169,0.4);box-shadow:0 6px 28px rgba(97,255,169,0.5);transform:translateY(-2px);}
+.fab-add.is-floating{position:fixed;z-index:200;margin:0;}
+.fab-add.is-dragging{cursor:grabbing;transition:none;opacity:0.85;box-shadow:0 10px 32px rgba(97,255,169,0.7);transform:scale(1.05);}
 /* TOASTS */
 .saving-overlay{position:fixed;inset:0;background:rgba(15,23,42,0.55);backdrop-filter:blur(4px);z-index:9000;display:none;align-items:center;justify-content:center;flex-direction:column;gap:18px;}
 .saving-overlay.open{display:flex;}
@@ -539,6 +542,8 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:13px;background:#cdf6f
     </div>
   </div>
 </div>
+<!-- FAB inline a fine layout (segue la tabella attiva) -->
+<div class="fab-host"><button class="fab-add" id="fab">+ Aggiungi</button></div>
 </div></div>
 <!-- MODAL ANAGRAFICA -->
 <div class="modal-overlay" id="modal-anagrafica">
@@ -847,8 +852,6 @@ function writeSheet_(ss, name, headers, rows) {
   sheet.setFrozenRows(1);
 }
 </script>
-<!-- FAB -->
-<button class="fab-add" id="fab" onclick="apriFab()">+ Aggiungi</button>
 <script>
 // ===========================================================
 // STATE & PERSISTENCE
@@ -1561,6 +1564,129 @@ function apriFab(){
   }
 }
 // ===========================================================
+// FAB Drag (mouse + touch) - default inline a fine layout,
+// trascinabile dovunque sul viewport, posizione persistita
+// ===========================================================
+function setupFabDrag(){
+  const fab = document.getElementById('fab');
+  if(!fab) return;
+  const STORAGE_KEY_POS = 'mc_vt_fab_pos';
+  const DRAG_THRESHOLD = 6;
+  let dragState = null;
+  let suppressNextClick = false;
+
+  fab.addEventListener('click', function(e){
+    if(suppressNextClick){
+      e.preventDefault(); e.stopPropagation();
+      suppressNextClick = false;
+      return;
+    }
+    apriFab();
+  });
+
+  fab.addEventListener('dblclick', function(e){
+    // Doppio click: reset alla posizione di default (in flow)
+    e.preventDefault(); e.stopPropagation();
+    fab.classList.remove('is-floating','is-dragging');
+    fab.style.left = ''; fab.style.top = '';
+    fab.style.right = ''; fab.style.bottom = '';
+    try{ localStorage.removeItem(STORAGE_KEY_POS); }catch(_){}
+  });
+
+  function getPoint(e){
+    if(e.touches && e.touches.length) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    return { x: e.clientX, y: e.clientY };
+  }
+  function onDown(e){
+    const p = getPoint(e);
+    const rect = fab.getBoundingClientRect();
+    dragState = {
+      startX: p.x, startY: p.y,
+      fabStartLeft: rect.left, fabStartTop: rect.top,
+      dragging: false
+    };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    document.addEventListener('touchmove', onMove, { passive: false });
+    document.addEventListener('touchend', onUp);
+  }
+  function onMove(e){
+    if(!dragState) return;
+    const p = getPoint(e);
+    const dx = p.x - dragState.startX;
+    const dy = p.y - dragState.startY;
+    if(!dragState.dragging){
+      if(Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD){
+        dragState.dragging = true;
+        fab.classList.add('is-floating','is-dragging');
+        fab.style.left = dragState.fabStartLeft + 'px';
+        fab.style.top = dragState.fabStartTop + 'px';
+        fab.style.bottom = 'auto';
+        fab.style.right = 'auto';
+      } else return;
+    }
+    e.preventDefault();
+    let newLeft = dragState.fabStartLeft + dx;
+    let newTop = dragState.fabStartTop + dy;
+    const maxLeft = window.innerWidth - fab.offsetWidth - 8;
+    const maxTop = window.innerHeight - fab.offsetHeight - 8;
+    newLeft = Math.max(8, Math.min(maxLeft, newLeft));
+    newTop = Math.max(8, Math.min(maxTop, newTop));
+    fab.style.left = newLeft + 'px';
+    fab.style.top = newTop + 'px';
+  }
+  function onUp(){
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+    document.removeEventListener('touchmove', onMove);
+    document.removeEventListener('touchend', onUp);
+    if(dragState && dragState.dragging){
+      fab.classList.remove('is-dragging');
+      try{
+        localStorage.setItem(STORAGE_KEY_POS, JSON.stringify({
+          left: parseFloat(fab.style.left),
+          top: parseFloat(fab.style.top)
+        }));
+      }catch(_){}
+      suppressNextClick = true;
+      setTimeout(()=>{ suppressNextClick = false; }, 100);
+    }
+    dragState = null;
+  }
+  fab.addEventListener('mousedown', onDown);
+  fab.addEventListener('touchstart', onDown, { passive: false });
+
+  // Ripristina posizione salvata (se valida per il viewport corrente)
+  try{
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY_POS) || 'null');
+    if(saved && typeof saved.left === 'number' && typeof saved.top === 'number'){
+      requestAnimationFrame(()=>{
+        const w = fab.offsetWidth, h = fab.offsetHeight;
+        if(saved.left >= 0 && saved.left + w <= window.innerWidth + 8 &&
+           saved.top >= 0 && saved.top + h <= window.innerHeight + 8){
+          fab.classList.add('is-floating');
+          fab.style.left = saved.left + 'px';
+          fab.style.top = saved.top + 'px';
+          fab.style.bottom = 'auto';
+          fab.style.right = 'auto';
+        }
+      });
+    }
+  }catch(_){}
+
+  // Sul resize della finestra, riallinea se fuori viewport
+  window.addEventListener('resize', ()=>{
+    if(!fab.classList.contains('is-floating')) return;
+    const w = fab.offsetWidth, h = fab.offsetHeight;
+    let l = parseFloat(fab.style.left) || 0;
+    let t = parseFloat(fab.style.top) || 0;
+    const maxLeft = window.innerWidth - w - 8;
+    const maxTop = window.innerHeight - h - 8;
+    if(l > maxLeft) fab.style.left = Math.max(8, maxLeft) + 'px';
+    if(t > maxTop) fab.style.top = Math.max(8, maxTop) + 'px';
+  });
+}
+// ===========================================================
 // FILTERS & RENDERING
 // ===========================================================
 function filtra(){
@@ -2087,6 +2213,7 @@ updateConnPill();
 // BOOT (cloud-first with local fallback)
 // ===========================================================
 bootCloudFirst();
+setupFabDrag();
 </script>
 </body>
 </html>
