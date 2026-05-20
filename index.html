@@ -247,6 +247,17 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
 .supplier-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;}
 .modal-info{background:#f8f8fd;border-radius:10px;padding:10px 14px;font-size:12px;color:var(--text-muted);margin-bottom:14px;border:1.5px solid var(--accent);box-shadow:inset 0 0 6px rgba(57,224,244,0.15);min-height:38px;}
 .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;}
+/* Modifica Giacenza: layout 2 colonne (info materiale | nuova giacenza) */
+.g-modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;align-items:stretch;}
+.g-info-block{background:rgba(57,224,244,0.06);border:1.5px solid var(--accent);border-radius:12px;padding:14px 16px;box-shadow:inset 0 0 8px rgba(57,224,244,0.12);}
+.g-info-row{margin-bottom:10px;}
+.g-info-row:last-child{margin-bottom:0;}
+.g-info-label{font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:3px;}
+.g-info-value{font-size:13px;font-weight:700;color:var(--text);}
+.g-info-primary{font-size:20px;font-weight:900;color:var(--accent2);letter-spacing:0.5px;}
+.g-input-block{display:flex;flex-direction:column;justify-content:center;}
+.g-input-block input{font-weight:900 !important;font-size:36px !important;text-align:center !important;height:90px !important;}
+@media(max-width:600px){.g-modal-grid{grid-template-columns:1fr;}}
 /* FAB */
 .fab-add{position:fixed;bottom:32px;left:32px;z-index:200;background:rgba(97,255,169,0.38);color:#00c96b;border:4px solid #61ffa9;border-radius:50px;padding:14px 26px;font-size:14px;font-weight:900;letter-spacing:1.5px;cursor:pointer;box-shadow:0 4px 20px rgba(97,255,169,0.35);display:flex;align-items:center;gap:8px;transition:all 0.2s;backdrop-filter:blur(12px);font-family:'Montserrat',sans-serif;}
 .fab-add:hover{background:rgba(97,255,169,0.4);box-shadow:0 6px 28px rgba(97,255,169,0.5);transform:translateY(-2px);}
@@ -646,10 +657,29 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
 <div class="modal-overlay" id="modal-giacenza">
   <div class="modal" style="max-width:520px;">
     <div class="modal-title">Modifica Giacenza</div>
-    <div class="modal-info" id="m-g-info">&mdash;</div>
-    <div class="fg" style="margin-bottom:14px;">
-      <label>Nuova Giacenza *</label>
-      <input type="number" id="m-g-nuova" style="font-weight:800;font-size:18px;text-align:center;">
+    <div class="g-modal-grid">
+      <div class="g-info-block">
+        <div class="g-info-row">
+          <div class="g-info-label">Materiale</div>
+          <div class="g-info-value g-info-primary" id="m-g-materiale">&mdash;</div>
+        </div>
+        <div class="g-info-row">
+          <div class="g-info-label">N° Codifica</div>
+          <div class="g-info-value"><code class="codice" id="m-g-numero-codifica">&mdash;</code></div>
+        </div>
+        <div class="g-info-row">
+          <div class="g-info-label">Codice Conto</div>
+          <div class="g-info-value"><code class="codice" id="m-g-codice-conto">&mdash;</code></div>
+        </div>
+        <div class="g-info-row">
+          <div class="g-info-label">Classe</div>
+          <div class="g-info-value" id="m-g-classe">&mdash;</div>
+        </div>
+      </div>
+      <div class="fg g-input-block">
+        <label>Nuova Giacenza *</label>
+        <input type="number" id="m-g-nuova">
+      </div>
     </div>
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeModal('modal-giacenza')">Annulla</button>
@@ -1489,11 +1519,10 @@ function apriModificaGiacenza(matId){
   if(!a){ showAlert('Materiale non trovato','err'); return; }
   editingGiacenzaCodice = a.codice;
   const cur = state.armadietto[a.codice] || 0;
-  document.getElementById('m-g-info').innerHTML =
-    '<b>'+escapeHtml(a.tipologia)+'</b> &nbsp;\u00b7&nbsp; '+
-    '<b>N\u00b0 Codifica:</b> <code class="codice">'+escapeHtml(a.numeroCodifica||'\u2014')+'</code> &nbsp;\u00b7&nbsp; '+
-    '<code class="codice">'+escapeHtml(a.codice)+'</code> &nbsp;\u00b7&nbsp; '+
-    '<b>Classe:</b> '+escapeHtml(a.classe||'\u2014');
+  document.getElementById('m-g-materiale').textContent = a.tipologia;
+  document.getElementById('m-g-numero-codifica').textContent = a.numeroCodifica || '\u2014';
+  document.getElementById('m-g-codice-conto').textContent = a.codice;
+  document.getElementById('m-g-classe').textContent = a.classe || '\u2014';
   document.getElementById('m-g-nuova').value = cur;
   openModal('modal-giacenza');
   setTimeout(()=>{
