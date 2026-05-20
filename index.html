@@ -426,7 +426,7 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:13px;background:#cdf6f
         <thead><tr>
           <th class="th-act">Azioni</th>
           <th>N° Codifica</th>
-          <th>Materiale</th>
+          <th>Nome Materiale</th>
           <th>Classe</th>
           <th>Codice conto</th>
           <th>Fornitore</th>
@@ -461,7 +461,7 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:13px;background:#cdf6f
       <table>
         <thead><tr>
           <th class="th-act">Azioni</th>
-          <th>N°</th><th>Data</th><th>N° Codifica</th><th>Materiale</th><th>Destinatario</th>
+          <th>N°</th><th>Data</th><th>N° Codifica</th><th>Nome Materiale</th><th>Destinatario</th>
           <th>Fornitore</th><th>Qtà</th><th>Prezzo</th><th class="th-tot">Totale</th>
           <th>DDT</th>
         </tr></thead>
@@ -507,7 +507,7 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:13px;background:#cdf6f
       <table>
         <thead><tr>
           <th class="th-act">Azioni</th>
-          <th>Data</th><th>Linea</th><th>N° Codifica</th><th>Materiale</th><th>Codice conto</th><th>Qtà</th>
+          <th>Data</th><th>Linea</th><th>N° Codifica</th><th>Nome Materiale</th><th>Codice conto</th><th>Qtà</th>
         </tr></thead>
         <tbody id="tb-consegne"><tr><td colspan="7" class="empty">Nessuna consegna registrata</td></tr></tbody>
       </table>
@@ -534,7 +534,7 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:13px;background:#cdf6f
         <thead><tr>
           <th class="th-act">Azioni</th>
           <th>N° Codifica</th>
-          <th>Materiale</th><th>Codice conto</th><th>Classe</th><th class="th-tot">Giacenza</th>
+          <th>Nome Materiale</th><th>Codice conto</th><th>Classe</th><th class="th-tot">Giacenza</th>
         </tr></thead>
         <tbody id="tb-armadietto"><tr><td colspan="6" class="empty">Aggiungi materiali in Anagrafica</td></tr></tbody>
       </table>
@@ -570,7 +570,7 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:13px;background:#cdf6f
     <div class="modal-grid">
       <div class="fg"><label>N° Codifica</label><input type="text" id="m-a-numero-codifica"></div>
       <div class="fg" style="position:relative;">
-        <label>Materiale *</label>
+        <label>Nome Materiale *</label>
         <input type="text" id="m-a-tipologia" autocomplete="off" oninput="searchCatalog()" onfocus="searchCatalog()" onblur="hideCatalog()">
         <div class="dropdown-list" id="catalog-dropdown" style="position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1.5px solid var(--accent);border-radius:10px;max-height:260px;overflow-y:auto;z-index:200;display:none;box-shadow:0 8px 24px rgba(57,224,244,0.15);"></div>
       </div>
@@ -621,7 +621,7 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:13px;background:#cdf6f
     </div>
     <div class="modal-grid">
       <div class="fg" style="position:relative;">
-        <label>Materiale *</label>
+        <label>Nome Materiale *</label>
         <input type="hidden" id="m-o-materiale-id" value="">
         <input type="text" id="m-o-materiale" autocomplete="off" oninput="searchOrdineMateriale()" onfocus="searchOrdineMateriale()" onblur="hideOrdineMateriale()">
         <div class="dropdown-list" id="ordine-mat-dropdown" style="position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1.5px solid var(--accent);border-radius:10px;max-height:220px;overflow-y:auto;z-index:200;display:none;box-shadow:0 8px 24px rgba(57,224,244,0.15);"></div>
@@ -645,7 +645,7 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:13px;background:#cdf6f
     <div class="modal-grid">
       <div class="fg"><label>Data *</label><input type="date" id="m-c-data"></div>
       <div class="fg"><label>Linea *</label><input type="text" id="m-c-linea"></div>
-      <div class="fg"><label>Materiale *</label>
+      <div class="fg"><label>Nome Materiale *</label>
         <select id="m-c-materiale" onchange="updateConsegnaInfo()"><option value="">Seleziona...</option></select>
       </div>
       <div class="fg"><label>Quantità *</label><input type="number" min="1" id="m-c-qta"></div>
@@ -683,7 +683,7 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:13px;background:#cdf6f
     <div class="g-modal-grid">
       <div class="g-info-block">
         <div class="g-info-row">
-          <div class="g-info-label">Materiale</div>
+          <div class="g-info-label">Nome Materiale</div>
           <div class="g-info-value g-info-primary" id="m-g-materiale">&mdash;</div>
         </div>
         <div class="g-info-row">
@@ -783,11 +783,11 @@ function doPost(e) {
       (a.fornitori || []).map(f => f.nome + ' (€' + (f.prezzo||0).toFixed(2) + ')').join(' | ')
     ]);
     writeSheet_(ss, 'Anagrafica',
-      ['N° Codifica', 'Materiale', 'Codice Conto', 'Classe', 'Fornitori'],
+      ['N° Codifica', 'Nome Materiale', 'Codice Conto', 'Classe', 'Fornitori'],
       anagRows);
 
     // === ORDINI (una riga per DDT, o una riga sola se nessun DDT) ===
-    const ordHeaders = ['N° Ordine', 'Data Ordine', 'N° Codifica', 'Materiale', 'Codice', 'Destinatario',
+    const ordHeaders = ['N° Ordine', 'Data Ordine', 'N° Codifica', 'Nome Materiale', 'Codice', 'Destinatario',
                         'Fornitore', 'Qtà Ordinata', 'Prezzo', 'Totale',
                         'N° DDT', 'Data DDT', 'Qtà DDT', 'Arrivata Tot', 'Delta'];
     const ordRows = [];
@@ -826,7 +826,7 @@ function doPost(e) {
       c.data || '', c.linea || '', c.numeroCodifica || '', c.materiale || '', c.codice || '', c.qta || 0
     ]);
     writeSheet_(ss, 'Consegne',
-      ['Data', 'Linea', 'N° Codifica', 'Materiale', 'Codice', 'Quantità'],
+      ['Data', 'Linea', 'N° Codifica', 'Nome Materiale', 'Codice', 'Quantità'],
       consRows);
 
     // === ARMADIETTO (giacenze + valore stimato) ===
@@ -836,7 +836,7 @@ function doPost(e) {
       return [a.numeroCodifica||'', a.tipologia||'', a.codice||'', a.classe||'', giacenza, prezzoBase, giacenza * prezzoBase];
     });
     writeSheet_(ss, 'Armadietto',
-      ['N° Codifica', 'Materiale', 'Codice', 'Classe', 'Giacenza', 'Prezzo Base', 'Valore €'],
+      ['N° Codifica', 'Nome Materiale', 'Codice', 'Classe', 'Giacenza', 'Prezzo Base', 'Valore €'],
       armRows);
 
     return ContentService
