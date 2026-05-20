@@ -87,17 +87,22 @@ header{
   padding:6px 12px;border-radius:20px;
 }
 .conn-pill.ok{background:#dcfce7;color:#15803d;border:1.5px solid #86efac;}
-/* TABS */
+/* LAYOUT 2 colonne: sidebar a sx + contenuto a dx */
+.layout-wrap{display:flex;gap:24px;align-items:flex-start;}
+.sidebar{flex-shrink:0;width:220px;position:sticky;top:16px;align-self:flex-start;}
+.content{flex:1;min-width:0;}
+/* TABS verticali */
 .tabs{
-  display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;
+  display:flex;flex-direction:column;gap:8px;margin-bottom:0;flex-wrap:nowrap;
 }
 .tab-btn{
-  display:flex;align-items:center;gap:8px;
+  display:flex;align-items:center;gap:10px;width:100%;justify-content:flex-start;
   background:#fff;border:2px solid var(--border);
-  padding:12px 22px;border-radius:14px;
-  font-size:13px;font-weight:800;letter-spacing:1px;
+  padding:14px 18px;border-radius:14px;
+  font-size:14px;font-weight:800;letter-spacing:1px;
   color:var(--text-muted);cursor:pointer;
   transition:all 0.18s;
+  text-align:left;
 }
 .tab-btn:hover{border-color:var(--accent);color:var(--accent2);}
 .tab-btn.active{
@@ -105,7 +110,13 @@ header{
   border-color:var(--accent);color:#fff;
   box-shadow:0 4px 16px rgba(57,224,244,0.45);
 }
-.tab-ico{width:18px;height:18px;flex-shrink:0;}
+.tab-ico{width:20px;height:20px;flex-shrink:0;}
+@media(max-width:800px){
+  .layout-wrap{flex-direction:column;}
+  .sidebar{width:100%;position:static;}
+  .tabs{flex-direction:row;flex-wrap:wrap;}
+  .tab-btn{width:auto;}
+}
 /* FILTERS */
 .filters{
   display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center;
@@ -361,6 +372,9 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:13px;background:#cdf6f
     <div class="conn-pill ok" id="conn-pill">Locale</div>
   </div>
 </header>
+<!-- LAYOUT 2 colonne -->
+<div class="layout-wrap">
+<aside class="sidebar">
 <!-- TABS -->
 <div class="tabs">
   <button class="tab-btn active" data-tab="anagrafica">
@@ -380,6 +394,8 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:13px;background:#cdf6f
     Armadietto
   </button>
 </div>
+</aside>
+<main class="content">
 <!-- ============ ANAGRAFICA ============ -->
 <div id="tab-anagrafica" class="tab-panel active">
   <div class="filters">
@@ -544,6 +560,8 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:13px;background:#cdf6f
 </div>
 <!-- FAB inline a fine layout (segue la tabella attiva) -->
 <div class="fab-host"><button class="fab-add" id="fab">+ Aggiungi</button></div>
+</main>
+</div>
 </div></div>
 <!-- MODAL ANAGRAFICA -->
 <div class="modal-overlay" id="modal-anagrafica">
