@@ -1633,7 +1633,8 @@ function renderOrdini(){
       const arrBig = '<span class="ddt-arr">'+arrivata+'</span>';
       const ddtText = ddtList.length+' DDT \u00b7 '+arrBig+'/'+o.qta;
       const deltaColor = isComplete ? 'delta-green' : 'delta-red';
-      const deltaBadge = '<span class="ddt-delta '+deltaColor+'">\u0394'+delta+'</span>';
+      const deltaContent = isComplete ? '\u2713' : '\u2212'+delta;
+      const deltaBadge = '<span class="ddt-delta '+deltaColor+'">'+deltaContent+'</span>';
       return '<tr>'+
       '<td style="white-space:nowrap;text-align:center;">'+
         '<button class="btn-edit" onclick="modificaOrdine('+o.id+')" title="Modifica">\u270f\ufe0f</button><button class="btn-danger" onclick="eliminaOrdine('+o.id+')" style="margin-left:6px;vertical-align:middle;" title="Elimina">\u00d7</button>'+
