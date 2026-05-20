@@ -864,6 +864,8 @@ function saveState(){
   catch(e){ showAlert('Errore salvataggio: '+e.message,'err'); }
   // Background push to Cloudflare D1 (debounced 300ms, no-op if not configured)
   if(typeof pushToCloud === 'function') pushToCloud();
+  // Background push to Google Sheets (debounced 5s, no-op if not configured)
+  if(typeof pushToSheetsDebounced === 'function') pushToSheetsDebounced();
 }
 // ===========================================================
 // CLOCK
@@ -1908,6 +1910,30 @@ function pushToCloud(){
       updateConnPill('error');
     }
   }, 300);
+}
+
+// ----- Auto-push to Google Sheets (longer debounce: Apps Script e' lento) -----
+let sheetsPushTimer = null;
+function pushToSheetsDebounced(){
+  const sheetUrl = getSheetUrl();
+  if(!sheetUrl) return;
+  clearTimeout(sheetsPushTimer);
+  sheetsPushTimer = setTimeout(async () => {
+    try{
+      const r = await fetch(sheetUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(state)
+      });
+      const txt = await r.text();
+      let parsed;
+      try{ parsed = JSON.parse(txt); }catch(e){ throw new Error('risposta non JSON'); }
+      if(!parsed.ok) throw new Error(parsed.error || 'errore Apps Script');
+      console.log('[Sheets auto-sync] OK', new Date().toLocaleTimeString());
+    } catch(e){
+      console.warn('[Sheets auto-sync] fallita:', e.message);
+    }
+  }, 5000);
 }
 
 // ----- Manual full sync: D1 + Sheets (header button) -----
