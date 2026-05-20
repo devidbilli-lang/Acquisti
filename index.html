@@ -266,6 +266,49 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
 .alert-box.err{background:#fef2f2;color:#dc2626;border:1.5px solid #fca5a5;}
 /* PIE CHART */
 .pie-card{background:var(--surface);border:2px solid var(--accent);border-radius:16px;padding:18px;text-align:center;box-shadow:0 0 16px 2px rgba(57,224,244,0.5),0 0 40px 8px rgba(57,224,244,0.2);}
+
+.sync-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;border:none;
+  padding:8px 14px;border-radius:20px;
+  font-size:11px;font-weight:800;letter-spacing:1px;text-transform:capitalize;
+  cursor:pointer;font-family:inherit;
+  box-shadow:0 2px 10px rgba(57,224,244,0.4);
+  transition:all 0.15s;
+}
+.sync-btn:hover{box-shadow:0 4px 16px rgba(57,224,244,0.6);transform:translateY(-1px);}
+.sync-btn svg{width:14px;height:14px;}
+.sync-btn.synced{background:linear-gradient(135deg,#10b981,#059669);box-shadow:0 2px 10px rgba(16,185,129,0.4);}
+.sync-btn.error{background:linear-gradient(135deg,#ef4444,#b91c1c);box-shadow:0 2px 10px rgba(239,68,68,0.4);}
+.gear-btn{
+  width:36px;height:36px;border-radius:50%;
+  background:rgba(57,224,244,0.08);
+  border:1.5px solid rgba(57,224,244,0.3);
+  color:var(--accent2);
+  cursor:pointer;font-family:inherit;
+  display:inline-flex;align-items:center;justify-content:center;
+  transition:all 0.15s;
+}
+.gear-btn:hover{background:rgba(57,224,244,0.15);border-color:var(--accent);}
+.gear-btn svg{width:18px;height:18px;}
+.script-pre{
+  background:#1a1a2e;color:#e2e8f0;
+  padding:14px 16px;border-radius:10px;
+  font-family:'Courier New',monospace;font-size:11px;line-height:1.5;
+  max-height:280px;overflow:auto;
+  white-space:pre;text-transform:none;
+  margin-top:10px;
+}
+.setup-steps{
+  background:rgba(57,224,244,0.05);
+  border:1.5px dashed var(--accent);border-radius:10px;
+  padding:14px 18px;margin-bottom:14px;
+}
+.setup-steps ol{margin-left:20px;font-size:12px;line-height:1.7;color:var(--text);}
+.setup-steps li{margin-bottom:4px;}
+.setup-steps strong{color:var(--accent2);}
+
 /* hidden tab panels */
 .tab-panel{display:none;}
 .tab-panel.active{display:block;}
@@ -294,7 +337,14 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
   <div class="brand-name">Materiali Consumabili (VT)</div>
   <div class="header-right">
     <div class="clock" id="clk">--:--</div>
-    <div class="conn-pill ok">Locale</div>
+    <button class="gear-btn" onclick="apriSettings()" title="Impostazioni Cloud">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+    <button class="sync-btn" id="sync-btn" onclick="syncAll()" title="Sincronizza Cloud D1 + Sheets">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <span>Sync</span>
+    </button>
+    <div class="conn-pill ok" id="conn-pill">Locale</div>
   </div>
 </header>
 <!-- TABS -->
@@ -618,6 +668,164 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:12px;background:#cdf6f
     </div>
   </div>
 </div>
+<!-- MODAL IMPOSTAZIONI CLOUD (D1 primario + Sheets backup) -->
+<div class="modal-overlay" id="modal-settings">
+  <div class="modal" style="max-width:780px;">
+    <div class="modal-title">Impostazioni Cloud</div>
+
+    <!-- ============== CLOUDFLARE D1 ============== -->
+    <div style="background:rgba(57,224,244,0.06);border:2px solid var(--accent);border-radius:12px;padding:16px;margin-bottom:18px;box-shadow:0 0 10px rgba(57,224,244,0.15);">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--accent2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+        <span style="font-size:13px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--accent2);">Cloudflare D1 — Database principale</span>
+      </div>
+      <div class="fg" style="margin-bottom:10px;">
+        <label>Worker URL</label>
+        <input type="text" id="m-api-url" placeholder="https://mc-vt-api.tuo-subdomain.workers.dev" style="text-transform:none;font-family:monospace;font-size:12px;">
+      </div>
+      <div class="fg" style="margin-bottom:12px;">
+        <label>API Token (lascia vuoto se Worker senza auth)</label>
+        <input type="password" id="m-api-token" placeholder="••••••••" style="text-transform:none;font-family:monospace;font-size:12px;">
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-blue" onclick="testApiConnection()" style="flex:1;">Test connessione</button>
+        <button class="btn-primary" onclick="salvaApiConfig()" style="flex:1;">Salva config D1</button>
+      </div>
+    </div>
+
+    <!-- ============== GOOGLE SHEETS (BACKUP) ============== -->
+    <div style="background:rgba(59,130,246,0.05);border:2px solid #3b82f6;border-radius:12px;padding:16px;margin-bottom:14px;box-shadow:0 0 10px rgba(59,130,246,0.15);">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+        <span style="font-size:13px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#3b82f6;">Google Sheets — Backup di scrittura</span>
+      </div>
+      <div class="fg" style="margin-bottom:12px;">
+        <label>Apps Script Web App URL</label>
+        <input type="text" id="m-sheet-url" placeholder="https://script.google.com/macros/s/.../exec" style="text-transform:none;font-family:monospace;font-size:12px;">
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-blue" onclick="testSheetUrl()" style="flex:1;">Test</button>
+        <button class="btn-primary" onclick="salvaSheetUrl()" style="flex:1;">Salva URL</button>
+      </div>
+      <details style="margin-top:12px;">
+        <summary style="cursor:pointer;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#3b82f6;">Codice Apps Script (per setup Sheets)</summary>
+        <button class="btn-secondary" onclick="copyAppsScript()" style="margin-top:8px;padding:6px 12px;font-size:11px;">Copia codice</button>
+        <pre class="script-pre" id="apps-script-display"></pre>
+      </details>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('modal-settings')">Chiudi</button>
+    </div>
+  </div>
+</div>
+<!-- HIDDEN: Apps Script code template -->
+<script type="text/plain" id="apps-script-template">/**
+ * MATERIALI CONSUMABILI (VT) - Sincronizzazione Google Sheet
+ * Generato da Materiali Consumabili (VT) - non modificare la firma doPost
+ */
+
+const SHEET_ID = 'INSERISCI_QUI_L_ID_DEL_TUO_FOGLIO';
+
+function doPost(e) {
+  try {
+    const data = JSON.parse(e.postData.contents);
+    const ss = SpreadsheetApp.openById(SHEET_ID);
+
+    // === ANAGRAFICA ===
+    const anagRows = (data.anagrafica || []).map(a => [
+      a.tipologia || '',
+      a.codice || '',
+      a.classe || '',
+      (a.fornitori || []).map(f => f.nome + ' (€' + (f.prezzo||0).toFixed(2) + ')').join(' | ')
+    ]);
+    writeSheet_(ss, 'Anagrafica',
+      ['Materiale', 'Codice Conto', 'Classe', 'Fornitori'],
+      anagRows);
+
+    // === ORDINI (una riga per DDT, o una riga sola se nessun DDT) ===
+    const ordHeaders = ['N° Ordine', 'Data Ordine', 'Materiale', 'Codice', 'Destinatario',
+                        'Fornitore', 'Qtà Ordinata', 'Prezzo', 'Totale',
+                        'N° DDT', 'Data DDT', 'Qtà DDT', 'Arrivata Tot', 'Delta'];
+    const ordRows = [];
+    (data.ordini || []).forEach(o => {
+      const ddt = o.ddt || [];
+      const arrivata = ddt.reduce((s,d) => s + (parseFloat(d.qta)||0), 0);
+      const delta = (o.qta || 0) - arrivata;
+      if (ddt.length === 0) {
+        ordRows.push([o.numero||'', o.data||'', o.materiale||'', o.codice||'',
+                      o.destinatario||'', o.fornitore||'', o.qta||0, o.prezzo||0, o.totale||0,
+                      '', '', '', 0, delta]);
+      } else {
+        ddt.forEach((d, i) => {
+          ordRows.push([
+            i === 0 ? (o.numero||'') : '',
+            i === 0 ? (o.data||'') : '',
+            i === 0 ? (o.materiale||'') : '',
+            i === 0 ? (o.codice||'') : '',
+            i === 0 ? (o.destinatario||'') : '',
+            i === 0 ? (o.fornitore||'') : '',
+            i === 0 ? (o.qta||0) : '',
+            i === 0 ? (o.prezzo||0) : '',
+            i === 0 ? (o.totale||0) : '',
+            d.numero||'', d.data||'', d.qta||0,
+            i === 0 ? arrivata : '',
+            i === 0 ? delta : ''
+          ]);
+        });
+      }
+    });
+    writeSheet_(ss, 'Ordini', ordHeaders, ordRows);
+
+    // === CONSEGNE ===
+    const consRows = (data.consegne || []).map(c => [
+      c.data || '', c.linea || '', c.materiale || '', c.codice || '', c.qta || 0
+    ]);
+    writeSheet_(ss, 'Consegne',
+      ['Data', 'Linea', 'Materiale', 'Codice', 'Quantità'],
+      consRows);
+
+    // === ARMADIETTO (giacenze + valore stimato) ===
+    const armRows = (data.anagrafica || []).map(a => {
+      const giacenza = (data.armadietto && data.armadietto[a.codice]) || 0;
+      const prezzoBase = (a.fornitori && a.fornitori[0] && a.fornitori[0].prezzo) || 0;
+      return [a.tipologia||'', a.codice||'', a.classe||'', giacenza, prezzoBase, giacenza * prezzoBase];
+    });
+    writeSheet_(ss, 'Armadietto',
+      ['Materiale', 'Codice', 'Classe', 'Giacenza', 'Prezzo Base', 'Valore €'],
+      armRows);
+
+    return ContentService
+      .createTextOutput(JSON.stringify({ok:true, timestamp: new Date().toISOString()}))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ok:false, error: err.message}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doGet(e) {
+  return ContentService
+    .createTextOutput(JSON.stringify({ok:true, message:'Endpoint Materiali Consumabili VT attivo'}))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function writeSheet_(ss, name, headers, rows) {
+  let sheet = ss.getSheetByName(name);
+  if (!sheet) sheet = ss.insertSheet(name);
+  sheet.clearContents();
+  sheet.getRange(1, 1, 1, headers.length)
+       .setValues([headers])
+       .setFontWeight('bold')
+       .setBackground('#39e0f4')
+       .setFontColor('#ffffff');
+  if (rows.length > 0) {
+    sheet.getRange(2, 1, rows.length, headers.length).setValues(rows);
+  }
+  sheet.setFrozenRows(1);
+}
+</script>
 <!-- FAB -->
 <button class="fab-add" id="fab" onclick="apriFab()">+ Aggiungi</button>
 <script>
@@ -654,6 +862,8 @@ function loadState(){
 function saveState(){
   try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
   catch(e){ showAlert('Errore salvataggio: '+e.message,'err'); }
+  // Background push to Cloudflare D1 (debounced 300ms, no-op if not configured)
+  if(typeof pushToCloud === 'function') pushToCloud();
 }
 // ===========================================================
 // CLOCK
@@ -1541,11 +1751,280 @@ function renderPie(){
       '<span style="font-weight:800;">'+d.qta+'</span>'+
     '</div>').join('')+'</div>';
 }
+
 // ===========================================================
-// BOOT
+// CLOUD SYNC (Cloudflare D1 + Google Sheets backup)
 // ===========================================================
-loadState();
-filtra();
+const API_URL_KEY   = 'mc_vt_api_url';
+const API_TOKEN_KEY = 'mc_vt_api_token';
+const SHEET_URL_KEY = 'mc_vt_sheet_url';
+
+function getApiConfig(){
+  return {
+    url: (localStorage.getItem(API_URL_KEY) || '').replace(/\/$/, ''),
+    token: localStorage.getItem(API_TOKEN_KEY) || ''
+  };
+}
+function setApiConfig(url, token){
+  if(url) localStorage.setItem(API_URL_KEY, url); else localStorage.removeItem(API_URL_KEY);
+  if(token) localStorage.setItem(API_TOKEN_KEY, token); else localStorage.removeItem(API_TOKEN_KEY);
+}
+function getSheetUrl(){ return localStorage.getItem(SHEET_URL_KEY) || ''; }
+function setSheetUrl(u){ if(u) localStorage.setItem(SHEET_URL_KEY, u); else localStorage.removeItem(SHEET_URL_KEY); }
+
+// Generic JSON fetch against the Worker with bearer auth
+async function apiFetch(pathOrUrl, options = {}){
+  const cfg = getApiConfig();
+  if(!cfg.url) throw new Error('Worker URL non configurato');
+  const url = pathOrUrl.startsWith('http') ? pathOrUrl : (cfg.url + pathOrUrl);
+  const headers = Object.assign(
+    { 'Content-Type': 'application/json' },
+    cfg.token ? { 'Authorization': 'Bearer ' + cfg.token } : {},
+    options.headers || {}
+  );
+  const r = await fetch(url, Object.assign({}, options, { headers }));
+  const text = await r.text();
+  let data;
+  try { data = JSON.parse(text); }
+  catch(e){ throw new Error('Risposta non JSON (HTTP '+r.status+'): '+text.substring(0,100)); }
+  if(!r.ok || data.ok === false) throw new Error(data.error || ('HTTP ' + r.status));
+  return data;
+}
+
+// ----- Settings modal -----
+function apriSettings(){
+  const apiCfg = getApiConfig();
+  const sheetUrl = getSheetUrl();
+  document.getElementById('m-api-url').value = apiCfg.url;
+  document.getElementById('m-api-token').value = apiCfg.token;
+  document.getElementById('m-sheet-url').value = sheetUrl;
+  const tpl = document.getElementById('apps-script-template');
+  const disp = document.getElementById('apps-script-display');
+  if(tpl && disp) disp.textContent = tpl.textContent;
+  openModal('modal-settings');
+}
+
+async function testApiConnection(){
+  const url = document.getElementById('m-api-url').value.trim().replace(/\/$/, '');
+  const token = document.getElementById('m-api-token').value.trim();
+  if(!url){ showAlert('Inserisci prima il Worker URL','err'); return; }
+  if(!/^https?:\/\//.test(url)){ showAlert('URL non valido','err'); return; }
+  showSpinner('Test connessione D1...');
+  try{
+    const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
+    const r = await fetch(url + '/api/health', { headers });
+    const txt = await r.text();
+    let parsed = null;
+    try{ parsed = JSON.parse(txt); }catch(e){}
+    hideSpinner();
+    if(r.ok && parsed && parsed.ok){
+      showSuccess('Connessione OK!');
+    } else if(r.status === 401){
+      showAlert('Token non valido (401)', 'err');
+    } else {
+      showAlert('Risposta inattesa (HTTP '+r.status+'): ' + txt.substring(0,120), 'err');
+    }
+  } catch(e){
+    hideSpinner();
+    showAlert('Errore: ' + e.message, 'err');
+  }
+}
+
+function salvaApiConfig(){
+  const url = document.getElementById('m-api-url').value.trim().replace(/\/$/, '');
+  const token = document.getElementById('m-api-token').value.trim();
+  if(url && !/^https?:\/\//.test(url)){ showAlert('URL non valido','err'); return; }
+  showSpinner('Salvataggio...');
+  setTimeout(()=>{
+    setApiConfig(url, token);
+    showSuccess(url ? 'Config D1 salvata!' : 'Config D1 rimossa!');
+    updateConnPill();
+  }, 350);
+}
+
+function salvaSheetUrl(){
+  const url = document.getElementById('m-sheet-url').value.trim();
+  if(url && !/^https:\/\/script\.google\.com\/macros\/s\/.*\/exec\/?$/.test(url)){
+    showAlert('URL non valido. Deve essere un Web App URL di Apps Script che finisce in /exec','err');
+    return;
+  }
+  showSpinner('Salvataggio URL Sheets...');
+  setTimeout(()=>{
+    setSheetUrl(url);
+    showSuccess(url ? 'URL Sheets salvato!' : 'URL Sheets rimosso!');
+  }, 350);
+}
+
+function copyAppsScript(){
+  const tpl = document.getElementById('apps-script-template');
+  if(!tpl){ showAlert('Codice non trovato','err'); return; }
+  const txt = tpl.textContent;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(()=>showSuccess('Codice copiato!'), ()=>fallbackCopy(txt));
+  } else {
+    fallbackCopy(txt);
+  }
+}
+function fallbackCopy(txt){
+  const ta = document.createElement('textarea');
+  ta.value = txt; ta.style.position='fixed'; ta.style.left='-9999px';
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); showSuccess('Codice copiato!'); }
+  catch(e){ showAlert('Copia non riuscita: copialo manualmente','err'); }
+  document.body.removeChild(ta);
+}
+
+async function testSheetUrl(){
+  const url = document.getElementById('m-sheet-url').value.trim();
+  if(!url){ showAlert('Inserisci prima un URL Sheets','err'); return; }
+  showSpinner('Test connessione Sheets...');
+  try{
+    const r = await fetch(url, { method: 'GET' });
+    const txt = await r.text();
+    let parsed = null;
+    try{ parsed = JSON.parse(txt); }catch(e){}
+    hideSpinner();
+    if(parsed && parsed.ok){ showSuccess('Connessione Sheets OK!'); }
+    else { showAlert('Risposta inattesa: ' + txt.substring(0,120), 'err'); }
+  } catch(e){
+    hideSpinner();
+    showAlert('Errore Sheets: ' + e.message, 'err');
+  }
+}
+
+// ----- Auto-push to D1 (debounced) -----
+let pushTimer = null;
+function pushToCloud(){
+  const cfg = getApiConfig();
+  if(!cfg.url) return;
+  clearTimeout(pushTimer);
+  pushTimer = setTimeout(async () => {
+    updateConnPill('syncing');
+    try{
+      await apiFetch('/api/state', { method: 'POST', body: JSON.stringify(state) });
+      updateConnPill('synced');
+    } catch(e){
+      console.warn('Cloud push failed:', e);
+      updateConnPill('error');
+    }
+  }, 300);
+}
+
+// ----- Manual full sync: D1 + Sheets (header button) -----
+async function syncAll(){
+  const apiCfg = getApiConfig();
+  const sheetUrl = getSheetUrl();
+  if(!apiCfg.url && !sheetUrl){
+    showAlert('Configura prima Cloudflare D1 o Google Sheets (icona ingranaggio)','err');
+    apriSettings(); return;
+  }
+  const btn = document.getElementById('sync-btn');
+  showSpinner('Sincronizzazione...');
+  const results = [];
+  // D1 push
+  if(apiCfg.url){
+    try{
+      await apiFetch('/api/state', { method: 'POST', body: JSON.stringify(state) });
+      results.push({ok:true, name:'D1'});
+    } catch(e){ results.push({ok:false, name:'D1', error:e.message}); }
+  }
+  // Sheets push
+  if(sheetUrl){
+    try{
+      const r = await fetch(sheetUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(state)
+      });
+      const txt = await r.text();
+      let parsed;
+      try{ parsed = JSON.parse(txt); }catch(e){ throw new Error('Sheets risposta non JSON'); }
+      if(parsed.ok) results.push({ok:true, name:'Sheets'});
+      else results.push({ok:false, name:'Sheets', error: parsed.error || 'unknown'});
+    } catch(e){ results.push({ok:false, name:'Sheets', error:e.message}); }
+  }
+  hideSpinner();
+  const oks = results.filter(r=>r.ok).map(r=>r.name);
+  const errs = results.filter(r=>!r.ok);
+  if(errs.length === 0){
+    showSuccess('Sync ' + oks.join(' + ') + ' OK!');
+    if(btn){ btn.classList.remove('error'); btn.classList.add('synced'); setTimeout(()=>btn.classList.remove('synced'), 4000); }
+    updateConnPill('synced');
+  } else if(oks.length > 0){
+    showAlert('Sync parziale OK su '+oks.join(',')+'. Errori: '+errs.map(e=>e.name+': '+e.error).join(' | '), 'err');
+    if(btn){ btn.classList.add('error'); setTimeout(()=>btn.classList.remove('error'), 4000); }
+  } else {
+    showAlert('Sync fallita: '+errs.map(e=>e.name+': '+e.error).join(' | '), 'err');
+    if(btn){ btn.classList.add('error'); setTimeout(()=>btn.classList.remove('error'), 4000); }
+    updateConnPill('error');
+  }
+}
+
+// ----- Connection pill state -----
+function updateConnPill(syncState){
+  const pill = document.getElementById('conn-pill');
+  if(!pill) return;
+  const cfg = getApiConfig();
+  let bg, color, border, txt;
+  if(syncState === 'syncing'){
+    txt='Sync...'; bg='#fef3c7'; color='#92400e'; border='#fcd34d';
+  } else if(syncState === 'synced'){
+    txt='Cloud'; bg='#dcfce7'; color='#15803d'; border='#86efac';
+  } else if(syncState === 'error'){
+    txt='Errore'; bg='#fee2e2'; color='#dc2626'; border='#fca5a5';
+  } else if(cfg.url){
+    txt='Cloud'; bg='rgba(57,224,244,0.12)'; color='#0ea5b8'; border='#39e0f4';
+  } else {
+    txt='Locale'; bg='#dcfce7'; color='#15803d'; border='#86efac';
+  }
+  pill.textContent = txt;
+  pill.style.background = bg; pill.style.color = color; pill.style.borderColor = border;
+}
+
+// ----- Cloud-first boot: localStorage immediately, then refresh from D1 -----
+async function bootCloudFirst(){
+  loadState();
+  filtra();
+  const cfg = getApiConfig();
+  if(!cfg.url){ updateConnPill(); return; }
+  updateConnPill('syncing');
+  try{
+    const data = await apiFetch('/api/state', { method: 'GET' });
+    const hasRemoteData = (data.anagrafica && data.anagrafica.length) ||
+                          (data.ordini && data.ordini.length) ||
+                          (data.consegne && data.consegne.length) ||
+                          (data.armadietto && Object.keys(data.armadietto).length);
+    if(hasRemoteData){
+      state = {
+        anagrafica: data.anagrafica || [],
+        ordini: data.ordini || [],
+        consegne: data.consegne || [],
+        armadietto: data.armadietto || {}
+      };
+      state.ordini.forEach(o => { if(!Array.isArray(o.ddt)) o.ddt = []; });
+      try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+      filtra();
+    } else {
+      // Remote is empty: push the local snapshot to bootstrap D1
+      if(state.anagrafica.length || state.ordini.length || state.consegne.length){
+        try{
+          await apiFetch('/api/state', { method: 'POST', body: JSON.stringify(state) });
+        } catch(e){ console.warn('Bootstrap push failed:', e); }
+      }
+    }
+    updateConnPill('synced');
+  } catch(e){
+    console.warn('Boot from cloud failed, using local cache:', e);
+    updateConnPill('error');
+  }
+}
+
+updateConnPill();
+
+// ===========================================================
+// BOOT (cloud-first with local fallback)
+// ===========================================================
+bootCloudFirst();
 </script>
 </body>
 </html>
