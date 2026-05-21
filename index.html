@@ -638,8 +638,10 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:13px;background:#cdf6f
     <div class="modal-grid">
       <div class="fg"><label>Data *</label><input type="date" id="m-c-data"></div>
       <div class="fg"><label>Linea *</label><input type="text" id="m-c-linea"></div>
-      <div class="fg"><label>Nome Materiale *</label>
-        <select id="m-c-materiale" onchange="updateConsegnaInfo()"><option value="">Seleziona...</option></select>
+      <div class="fg" style="position:relative;"><label>Nome Materiale *</label>
+        <input type="hidden" id="m-c-materiale-id" value="">
+        <input type="text" id="m-c-materiale" autocomplete="off" placeholder="Cerca per nome o codifica..." oninput="searchConsegnaMateriale()" onfocus="searchConsegnaMateriale()" onblur="hideConsegnaMateriale()">
+        <div class="dropdown-list" id="consegna-mat-dropdown" style="position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1.5px solid var(--accent);border-radius:10px;max-height:220px;overflow-y:auto;z-index:200;display:none;box-shadow:0 8px 24px rgba(57,224,244,0.15);"></div>
       </div>
       <div class="fg"><label>Quantità *</label><input type="number" min="1" id="m-c-qta"></div>
     </div>
@@ -1171,15 +1173,7 @@ async function eliminaAnagrafica(id){
 // ===========================================================
 // ORDINI
 // ===========================================================
-function fillSelects(){
-  ['m-c-materiale'].forEach(id=>{
-    const el=document.getElementById(id);
-    const cur=el.value;
-    el.innerHTML='<option value="">Seleziona...</option>'+
-      state.anagrafica.map(a=>'<option value="'+a.id+'">'+escapeHtml(a.tipologia)+' ('+escapeHtml(a.codice)+')</option>').join('');
-    el.value=cur;
-  });
-}
+function fillSelects(){ /* non piu' necessario: la selezione materiale consegne ora e' un campo di ricerca */ }
 function apriOrdine(){
   if(!state.anagrafica.length){ showAlert('Aggiungi prima un materiale in Anagrafica','err'); return; }
   editingOrdId = null;
@@ -1428,6 +1422,7 @@ function apriConsegna(){
   document.getElementById('m-c-data').value=todayLocal();
   document.getElementById('m-c-linea').value='';
   document.getElementById('m-c-materiale').value='';
+  document.getElementById('m-c-materiale-id').value='';
   document.getElementById('m-c-qta').value='';
   document.getElementById('m-c-info').textContent='Seleziona un materiale per vedere giacenza e dati.';
   openModal('modal-consegna');
@@ -1438,14 +1433,58 @@ function modificaConsegna(id){
   document.getElementById('modal-cons-title').textContent='Modifica Consegna';
   document.getElementById('m-c-data').value=c.data;
   document.getElementById('m-c-linea').value=c.linea;
-  fillSelects();
-  document.getElementById('m-c-materiale').value=c.materialeId;
+  const mc=state.anagrafica.find(a=>a.id===c.materialeId);
+  document.getElementById('m-c-materiale').value = mc ? mc.tipologia : (c.materiale||'');
+  document.getElementById('m-c-materiale-id').value = c.materialeId;
   updateConsegnaInfo();
   document.getElementById('m-c-qta').value=c.qta;
   openModal('modal-consegna');
 }
+function searchConsegnaMateriale(){
+  const inp = document.getElementById('m-c-materiale');
+  const dd = document.getElementById('consegna-mat-dropdown');
+  if(!inp || !dd) return;
+  const q = inp.value.trim().toUpperCase();
+  document.getElementById('m-c-materiale-id').value = '';
+  document.getElementById('m-c-info').textContent = 'Seleziona un materiale per vedere giacenza e dati.';
+  const render = (arr) => arr.map(a =>
+    '<div class="catalog-item" onmousedown="selectConsegnaMateriale('+a.id+')">'+
+      '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'+
+        (a.numeroCodifica ? '<span style="background:#cffafe;color:#155e75;border-radius:6px;padding:1px 8px;font-size:12px;font-weight:800;">'+escapeHtml(a.numeroCodifica)+'</span>' : '')+
+        '<span style="font-weight:700;font-size:13px;color:var(--text);">'+escapeHtml(a.tipologia)+'</span>'+
+      '</div>'+
+      (a.classe ? '<div style="font-size:11px;color:var(--text-muted);margin-top:2px;">'+escapeHtml(a.classe)+'</div>' : '')+
+    '</div>'
+  ).join('');
+  if(!q){
+    if(document.activeElement === inp && state.anagrafica.length){
+      dd.innerHTML = render(state.anagrafica); dd.style.display = 'block';
+    } else { dd.style.display = 'none'; }
+    return;
+  }
+  const tokens = q.split(/\s+/).filter(Boolean);
+  const results = state.anagrafica.filter(a => {
+    const hay = ((a.numeroCodifica||'')+' '+a.tipologia+' '+(a.codice||'')+' '+(a.classe||'')).toUpperCase();
+    return tokens.every(t => hay.includes(t));
+  });
+  if(!results.length){
+    dd.innerHTML = '<div style="padding:14px;text-align:center;color:var(--text-muted);font-size:12px;font-weight:600;">Nessun materiale trovato</div>';
+    dd.style.display = 'block'; return;
+  }
+  dd.innerHTML = render(results); dd.style.display = 'block';
+}
+function hideConsegnaMateriale(){
+  setTimeout(()=>{ const dd=document.getElementById('consegna-mat-dropdown'); if(dd) dd.style.display='none'; }, 200);
+}
+function selectConsegnaMateriale(id){
+  const a = state.anagrafica.find(x=>x.id===id); if(!a) return;
+  document.getElementById('m-c-materiale').value = a.tipologia;
+  document.getElementById('m-c-materiale-id').value = id;
+  document.getElementById('consegna-mat-dropdown').style.display = 'none';
+  updateConsegnaInfo();
+}
 function updateConsegnaInfo(){
-  const matId=parseInt(document.getElementById('m-c-materiale').value);
+  const matId=parseInt(document.getElementById('m-c-materiale-id').value);
   const info=document.getElementById('m-c-info');
   const mat=state.anagrafica.find(a=>a.id===matId);
   if(!mat){ info.textContent='Seleziona un materiale per vedere giacenza e dati.'; return; }
@@ -1455,7 +1494,7 @@ function updateConsegnaInfo(){
 async function salvaConsegna(){
   const data=document.getElementById('m-c-data').value;
   const linea=toTitleCase(document.getElementById('m-c-linea').value);
-  const matId=parseInt(document.getElementById('m-c-materiale').value);
+  const matId=parseInt(document.getElementById('m-c-materiale-id').value);
   const qta=parseInt(document.getElementById('m-c-qta').value);
   if(!data||!linea||!matId||!qta||qta<1){ showAlert('Compila tutti i campi','err'); return; }
   const mat=state.anagrafica.find(a=>a.id===matId);
