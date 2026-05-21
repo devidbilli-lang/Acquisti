@@ -1754,6 +1754,7 @@ function setupFabDrag(){
 // FILTERS & RENDERING
 // ===========================================================
 const sortCfg = { anagrafica:{key:null,dir:1}, ordini:{key:null,dir:1}, consegne:{key:null,dir:1}, armadietto:{key:null,dir:1} };
+try{ const _sc=localStorage.getItem('mc_vt_sort'); if(_sc){ const _p=JSON.parse(_sc); for(const _k in sortCfg){ if(_p[_k]&&typeof _p[_k]==='object'){ sortCfg[_k].key=_p[_k].key||null; sortCfg[_k].dir=_p[_k].dir===-1?-1:1; } } } }catch(e){}
 function sortVal(tab,row,key){
   if(tab==='anagrafica'){
     if(key==='fornitore') return (row.fornitori&&row.fornitori[0]&&row.fornitori[0].nome)||'';
@@ -1788,6 +1789,7 @@ function applySort(tab,rows){
 function setSort(tab,key){
   const c=sortCfg[tab];
   if(c.key===key) c.dir=-c.dir; else { c.key=key; c.dir=1; }
+  try{ localStorage.setItem('mc_vt_sort', JSON.stringify(sortCfg)); }catch(e){}
   filtra();
 }
 function updateSortIndicators(){
