@@ -1009,6 +1009,56 @@ function selectCatalogItem(idx){
 // ANAGRAFICA - multi-supplier
 // ===========================================================
 let supRowCount = 0;
+// ---- Autocomplete fornitori (per frequenza d'uso) ----
+function fornitoreFrequencies(){
+  const map = {};
+  (state.anagrafica||[]).forEach(a => {
+    (a.fornitori||[]).forEach(f => {
+      const nome = (f.nome||'').trim();
+      if(!nome) return;
+      const key = nome.toLowerCase();
+      if(!map[key]) map[key] = { nome:nome, count:0, prezzi:{} };
+      map[key].count++;
+      const p = Number(f.prezzo);
+      if(!isNaN(p) && p>0) map[key].prezzi[p] = (map[key].prezzi[p]||0)+1;
+    });
+  });
+  return Object.values(map).map(o => {
+    let best='', bestC=0;
+    for(const p in o.prezzi){ if(o.prezzi[p]>bestC){ bestC=o.prezzi[p]; best=p; } }
+    return { nome:o.nome, count:o.count, prezzo:best };
+  }).sort((a,b)=> b.count-a.count || a.nome.localeCompare(b.nome));
+}
+function searchFornitore(inp){
+  const block = inp.closest('.supplier-block'); if(!block) return;
+  const dd = block.querySelector('.forn-dd'); if(!dd) return;
+  const q = inp.value.trim().toLowerCase();
+  let list = fornitoreFrequencies();
+  if(q) list = list.filter(f => f.nome.toLowerCase().includes(q));
+  list = list.slice(0, 8);
+  if(!list.length){ dd.style.display='none'; return; }
+  dd.innerHTML = list.map(f =>
+    '<div class="catalog-item" data-nome="'+escapeHtml(f.nome)+'" onmousedown="selectFornitore(this)">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">'+
+        '<span style="font-weight:700;font-size:13px;color:var(--text);">'+escapeHtml(f.nome)+'</span>'+
+        '<span style="font-size:10px;color:var(--text-muted);white-space:nowrap;">'+f.count+'\u00d7</span>'+
+      '</div>'+
+    '</div>'
+  ).join('');
+  dd.style.display='block';
+}
+function hideFornitore(inp){
+  const block = inp.closest('.supplier-block'); if(!block) return;
+  const dd = block.querySelector('.forn-dd'); if(!dd) return;
+  setTimeout(()=>{ dd.style.display='none'; }, 200);
+}
+function selectFornitore(el){
+  const block = el.closest('.supplier-block'); if(!block) return;
+  const nome = el.dataset.nome || '';
+  const nameInp = block.querySelector('.sup-name');
+  if(nameInp) nameInp.value = nome;
+  const dd = block.querySelector('.forn-dd'); if(dd) dd.style.display='none';
+}
 function addSupplierRow(nome,prezzo){
   nome = nome || '';
   prezzo = prezzo == null ? '' : prezzo;
@@ -1021,7 +1071,7 @@ function addSupplierRow(nome,prezzo){
     '<span class="sup-num">Fornitore '+(document.querySelectorAll('.supplier-block').length+1)+'</span>'+
     '<button class="rm-btn" onclick="removeSupplierRow('+idx+')" title="Rimuovi fornitore">\u00d7</button>'+
     '<div class="supplier-grid">'+
-      '<div class="fg"><label>Nome fornitore *</label><input type="text" class="sup-name" value="'+escapeHtml(nome)+'"></div>'+
+      '<div class="fg" style="position:relative;"><label>Nome fornitore *</label><input type="text" class="sup-name" autocomplete="off" value="'+escapeHtml(nome)+'" oninput="searchFornitore(this)" onfocus="searchFornitore(this)" onblur="hideFornitore(this)"><div class="dropdown-list forn-dd" style="position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1.5px solid var(--accent);border-radius:10px;max-height:220px;overflow-y:auto;z-index:200;display:none;box-shadow:0 8px 24px rgba(57,224,244,0.15);"></div></div>'+
       '<div class="fg"><label>Prezzo \u20ac</label><input type="number" step="0.01" class="sup-price" value="'+escapeHtml(prezzo)+'"></div>'+
     '</div>';
   c.appendChild(div);
