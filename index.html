@@ -1781,7 +1781,7 @@ function toggleHighlight(tab,id){
 }
 function hlBtn(tab,id){
   const on=isHL(tab,id);
-  return '<button class="btn-hl'+(on?' on':'')+'" onclick="toggleHighlight(\''+tab+'\','+id+')" title="'+(on?'Togli evidenziazione':'Evidenzia riga')+'">\ud83d\udfe1</button>';
+  return '<button class="btn-hl'+(on?' on':'')+'" onclick="toggleHighlight(\''+tab+'\','+id+')" title="'+(on?'Togli evidenziazione':'Evidenzia riga')+'">\u2b50</button>';
 }
 function renderAnagrafica(){
   const fNC=document.getElementById('f-a-numero-codifica').value.toLowerCase();
