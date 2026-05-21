@@ -176,6 +176,9 @@ table{width:100%;border-collapse:collapse;}
 thead th{background:linear-gradient(135deg,var(--accent),var(--accent2));padding:13px 8px;text-align:center;font-size:14px;font-weight:800;letter-spacing:0.5px;color:#fff;white-space:nowrap;position:sticky;top:var(--thead-top,72px);z-index:20;}
 thead th.th-tot{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;}
 thead th.th-act{background:#1a1a2e;color:#fff;width:100px;min-width:100px;}
+.th-sort{cursor:pointer;user-select:none;}
+.th-sort:hover{filter:brightness(1.08);}
+.sort-ind{font-size:11px;opacity:0.95;}
 tbody td{padding:11px 8px;text-align:center;border-bottom:1px solid var(--border);color:var(--text);font-weight:500;font-size:15px;}
 tbody tr:last-child td{border-bottom:none;}
 tbody tr:nth-child(even){background:#f8f8fd;}
@@ -425,11 +428,11 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:13px;background:#cdf6f
       <table>
         <thead><tr>
           <th class="th-act">Azioni</th>
-          <th>N° Codifica</th>
-          <th>Nome Materiale</th>
-          <th>Classe</th>
-          <th>Codice conto</th>
-          <th>Fornitore</th>
+          <th class="th-sort" data-tab="anagrafica" data-key="numeroCodifica" onclick="setSort('anagrafica','numeroCodifica')">N° Codifica<span class="sort-ind"></span></th>
+          <th class="th-sort" data-tab="anagrafica" data-key="tipologia" onclick="setSort('anagrafica','tipologia')">Nome Materiale<span class="sort-ind"></span></th>
+          <th class="th-sort" data-tab="anagrafica" data-key="classe" onclick="setSort('anagrafica','classe')">Classe<span class="sort-ind"></span></th>
+          <th class="th-sort" data-tab="anagrafica" data-key="codice" onclick="setSort('anagrafica','codice')">Codice conto<span class="sort-ind"></span></th>
+          <th class="th-sort" data-tab="anagrafica" data-key="fornitore" onclick="setSort('anagrafica','fornitore')">Fornitore<span class="sort-ind"></span></th>
         </tr></thead>
         <tbody id="tb-anagrafica"><tr><td colspan="6" class="empty">Nessun materiale registrato</td></tr></tbody>
       </table>
@@ -461,8 +464,8 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:13px;background:#cdf6f
       <table>
         <thead><tr>
           <th class="th-act">Azioni</th>
-          <th>N°</th><th>Data</th><th>N° Codifica</th><th>Nome Materiale</th><th>Destinatario</th>
-          <th>Fornitore</th><th>Qtà</th><th>Prezzo</th><th class="th-tot">Totale</th>
+          <th class="th-sort" data-tab="ordini" data-key="numero" onclick="setSort('ordini','numero')">N°<span class="sort-ind"></span></th><th class="th-sort" data-tab="ordini" data-key="data" onclick="setSort('ordini','data')">Data<span class="sort-ind"></span></th><th class="th-sort" data-tab="ordini" data-key="numeroCodifica" onclick="setSort('ordini','numeroCodifica')">N° Codifica<span class="sort-ind"></span></th><th class="th-sort" data-tab="ordini" data-key="materiale" onclick="setSort('ordini','materiale')">Nome Materiale<span class="sort-ind"></span></th><th class="th-sort" data-tab="ordini" data-key="destinatario" onclick="setSort('ordini','destinatario')">Destinatario<span class="sort-ind"></span></th>
+          <th class="th-sort" data-tab="ordini" data-key="fornitore" onclick="setSort('ordini','fornitore')">Fornitore<span class="sort-ind"></span></th><th class="th-sort" data-tab="ordini" data-key="qta" onclick="setSort('ordini','qta')">Qtà<span class="sort-ind"></span></th><th class="th-sort" data-tab="ordini" data-key="prezzo" onclick="setSort('ordini','prezzo')">Prezzo<span class="sort-ind"></span></th><th class="th-sort th-tot" data-tab="ordini" data-key="totale" onclick="setSort('ordini','totale')">Totale<span class="sort-ind"></span></th>
           <th>DDT</th>
         </tr></thead>
         <tbody id="tb-ordini"><tr><td colspan="11" class="empty">Nessun ordine registrato</td></tr></tbody>
@@ -507,7 +510,7 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:13px;background:#cdf6f
       <table>
         <thead><tr>
           <th class="th-act">Azioni</th>
-          <th>Data</th><th>Linea</th><th>N° Codifica</th><th>Nome Materiale</th><th>Codice conto</th><th>Qtà</th>
+          <th class="th-sort" data-tab="consegne" data-key="data" onclick="setSort('consegne','data')">Data<span class="sort-ind"></span></th><th class="th-sort" data-tab="consegne" data-key="linea" onclick="setSort('consegne','linea')">Linea<span class="sort-ind"></span></th><th class="th-sort" data-tab="consegne" data-key="numeroCodifica" onclick="setSort('consegne','numeroCodifica')">N° Codifica<span class="sort-ind"></span></th><th class="th-sort" data-tab="consegne" data-key="materiale" onclick="setSort('consegne','materiale')">Nome Materiale<span class="sort-ind"></span></th><th class="th-sort" data-tab="consegne" data-key="codice" onclick="setSort('consegne','codice')">Codice conto<span class="sort-ind"></span></th><th class="th-sort" data-tab="consegne" data-key="qta" onclick="setSort('consegne','qta')">Qtà<span class="sort-ind"></span></th>
         </tr></thead>
         <tbody id="tb-consegne"><tr><td colspan="7" class="empty">Nessuna consegna registrata</td></tr></tbody>
       </table>
@@ -533,8 +536,8 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:13px;background:#cdf6f
       <table>
         <thead><tr>
           <th class="th-act">Azioni</th>
-          <th>N° Codifica</th>
-          <th>Nome Materiale</th><th>Codice conto</th><th>Classe</th><th class="th-tot">Giacenza</th>
+          <th class="th-sort" data-tab="armadietto" data-key="numeroCodifica" onclick="setSort('armadietto','numeroCodifica')">N° Codifica<span class="sort-ind"></span></th>
+          <th class="th-sort" data-tab="armadietto" data-key="tipologia" onclick="setSort('armadietto','tipologia')">Nome Materiale<span class="sort-ind"></span></th><th class="th-sort" data-tab="armadietto" data-key="codice" onclick="setSort('armadietto','codice')">Codice conto<span class="sort-ind"></span></th><th class="th-sort" data-tab="armadietto" data-key="classe" onclick="setSort('armadietto','classe')">Classe<span class="sort-ind"></span></th><th class="th-sort th-tot" data-tab="armadietto" data-key="giacenza" onclick="setSort('armadietto','giacenza')">Giacenza<span class="sort-ind"></span></th>
         </tr></thead>
         <tbody id="tb-armadietto"><tr><td colspan="6" class="empty">Aggiungi materiali in Anagrafica</td></tr></tbody>
       </table>
@@ -1753,6 +1756,52 @@ function setupFabDrag(){
 // ===========================================================
 // FILTERS & RENDERING
 // ===========================================================
+const sortCfg = { anagrafica:{key:null,dir:1}, ordini:{key:null,dir:1}, consegne:{key:null,dir:1}, armadietto:{key:null,dir:1} };
+function sortVal(tab,row,key){
+  if(tab==='anagrafica'){
+    if(key==='fornitore') return (row.fornitori&&row.fornitori[0]&&row.fornitori[0].nome)||'';
+    return row[key]||'';
+  }
+  if(tab==='ordini'){
+    if(key==='qta') return Number(row.qta)||0;
+    if(key==='prezzo') return Number(row.prezzo)||0;
+    if(key==='totale') return Number(row.totale)||0;
+    return row[key]||'';
+  }
+  if(tab==='consegne'){
+    if(key==='qta') return Number(row.qta)||0;
+    return row[key]||'';
+  }
+  if(tab==='armadietto'){
+    if(key==='giacenza') return Number(state.armadietto[row.id]||0);
+    return row[key]||'';
+  }
+  return '';
+}
+function applySort(tab,rows){
+  const c=sortCfg[tab];
+  if(!c||!c.key) return rows;
+  const dir=c.dir;
+  return rows.slice().sort((x,y)=>{
+    const a=sortVal(tab,x,c.key), b=sortVal(tab,y,c.key);
+    if(typeof a==='number' && typeof b==='number') return (a-b)*dir;
+    return String(a).localeCompare(String(b),'it',{numeric:true,sensitivity:'base'})*dir;
+  });
+}
+function setSort(tab,key){
+  const c=sortCfg[tab];
+  if(c.key===key) c.dir=-c.dir; else { c.key=key; c.dir=1; }
+  filtra();
+}
+function updateSortIndicators(){
+  document.querySelectorAll('.th-sort .sort-ind').forEach(el=>el.textContent='');
+  for(const tab in sortCfg){
+    const c=sortCfg[tab];
+    if(!c.key) continue;
+    const ind=document.querySelector('.th-sort[data-tab="'+tab+'"][data-key="'+c.key+'"] .sort-ind');
+    if(ind) ind.textContent = c.dir>0 ? ' \u25b2' : ' \u25bc';
+  }
+}
 function setStickyOffsets(){
   const panel = document.querySelector('.tab-panel.active');
   if(!panel) return;
@@ -1768,6 +1817,7 @@ function filtra(){
   else if(activeTab==='consegne') renderConsegne();
   else if(activeTab==='armadietto') renderArmadietto();
   setStickyOffsets();
+  updateSortIndicators();
 }
 // Evidenziazione righe in giallo (memoria locale del dispositivo)
 let hlSet = new Set();
@@ -1789,7 +1839,7 @@ function renderAnagrafica(){
   const fC=document.getElementById('f-a-codice').value.toLowerCase();
   const fCl=document.getElementById('f-a-classe').value.toLowerCase();
   const fF=document.getElementById('f-a-fornitore').value.toLowerCase();
-  const rows=state.anagrafica.filter(a=>{
+  let rows=state.anagrafica.filter(a=>{
     if(fNC && !(a.numeroCodifica||'').toLowerCase().includes(fNC)) return false;
     if(fT && !a.tipologia.toLowerCase().includes(fT)) return false;
     if(fC && !a.codice.toLowerCase().includes(fC)) return false;
@@ -1797,6 +1847,7 @@ function renderAnagrafica(){
     if(fF && !a.fornitori.some(s=>s.nome.toLowerCase().includes(fF))) return false;
     return true;
   });
+  rows=applySort('anagrafica',rows);
   const tb=document.getElementById('tb-anagrafica');
   if(!rows.length){
     tb.innerHTML='<tr><td colspan="6" class="empty">Nessun materiale</td></tr>';
@@ -1823,13 +1874,14 @@ function renderOrdini(){
   const fM=document.getElementById('f-o-materiale').value.toLowerCase();
   const fD=document.getElementById('f-o-destinatario').value.toLowerCase();
   const fF=document.getElementById('f-o-fornitore').value.toLowerCase();
-  const rows=state.ordini.filter(o=>{
+  let rows=state.ordini.filter(o=>{
     if(fN && !o.numero.toLowerCase().includes(fN)) return false;
     if(fM && !(o.materiale.toLowerCase().includes(fM)||o.codice.toLowerCase().includes(fM)||(o.numeroCodifica||'').toLowerCase().includes(fM))) return false;
     if(fD && !o.destinatario.toLowerCase().includes(fD)) return false;
     if(fF && !o.fornitore.toLowerCase().includes(fF)) return false;
     return true;
   }).slice().reverse();
+  rows=applySort('ordini',rows);
   const tb=document.getElementById('tb-ordini');
   if(!rows.length){
     tb.innerHTML='<tr><td colspan="11" class="empty">Nessun ordine</td></tr>';
@@ -1886,11 +1938,12 @@ function renderOrdini(){
 function renderConsegne(){
   const fL=document.getElementById('f-c-linea').value.toLowerCase();
   const fM=document.getElementById('f-c-materiale').value.toLowerCase();
-  const rows=state.consegne.filter(c=>{
+  let rows=state.consegne.filter(c=>{
     if(fL && !c.linea.toLowerCase().includes(fL)) return false;
     if(fM && !(c.materiale.toLowerCase().includes(fM)||c.codice.toLowerCase().includes(fM)||(c.numeroCodifica||'').toLowerCase().includes(fM))) return false;
     return true;
   }).slice().reverse();
+  rows=applySort('consegne',rows);
   const tb=document.getElementById('tb-consegne');
   if(!rows.length){
     tb.innerHTML='<tr><td colspan="7" class="empty">Nessuna consegna</td></tr>';
@@ -1917,11 +1970,12 @@ function renderConsegne(){
 }
 function renderArmadietto(){
   const fT=document.getElementById('f-arm-tipologia').value.toLowerCase();
-  const rows=state.anagrafica.filter(a=>{
+  let rows=state.anagrafica.filter(a=>{
     if((state.armadietto[a.id]||0)===0) return false;
     if(fT && !(a.tipologia.toLowerCase().includes(fT)||a.codice.toLowerCase().includes(fT)||(a.numeroCodifica||'').toLowerCase().includes(fT))) return false;
     return true;
   });
+  rows=applySort('armadietto',rows);
   const tb=document.getElementById('tb-armadietto');
   if(!rows.length){
     tb.innerHTML='<tr><td colspan="6" class="empty">Nessun materiale</td></tr>';
