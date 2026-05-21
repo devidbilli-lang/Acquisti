@@ -160,7 +160,7 @@ header{
 .btn-danger:hover{background:#fca5a5;color:#fff;}
 .btn-edit{background:#fff;color:#333;border:2px solid #1a1a2e;border-radius:8px;font-size:14px;cursor:pointer;padding:4px 9px;line-height:1;box-shadow:0 2px 8px rgba(57,224,244,0.15);}
 .btn-edit:hover{background:#c4b5fd;color:#fff;}
-.btn-hl{background:#fff;color:#a16207;border:2px solid #d4ff00;border-radius:8px;font-size:13px;cursor:pointer;padding:4px 7px;line-height:1;margin-left:6px;vertical-align:middle;box-shadow:0 0 7px rgba(212,255,0,0.75);}
+.btn-hl{background:#fff;color:#d4ff00;border:2px solid #d4ff00;border-radius:8px;font-size:14px;cursor:pointer;padding:4px 7px;line-height:1;margin-left:6px;vertical-align:middle;box-shadow:0 0 7px rgba(212,255,0,0.75);text-shadow:0 0 2px rgba(0,0,0,0.45);}
 .btn-hl:hover{background:#fde68a;}
 .btn-hl.on{background:#fde047;border-color:#d4ff00;}
 tr.row-hl>td{background:#fff7b8 !important;}
@@ -840,7 +840,7 @@ const STORAGE_KEY = 'gestionale_magazzino_v3';
 // ===========================================================
 const CATALOGO = [];
 let lastSelectedCatalogItem = null;
-let state = { anagrafica: [], ordini: [], consegne: [], armadietto: {} };
+let state = { anagrafica: [], ordini: [], consegne: [], armadietto: {}, highlights: [] };
 let activeTab = 'anagrafica';
 let editingAnagId = null;
 let editingOrdId = null;
@@ -854,7 +854,8 @@ function loadState(){
         anagrafica: p.anagrafica||[],
         ordini: p.ordini||[],
         consegne: p.consegne||[],
-        armadietto: p.armadietto||{}
+        armadietto: p.armadietto||{},
+        highlights: Array.isArray(p.highlights)?p.highlights:[]
       };
       // Migration: ensure each order has a ddt array
       state.ordini.forEach(o => { if(!Array.isArray(o.ddt)) o.ddt = []; });
@@ -864,6 +865,10 @@ function loadState(){
       state.consegne.forEach(c => { if(c.numeroCodifica == null) c.numeroCodifica = ''; });
       // Migrazione giacenze: da chiave-codice a chiave-id materiale
       migrateArmadiettoToId();
+      // Migrazione evidenziazioni: dal vecchio storage locale allo stato sincronizzato
+      if(!state.highlights.length){
+        try{ const _old=localStorage.getItem('mc_vt_highlights'); if(_old){ const _a=JSON.parse(_old); if(Array.isArray(_a)) state.highlights=_a; } }catch(e){}
+      }
     }
   }catch(e){console.error(e);}
 }
@@ -1818,19 +1823,19 @@ function filtra(){
   setStickyOffsets();
   updateSortIndicators();
 }
-// Evidenziazione righe in giallo (memoria locale del dispositivo)
-let hlSet = new Set();
-try{ const _hl=localStorage.getItem('mc_vt_highlights'); if(_hl) hlSet=new Set(JSON.parse(_hl)); }catch(e){}
-function isHL(tab,id){ return hlSet.has(tab+':'+id); }
+// Evidenziazione righe (condivisa fra tutti i dispositivi via sincronizzazione)
+function isHL(tab,id){ return Array.isArray(state.highlights) && state.highlights.indexOf(tab+':'+id)>=0; }
 function toggleHighlight(tab,id){
+  if(!Array.isArray(state.highlights)) state.highlights=[];
   const k=tab+':'+id;
-  if(hlSet.has(k)) hlSet.delete(k); else hlSet.add(k);
-  try{ localStorage.setItem('mc_vt_highlights', JSON.stringify([...hlSet])); }catch(e){}
+  const i=state.highlights.indexOf(k);
+  if(i>=0) state.highlights.splice(i,1); else state.highlights.push(k);
+  saveState();
   filtra();
 }
 function hlBtn(tab,id){
   const on=isHL(tab,id);
-  return '<button class="btn-hl'+(on?' on':'')+'" onclick="toggleHighlight(\''+tab+'\','+id+')" title="'+(on?'Togli evidenziazione':'Evidenzia riga')+'">\u2b50</button>';
+  return '<button class="btn-hl'+(on?' on':'')+'" onclick="toggleHighlight(\''+tab+'\','+id+')" title="'+(on?'Togli evidenziazione':'Evidenzia riga')+'">\u2605</button>';
 }
 function renderAnagrafica(){
   const fNC=document.getElementById('f-a-numero-codifica').value.toLowerCase();
@@ -2304,7 +2309,8 @@ function normalizeServer(data){
     anagrafica: data.anagrafica || [],
     ordini: data.ordini || [],
     consegne: data.consegne || [],
-    armadietto: data.armadietto || {}
+    armadietto: data.armadietto || {},
+    highlights: Array.isArray(data.highlights) ? data.highlights : []
   };
   s.ordini.forEach(o => { if(!Array.isArray(o.ddt)) o.ddt = []; });
   s.anagrafica.forEach(a => { if(a.numeroCodifica == null) a.numeroCodifica = ''; });
@@ -2343,6 +2349,11 @@ function computeDiff(oldS, newS, allowDeletes){
     for(const mid in oldArm){
       if(!(mid in newArm)) ops.push({ entity:'armadietto', action:'delete', id: Number(mid) });
     }
+  }
+  const oldHL=(oldS.highlights||[]).slice().sort();
+  const newHL=(newS.highlights||[]).slice().sort();
+  if(JSON.stringify(oldHL)!==JSON.stringify(newHL)){
+    ops.push({ entity:'highlights', action:'set', value: newS.highlights||[] });
   }
   return ops;
 }
@@ -2543,7 +2554,8 @@ async function bootCloudFirst(){
         anagrafica: data.anagrafica || [],
         ordini: data.ordini || [],
         consegne: data.consegne || [],
-        armadietto: data.armadietto || {}
+        armadietto: data.armadietto || {},
+        highlights: Array.isArray(data.highlights) ? data.highlights : []
       };
       state.ordini.forEach(o => { if(!Array.isArray(o.ddt)) o.ddt = []; });
       // Migrazione: aggiungi campo numeroCodifica ai record esistenti
