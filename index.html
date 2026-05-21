@@ -157,6 +157,10 @@ header{
 .btn-danger:hover{background:#fca5a5;color:#fff;}
 .btn-edit{background:#fff;color:#333;border:2px solid #1a1a2e;border-radius:8px;font-size:14px;cursor:pointer;padding:4px 9px;line-height:1;box-shadow:0 2px 8px rgba(57,224,244,0.15);}
 .btn-edit:hover{background:#c4b5fd;color:#fff;}
+.btn-hl{background:#fff;color:#a16207;border:2px solid #f59e0b;border-radius:8px;font-size:13px;cursor:pointer;padding:4px 7px;line-height:1;margin-left:6px;vertical-align:middle;box-shadow:0 2px 8px rgba(245,158,11,0.15);}
+.btn-hl:hover{background:#fde68a;}
+.btn-hl.on{background:#fde047;border-color:#a16207;}
+tr.row-hl>td{background:#fff7b8 !important;}
 .btn-link{background:none;border:1.5px dashed rgba(57,224,244,0.4);color:var(--accent);font-weight:800;cursor:pointer;padding:8px 14px;border-radius:10px;font-size:12px;letter-spacing:1px;font-family:'Montserrat',sans-serif;}
 .btn-link:hover{background:rgba(57,224,244,0.05);}
 /* LAYOUT — main content with right sidebar */
@@ -1753,6 +1757,20 @@ function filtra(){
   else if(activeTab==='consegne') renderConsegne();
   else if(activeTab==='armadietto') renderArmadietto();
 }
+// Evidenziazione righe in giallo (memoria locale del dispositivo)
+let hlSet = new Set();
+try{ const _hl=localStorage.getItem('mc_vt_highlights'); if(_hl) hlSet=new Set(JSON.parse(_hl)); }catch(e){}
+function isHL(tab,id){ return hlSet.has(tab+':'+id); }
+function toggleHighlight(tab,id){
+  const k=tab+':'+id;
+  if(hlSet.has(k)) hlSet.delete(k); else hlSet.add(k);
+  try{ localStorage.setItem('mc_vt_highlights', JSON.stringify([...hlSet])); }catch(e){}
+  filtra();
+}
+function hlBtn(tab,id){
+  const on=isHL(tab,id);
+  return '<button class="btn-hl'+(on?' on':'')+'" onclick="toggleHighlight(\''+tab+'\','+id+')" title="'+(on?'Togli evidenziazione':'Evidenzia riga')+'">\ud83d\udfe1</button>';
+}
 function renderAnagrafica(){
   const fNC=document.getElementById('f-a-numero-codifica').value.toLowerCase();
   const fT=document.getElementById('f-a-tipologia').value.toLowerCase();
@@ -1775,9 +1793,9 @@ function renderAnagrafica(){
       const forn=a.fornitori.map(f=>
         '<span class="supp-line"><span class="supp-name">'+escapeHtml(f.nome)+'</span><span class="supp-price">\u20ac'+f.prezzo.toFixed(2)+'</span></span>'
       ).join('');
-      return '<tr>'+
+      return '<tr'+(isHL('anagrafica',a.id)?' class="row-hl"':'')+'>'+
         '<td style="white-space:nowrap;text-align:center;">'+
-          '<button class="btn-edit" onclick="modificaAnagrafica('+a.id+')" title="Modifica">\u270f\ufe0f</button><button class="btn-danger" onclick="eliminaAnagrafica('+a.id+')" style="margin-left:6px;vertical-align:middle;" title="Elimina">\u00d7</button>'+
+          '<button class="btn-edit" onclick="modificaAnagrafica('+a.id+')" title="Modifica">\u270f\ufe0f</button>'+hlBtn('anagrafica',a.id)+'<button class="btn-danger" onclick="eliminaAnagrafica('+a.id+')" style="margin-left:6px;vertical-align:middle;" title="Elimina">\u00d7</button>'+
         '</td>'+
         '<td><code class="codice">'+escapeHtml(a.numeroCodifica||'\u2014')+'</code></td>'+
         '<td style="font-weight:700;">'+escapeHtml(a.tipologia)+'</td>'+
@@ -1818,9 +1836,9 @@ function renderOrdini(){
       const deltaColor = isComplete ? 'delta-green' : 'delta-red';
       const deltaContent = isComplete ? '\u2713' : '\u2212'+delta;
       const deltaBadge = '<span class="ddt-delta '+deltaColor+'">'+deltaContent+'</span>';
-      return '<tr>'+
+      return '<tr'+(isHL('ordini',o.id)?' class="row-hl"':'')+'>'+
       '<td style="white-space:nowrap;text-align:center;">'+
-        '<button class="btn-edit" onclick="modificaOrdine('+o.id+')" title="Modifica">\u270f\ufe0f</button><button class="btn-danger" onclick="eliminaOrdine('+o.id+')" style="margin-left:6px;vertical-align:middle;" title="Elimina">\u00d7</button>'+
+        '<button class="btn-edit" onclick="modificaOrdine('+o.id+')" title="Modifica">\u270f\ufe0f</button>'+hlBtn('ordini',o.id)+'<button class="btn-danger" onclick="eliminaOrdine('+o.id+')" style="margin-left:6px;vertical-align:middle;" title="Elimina">\u00d7</button>'+
       '</td>'+
       '<td><code class="codice">'+escapeHtml(o.numero)+'</code></td>'+
       '<td>'+formatDataIT(o.data)+'</td>'+
@@ -1865,9 +1883,9 @@ function renderConsegne(){
   if(!rows.length){
     tb.innerHTML='<tr><td colspan="7" class="empty">Nessuna consegna</td></tr>';
   } else {
-    tb.innerHTML=rows.map(c=>'<tr>'+
+    tb.innerHTML=rows.map(c=>'<tr'+(isHL('consegne',c.id)?' class="row-hl"':'')+'>'+
       '<td style="white-space:nowrap;text-align:center;">'+
-        '<button class="btn-edit" onclick="modificaConsegna('+c.id+')" title="Modifica">\u270f\ufe0f</button><button class="btn-danger" onclick="eliminaConsegna('+c.id+')" style="margin-left:6px;vertical-align:middle;" title="Elimina">\u00d7</button>'+
+        '<button class="btn-edit" onclick="modificaConsegna('+c.id+')" title="Modifica">\u270f\ufe0f</button>'+hlBtn('consegne',c.id)+'<button class="btn-danger" onclick="eliminaConsegna('+c.id+')" style="margin-left:6px;vertical-align:middle;" title="Elimina">\u00d7</button>'+
       '</td>'+
       '<td>'+formatDataIT(c.data)+'</td>'+
       '<td><b>'+escapeHtml(c.linea)+'</b></td>'+
@@ -1900,9 +1918,9 @@ function renderArmadietto(){
       let cls='';
       if(stock===0) cls=' zero';
       else if(stock<=5) cls=' low';
-      return '<tr>'+
+      return '<tr'+(isHL('armadietto',a.id)?' class="row-hl"':'')+'>'+
         '<td style="white-space:nowrap;text-align:center;">'+
-          '<button class="btn-edit" onclick="apriModificaGiacenza('+a.id+')" title="Modifica giacenza">\u270f\ufe0f</button>'+
+          '<button class="btn-edit" onclick="apriModificaGiacenza('+a.id+')" title="Modifica giacenza">\u270f\ufe0f</button>'+hlBtn('armadietto',a.id)+
         '</td>'+
         '<td><code class="codice">'+escapeHtml(a.numeroCodifica||'\u2014')+'</code></td>'+
         '<td style="font-weight:700;">'+escapeHtml(a.tipologia)+'</td>'+
