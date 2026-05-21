@@ -1063,6 +1063,13 @@ function salvaAnagrafica(){
   const codice=toTitleCase(document.getElementById('m-a-codice').value);
   const classe=toTitleCase(document.getElementById('m-a-classe').value);
   if(!tipologia||!codice){ showAlert('Materiale e codice conto sono obbligatori','err'); return; }
+  // Il codice conto deve essere unico (e' la chiave delle giacenze). Blocca i duplicati
+  // con un messaggio chiaro invece di lasciar fallire il salvataggio sul database.
+  const dup = state.anagrafica.find(x => x.codice === codice && x.id !== editingAnagId);
+  if(dup){
+    showAlert('Esiste gi\u00e0 un materiale con Codice Conto "'+codice+'": '+dup.tipologia,'err');
+    return;
+  }
   const fornitori=[];
   document.querySelectorAll('.supplier-block').forEach(r=>{
     const nome=toTitleCase(r.querySelector('.sup-name').value);
@@ -1908,6 +1915,32 @@ async function apiFetch(pathOrUrl, options = {}){
   return data;
 }
 
+// ----- Lettura via JSONP (come COFFRE): niente CORS, niente token, funziona ovunque -----
+let _jsonpId = 0;
+function jsonpGet(path, params, timeoutMs){
+  return new Promise((resolve, reject) => {
+    const cfg = getApiConfig();
+    if(!cfg.url){ reject(new Error('Worker URL non configurato')); return; }
+    const cbName = '_mcvt_cb' + (_jsonpId++);
+    const qs = new URLSearchParams(Object.assign({ callback: cbName, _t: Date.now() }, params || {})).toString();
+    const src = cfg.url + path + (path.indexOf('?') >= 0 ? '&' : '?') + qs;
+    const script = document.createElement('script');
+    let done = false;
+    const cleanup = () => { try{ delete window[cbName]; }catch(_){} if(script.parentNode) script.remove(); };
+    const timer = setTimeout(() => { if(!done){ done = true; cleanup(); reject(new Error('Timeout connessione')); } }, timeoutMs || 15000);
+    window[cbName] = (data) => { if(done) return; done = true; clearTimeout(timer); cleanup(); resolve(data); };
+    script.onerror = () => { if(done) return; done = true; clearTimeout(timer); cleanup(); reject(new Error('Errore rete')); };
+    script.src = src;
+    document.head.appendChild(script);
+  });
+}
+// Legge lo stato completo da D1 via JSONP
+async function fetchState(){
+  const data = await jsonpGet('/api/state', {});
+  if(!data || data.ok === false) throw new Error((data && data.error) || 'Risposta non valida');
+  return data;
+}
+
 // ----- Settings modal -----
 function apriSettings(){
   const apiCfg = getApiConfig();
@@ -2023,7 +2056,7 @@ async function diagConnection(){
   const cfg = getApiConfig();
   showSpinner('Verifica connessione a D1...');
   try{
-    const data = await apiFetch('/api/state', { method:'GET' });
+    const data = await fetchState();
     hideSpinner();
     const nMat = (data.anagrafica||[]).length;
     const nOrd = (data.ordini||[]).length;
@@ -2108,12 +2141,12 @@ async function doPush(){
     if(!lastServerState){
       // Nessun baseline (boot fallito): stabiliscilo dal server, sync upsert-only (niente delete)
       let server = null;
-      try{ server = normalizeServer(await apiFetch('/api/state', { method:'GET' })); }catch(_){ server = null; }
+      try{ server = normalizeServer(await fetchState()); }catch(_){ server = null; }
       if(server){
         const ops = computeDiff(server, state, false);
         if(ops.length > 0) await apiFetch('/api/ops', { method:'POST', body: JSON.stringify({ ops }) });
         // Riallinea baseline + vista locale allo stato server aggiornato
-        const merged = normalizeServer(await apiFetch('/api/state', { method:'GET' }));
+        const merged = normalizeServer(await fetchState());
         state = merged;
         lastServerState = snapshot(merged);
         try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(_){}
@@ -2156,7 +2189,7 @@ async function pollRefresh(){
   if(localDirty || pushInFlight) return;   // c'e' una nostra modifica in volo
   if(anyModalOpen()) return;               // utente sta editando, non disturbare
   try{
-    const server = normalizeServer(await apiFetch('/api/state', { method:'GET' }));
+    const server = normalizeServer(await fetchState());
     // Ricontrolla dopo l'await: l'utente potrebbe aver iniziato a editare nel frattempo
     if(localDirty || pushInFlight || anyModalOpen()) return;
     if(JSON.stringify(server) === JSON.stringify(state)){
@@ -2277,7 +2310,7 @@ async function bootCloudFirst(){
   if(!cfg.url){ updateConnPill(); return; }
   updateConnPill('syncing');
   try{
-    const data = await apiFetch('/api/state', { method: 'GET' });
+    const data = await fetchState();
     const hasRemoteData = (data.anagrafica && data.anagrafica.length) ||
                           (data.ordini && data.ordini.length) ||
                           (data.consegne && data.consegne.length) ||
