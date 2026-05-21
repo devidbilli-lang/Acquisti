@@ -1937,17 +1937,28 @@ const API_URL_KEY   = 'mc_vt_api_url';
 const API_TOKEN_KEY = 'mc_vt_api_token';
 const SHEET_URL_KEY = 'mc_vt_sheet_url';
 
+// Default di fabbrica: ogni dispositivo che apre il file e' gia' connesso.
+// Restano sovrascrivibili dall'ingranaggio (Impostazioni) per ogni dispositivo.
+const DEFAULT_API_URL   = 'https://mc-vt-api.devid-billi.workers.dev';
+const DEFAULT_API_TOKEN = '524352cb0554682c82bdfc1d3162cd5f64130e7dfa693bb0408bc8ccfd95f0ba';
+const DEFAULT_SHEET_URL = 'https://script.google.com/macros/s/AKfycbwmuVtKxnkEBZAc_V91J_HNkU_4Cq6BNRq3wdxw8Qg6CtXvsbfzbY24FBbbieyZ42vo/exec';
+
 function getApiConfig(){
+  const u = localStorage.getItem(API_URL_KEY);
+  const t = localStorage.getItem(API_TOKEN_KEY);
   return {
-    url: (localStorage.getItem(API_URL_KEY) || '').replace(/\/$/, ''),
-    token: localStorage.getItem(API_TOKEN_KEY) || ''
+    url: ((u != null ? u : DEFAULT_API_URL) || '').replace(/\/$/, ''),
+    token: (t != null ? t : DEFAULT_API_TOKEN) || ''
   };
 }
 function setApiConfig(url, token){
   if(url) localStorage.setItem(API_URL_KEY, url); else localStorage.removeItem(API_URL_KEY);
   if(token) localStorage.setItem(API_TOKEN_KEY, token); else localStorage.removeItem(API_TOKEN_KEY);
 }
-function getSheetUrl(){ return localStorage.getItem(SHEET_URL_KEY) || ''; }
+function getSheetUrl(){
+  const u = localStorage.getItem(SHEET_URL_KEY);
+  return (u != null ? u : DEFAULT_SHEET_URL) || '';
+}
 function setSheetUrl(u){ if(u) localStorage.setItem(SHEET_URL_KEY, u); else localStorage.removeItem(SHEET_URL_KEY); }
 
 // Generic JSON fetch against the Worker with bearer auth
