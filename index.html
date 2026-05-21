@@ -160,9 +160,9 @@ header{
 .btn-danger:hover{background:#fca5a5;color:#fff;}
 .btn-edit{background:#fff;color:#333;border:2px solid #1a1a2e;border-radius:8px;font-size:14px;cursor:pointer;padding:4px 9px;line-height:1;box-shadow:0 2px 8px rgba(57,224,244,0.15);}
 .btn-edit:hover{background:#c4b5fd;color:#fff;}
-.btn-hl{background:#fff;color:#a16207;border:2px solid #f59e0b;border-radius:8px;font-size:13px;cursor:pointer;padding:4px 7px;line-height:1;margin-left:6px;vertical-align:middle;box-shadow:0 2px 8px rgba(245,158,11,0.15);}
+.btn-hl{background:#fff;color:#a16207;border:2px solid #d4ff00;border-radius:8px;font-size:13px;cursor:pointer;padding:4px 7px;line-height:1;margin-left:6px;vertical-align:middle;box-shadow:0 0 7px rgba(212,255,0,0.75);}
 .btn-hl:hover{background:#fde68a;}
-.btn-hl.on{background:#fde047;border-color:#a16207;}
+.btn-hl.on{background:#fde047;border-color:#d4ff00;}
 tr.row-hl>td{background:#fff7b8 !important;}
 .btn-link{background:none;border:1.5px dashed rgba(57,224,244,0.4);color:var(--accent);font-weight:800;cursor:pointer;padding:8px 14px;border-radius:10px;font-size:12px;letter-spacing:1px;font-family:'Montserrat',sans-serif;}
 .btn-link:hover{background:rgba(57,224,244,0.05);}
@@ -519,6 +519,11 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:13px;background:#cdf6f
       <div class="right-card blue">
         <div class="right-card-title">Dettaglio Linea</div>
         <div id="consegne-linee" class="right-card-list"></div>
+      </div>
+      <div class="pie-card">
+        <div class="right-card-title" style="margin-bottom:12px;">Dettaglio Materiali</div>
+        <canvas id="pieConsegne" width="200" height="200"></canvas>
+        <div id="pie-consegne-legend" style="margin-top:10px;"></div>
       </div>
     </div>
   </div>
@@ -1235,10 +1240,7 @@ function searchOrdineMateriale(){
         '<div style="font-weight:700;font-size:13px;color:var(--text);">'+
         (a.numeroCodifica ? '<span style="color:var(--accent2);margin-right:6px;">['+escapeHtml(a.numeroCodifica)+']</span>' : '')+
         escapeHtml(a.tipologia)+'</div>'+
-        '<div style="font-size:11px;color:var(--text-muted);margin-top:2px;">'+
-        '<code class="codice">'+escapeHtml(a.codice)+'</code>'+
-        (a.classe?' \u00b7 '+escapeHtml(a.classe):'')+
-        '</div></div>'
+        '</div>'
       ).join('');
       dd.style.display = 'block';
     } else {
@@ -1261,11 +1263,7 @@ function searchOrdineMateriale(){
     '<div style="font-weight:700;font-size:13px;color:var(--text);">'+
     (a.numeroCodifica ? '<span style="color:var(--accent2);margin-right:6px;">['+escapeHtml(a.numeroCodifica)+']</span>' : '')+
     escapeHtml(a.tipologia)+'</div>'+
-    '<div style="font-size:11px;color:var(--text-muted);margin-top:2px;">'+
-    '<code class="codice">'+escapeHtml(a.codice)+'</code>'+
-    (a.classe?' \u00b7 '+escapeHtml(a.classe):'')+
-    ' \u00b7 '+a.fornitori.map(f=>escapeHtml(f.nome)+' \u20ac'+f.prezzo.toFixed(2)).join(' \u00b7 ')+
-    '</div></div>'
+    '</div>'
   ).join('');
   dd.style.display = 'block';
 }
@@ -1463,7 +1461,6 @@ function searchConsegnaMateriale(){
         (a.numeroCodifica ? '<span style="background:#cffafe;color:#155e75;border-radius:6px;padding:1px 8px;font-size:12px;font-weight:800;">'+escapeHtml(a.numeroCodifica)+'</span>' : '')+
         '<span style="font-weight:700;font-size:13px;color:var(--text);">'+escapeHtml(a.tipologia)+'</span>'+
       '</div>'+
-      (a.classe ? '<div style="font-size:11px;color:var(--text-muted);margin-top:2px;">'+escapeHtml(a.classe)+'</div>' : '')+
     '</div>'
   ).join('');
   if(!q){
@@ -1967,6 +1964,7 @@ function renderConsegne(){
   cont.innerHTML = e.length
     ? e.map(([k,v])=>'<div class="list-row"><div class="info"><div class="nm">'+escapeHtml(k)+'</div></div><span class="qt blue">'+v+'</span></div>').join('')
     : '<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:10px;">Nessuna consegna</div>';
+  renderPieConsegne();
 }
 function renderArmadietto(){
   const fT=document.getElementById('f-arm-tipologia').value.toLowerCase();
@@ -2028,6 +2026,55 @@ function renderPie(){
     ctx.fillStyle='#e8e8f0'; ctx.beginPath(); ctx.arc(100,100,90,0,Math.PI*2); ctx.fill();
     ctx.beginPath(); ctx.arc(100,100,44,0,Math.PI*2); ctx.fillStyle='#fff'; ctx.fill();
     legend.innerHTML='<div style="font-size:12px;color:var(--text-muted);text-align:center">Nessuna giacenza</div>';
+    return;
+  }
+  let start=-Math.PI/2;
+  top.forEach((d,i)=>{
+    const slice=(d.qta/total)*Math.PI*2;
+    ctx.beginPath(); ctx.moveTo(100,100);
+    ctx.arc(100,100,90,start,start+slice);
+    ctx.closePath();
+    ctx.fillStyle=COLORS[i%COLORS.length];
+    ctx.fill();
+    ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.stroke();
+    start+=slice;
+  });
+  ctx.beginPath(); ctx.arc(100,100,44,0,Math.PI*2); ctx.fillStyle='#fff'; ctx.fill();
+  ctx.fillStyle='#1a1a2e';
+  ctx.font='bold 22px Montserrat,sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(total,100,100);
+  legend.innerHTML='<div style="display:flex;flex-direction:column;gap:4px;text-align:left;font-size:11px;">'+
+    top.map((d,i)=>'<div style="display:flex;align-items:center;gap:6px;">'+
+      '<span style="width:12px;height:12px;border-radius:3px;background:'+COLORS[i%COLORS.length]+';flex-shrink:0;"></span>'+
+      '<span style="flex:1;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escapeHtml(d.nome)+'</span>'+
+      '<span style="font-weight:800;">'+d.qta+'</span>'+
+    '</div>').join('')+'</div>';
+}
+function renderPieConsegne(){
+  const canvas=document.getElementById('pieConsegne');
+  const legend=document.getElementById('pie-consegne-legend');
+  if(!canvas||!legend) return;
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,200,200);
+  const byM={};
+  state.consegne.forEach(c=>{
+    const mat=state.anagrafica.find(a=>a.id===c.materialeId);
+    const nome=mat?mat.tipologia:(c.materiale||'\u2014');
+    const key=c.materialeId!=null?('id:'+c.materialeId):('nm:'+nome);
+    if(!byM[key]) byM[key]={nome:nome,qta:0};
+    byM[key].qta+=Number(c.qta)||0;
+  });
+  const data=Object.values(byM).filter(d=>d.qta>0).sort((a,b)=>b.qta-a.qta);
+  const top=data.slice(0,8);
+  const altre=data.slice(8).reduce((s,d)=>s+d.qta,0);
+  if(altre>0) top.push({nome:'Altri',qta:altre});
+  const total=top.reduce((s,d)=>s+d.qta,0);
+  const COLORS=['#39e0f4','#0ea5b8','#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#a78bfa'];
+  if(!total){
+    ctx.fillStyle='#e8e8f0'; ctx.beginPath(); ctx.arc(100,100,90,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(100,100,44,0,Math.PI*2); ctx.fillStyle='#fff'; ctx.fill();
+    legend.innerHTML='<div style="font-size:12px;color:var(--text-muted);text-align:center">Nessuna consegna</div>';
     return;
   }
   let start=-Math.PI/2;
