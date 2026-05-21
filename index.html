@@ -362,13 +362,6 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:13px;background:#cdf6f
   <div class="brand-name">Materiali Consumabili (VT)</div>
   <div class="header-right">
     <div class="clock" id="clk">--:--</div>
-    <button class="gear-btn" onclick="apriSettings()" title="Impostazioni Cloud">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-    </button>
-    <button class="sync-btn" id="sync-btn" onclick="syncAll()" title="Sincronizza Cloud D1 + Sheets">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-      <span>Sync</span>
-    </button>
     <div class="conn-pill ok" id="conn-pill">Locale</div>
   </div>
 </header>
@@ -711,56 +704,6 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:13px;background:#cdf6f
   </div>
 </div>
 <!-- MODAL IMPOSTAZIONI CLOUD (D1 primario + Sheets backup) -->
-<div class="modal-overlay" id="modal-settings">
-  <div class="modal" style="max-width:780px;">
-    <div class="modal-title">Impostazioni Cloud</div>
-
-    <!-- ============== CLOUDFLARE D1 ============== -->
-    <div style="background:rgba(57,224,244,0.06);border:2px solid var(--accent);border-radius:12px;padding:16px;margin-bottom:18px;box-shadow:0 0 10px rgba(57,224,244,0.15);">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--accent2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
-        <span style="font-size:13px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--accent2);">Cloudflare D1 — Database principale</span>
-      </div>
-      <div class="fg" style="margin-bottom:10px;">
-        <label>Worker URL</label>
-        <input type="text" id="m-api-url" placeholder="https://mc-vt-api.tuo-subdomain.workers.dev" style="text-transform:none;font-family:monospace;font-size:12px;">
-      </div>
-      <div class="fg" style="margin-bottom:12px;">
-        <label>API Token (lascia vuoto se Worker senza auth)</label>
-        <input type="password" id="m-api-token" placeholder="••••••••" style="text-transform:none;font-family:monospace;font-size:12px;">
-      </div>
-      <div style="display:flex;gap:8px;">
-        <button class="btn-blue" onclick="testApiConnection()" style="flex:1;">Test connessione</button>
-        <button class="btn-primary" onclick="salvaApiConfig()" style="flex:1;">Salva config D1</button>
-      </div>
-    </div>
-
-    <!-- ============== GOOGLE SHEETS (BACKUP) ============== -->
-    <div style="background:rgba(59,130,246,0.05);border:2px solid #3b82f6;border-radius:12px;padding:16px;margin-bottom:14px;box-shadow:0 0 10px rgba(59,130,246,0.15);">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
-        <span style="font-size:13px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#3b82f6;">Google Sheets — Backup di scrittura</span>
-      </div>
-      <div class="fg" style="margin-bottom:12px;">
-        <label>Apps Script Web App URL</label>
-        <input type="text" id="m-sheet-url" placeholder="https://script.google.com/macros/s/.../exec" style="text-transform:none;font-family:monospace;font-size:12px;">
-      </div>
-      <div style="display:flex;gap:8px;">
-        <button class="btn-blue" onclick="testSheetUrl()" style="flex:1;">Test</button>
-        <button class="btn-primary" onclick="salvaSheetUrl()" style="flex:1;">Salva URL</button>
-      </div>
-      <details style="margin-top:12px;">
-        <summary style="cursor:pointer;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#3b82f6;">Codice Apps Script (per setup Sheets)</summary>
-        <button class="btn-secondary" onclick="copyAppsScript()" style="margin-top:8px;padding:6px 12px;font-size:11px;">Copia codice</button>
-        <pre class="script-pre" id="apps-script-display"></pre>
-      </details>
-    </div>
-
-    <div class="modal-actions">
-      <button class="btn-secondary" onclick="closeModal('modal-settings')">Chiudi</button>
-    </div>
-  </div>
-</div>
 <!-- HIDDEN: Apps Script code template -->
 <script type="text/plain" id="apps-script-template">/**
  * MATERIALI CONSUMABILI (VT) - Sincronizzazione Google Sheet
@@ -1933,33 +1876,18 @@ function renderPie(){
 // ===========================================================
 // CLOUD SYNC (Cloudflare D1 + Google Sheets backup)
 // ===========================================================
-const API_URL_KEY   = 'mc_vt_api_url';
-const API_TOKEN_KEY = 'mc_vt_api_token';
-const SHEET_URL_KEY = 'mc_vt_sheet_url';
-
-// Default di fabbrica: ogni dispositivo che apre il file e' gia' connesso.
-// Restano sovrascrivibili dall'ingranaggio (Impostazioni) per ogni dispositivo.
+// Configurazione interna: ogni dispositivo usa sempre questi valori.
+// Non c'e' piu' configurazione manuale; localStorage viene ignorato per le credenziali.
 const DEFAULT_API_URL   = 'https://mc-vt-api.devid-billi.workers.dev';
 const DEFAULT_API_TOKEN = '524352cb0554682c82bdfc1d3162cd5f64130e7dfa693bb0408bc8ccfd95f0ba';
 const DEFAULT_SHEET_URL = 'https://script.google.com/macros/s/AKfycbwmuVtKxnkEBZAc_V91J_HNkU_4Cq6BNRq3wdxw8Qg6CtXvsbfzbY24FBbbieyZ42vo/exec';
 
 function getApiConfig(){
-  const u = localStorage.getItem(API_URL_KEY);
-  const t = localStorage.getItem(API_TOKEN_KEY);
-  return {
-    url: ((u != null ? u : DEFAULT_API_URL) || '').replace(/\/$/, ''),
-    token: (t != null ? t : DEFAULT_API_TOKEN) || ''
-  };
+  return { url: DEFAULT_API_URL.replace(/\/$/, ''), token: DEFAULT_API_TOKEN };
 }
-function setApiConfig(url, token){
-  if(url) localStorage.setItem(API_URL_KEY, url); else localStorage.removeItem(API_URL_KEY);
-  if(token) localStorage.setItem(API_TOKEN_KEY, token); else localStorage.removeItem(API_TOKEN_KEY);
-}
-function getSheetUrl(){
-  const u = localStorage.getItem(SHEET_URL_KEY);
-  return (u != null ? u : DEFAULT_SHEET_URL) || '';
-}
-function setSheetUrl(u){ if(u) localStorage.setItem(SHEET_URL_KEY, u); else localStorage.removeItem(SHEET_URL_KEY); }
+function setApiConfig(){ /* configurazione interna: no-op */ }
+function getSheetUrl(){ return DEFAULT_SHEET_URL; }
+function setSheetUrl(){ /* configurazione interna: no-op */ }
 
 // Generic JSON fetch against the Worker with bearer auth
 async function apiFetch(pathOrUrl, options = {}){
