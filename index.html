@@ -774,7 +774,7 @@ function doPost(e) {
 
     // === ARMADIETTO (giacenze + valore stimato) ===
     const armRows = (data.anagrafica || []).map(a => {
-      const giacenza = (data.armadietto && data.armadietto[a.codice]) || 0;
+      const giacenza = (data.armadietto && data.armadietto[a.id]) || 0;
       const prezzoBase = (a.fornitori && a.fornitori[0] && a.fornitori[0].prezzo) || 0;
       return [a.numeroCodifica||'', a.tipologia||'', a.codice||'', a.classe||'', giacenza, prezzoBase, giacenza * prezzoBase];
     });
@@ -845,8 +845,25 @@ function loadState(){
       state.anagrafica.forEach(a => { if(a.numeroCodifica == null) a.numeroCodifica = ''; });
       state.ordini.forEach(o => { if(o.numeroCodifica == null) o.numeroCodifica = ''; });
       state.consegne.forEach(c => { if(c.numeroCodifica == null) c.numeroCodifica = ''; });
+      // Migrazione giacenze: da chiave-codice a chiave-id materiale
+      migrateArmadiettoToId();
     }
   }catch(e){console.error(e);}
+}
+// Converte state.armadietto da {codice: giacenza} a {idMateriale: giacenza}
+function migrateArmadiettoToId(){
+  const arm = state.armadietto || {};
+  const codToId = {};
+  state.anagrafica.forEach(a => { codToId[a.codice] = a.id; });
+  const idSet = new Set(state.anagrafica.map(a => String(a.id)));
+  let changed = false;
+  const newArm = {};
+  for(const k in arm){
+    if(idSet.has(String(k))){ newArm[k] = arm[k]; }            // gia' chiave-id
+    else if(codToId[k] != null){ newArm[codToId[k]] = arm[k]; changed = true; } // codice -> id
+    else { changed = true; }                                    // chiave orfana: scarta
+  }
+  if(changed) state.armadietto = newArm;
 }
 function saveState(){
   try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
@@ -931,7 +948,7 @@ function showConfirm(msg,title,okLabel){
   });
 }
 function openModal(id){ document.getElementById(id).classList.add('open'); }
-function closeModal(id){ document.getElementById(id).classList.remove('open'); editingAnagId=null; editingOrdId=null; editingConsId=null; editingGiacenzaCodice=null; }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); editingAnagId=null; editingOrdId=null; editingConsId=null; editingGiacenzaId=null; }
 // ===========================================================
 // CATALOGO autocomplete
 // ===========================================================
@@ -1063,13 +1080,6 @@ function salvaAnagrafica(){
   const codice=toTitleCase(document.getElementById('m-a-codice').value);
   const classe=toTitleCase(document.getElementById('m-a-classe').value);
   if(!tipologia||!codice){ showAlert('Materiale e codice conto sono obbligatori','err'); return; }
-  // Il codice conto deve essere unico (e' la chiave delle giacenze). Blocca i duplicati
-  // con un messaggio chiaro invece di lasciar fallire il salvataggio sul database.
-  const dup = state.anagrafica.find(x => x.codice === codice && x.id !== editingAnagId);
-  if(dup){
-    showAlert('Esiste gi\u00e0 un materiale con Codice Conto "'+codice+'": '+dup.tipologia,'err');
-    return;
-  }
   const fornitori=[];
   document.querySelectorAll('.supplier-block').forEach(r=>{
     const nome=toTitleCase(r.querySelector('.sup-name').value);
@@ -1081,16 +1091,11 @@ function salvaAnagrafica(){
   setTimeout(()=>{
     if(editingAnagId){
       const a=state.anagrafica.find(x=>x.id===editingAnagId);
-      const oldCodice=a.codice;
       a.numeroCodifica=numeroCodifica; a.tipologia=tipologia; a.codice=codice; a.classe=classe; a.fornitori=fornitori;
-      if(oldCodice!==codice && state.armadietto[oldCodice]!=null){
-        state.armadietto[codice]=state.armadietto[oldCodice];
-        delete state.armadietto[oldCodice];
-      }
     } else {
       const item={ id:Date.now(), numeroCodifica, tipologia, codice, classe, fornitori };
       state.anagrafica.push(item);
-      if(!(codice in state.armadietto)) state.armadietto[codice]=0;
+      if(!(item.id in state.armadietto)) state.armadietto[item.id]=0;
     }
     saveState();
     closeModal('modal-anagrafica');
@@ -1103,6 +1108,7 @@ async function eliminaAnagrafica(id){
   showSpinner('Eliminazione...');
   setTimeout(()=>{
     state.anagrafica = state.anagrafica.filter(a=>a.id!==id);
+    delete state.armadietto[id];
     saveState();
     showSuccess('Eliminato!');
     filtra();
@@ -1230,7 +1236,7 @@ function updateOrdineFornitori(){
   }
   sel.innerHTML='<option value="">Seleziona...</option>'+
     mat.fornitori.map((f,i)=>'<option value="'+i+'">'+escapeHtml(f.nome)+' \u2014 \u20ac'+f.prezzo.toFixed(2)+'</option>').join('');
-  info.innerHTML = '<b>N\u00b0 Codifica:</b> '+escapeHtml(mat.numeroCodifica||'\u2014')+' &nbsp;\u00b7&nbsp; <b>Codice conto:</b> '+escapeHtml(mat.codice)+' &nbsp;\u00b7&nbsp; <b>Classe:</b> '+escapeHtml(mat.classe||'\u2014')+' &nbsp;\u00b7&nbsp; <b>Giacenza attuale:</b> '+(state.armadietto[mat.codice]||0);
+  info.innerHTML = '<b>N\u00b0 Codifica:</b> '+escapeHtml(mat.numeroCodifica||'\u2014')+' &nbsp;\u00b7&nbsp; <b>Codice conto:</b> '+escapeHtml(mat.codice)+' &nbsp;\u00b7&nbsp; <b>Classe:</b> '+escapeHtml(mat.classe||'\u2014')+' &nbsp;\u00b7&nbsp; <b>Giacenza attuale:</b> '+(state.armadietto[mat.id]||0);
 }
 function salvaOrdine(){
   const numero=toTitleCase(document.getElementById('m-o-numero').value);
@@ -1249,9 +1255,7 @@ function salvaOrdine(){
     if(editingOrdId){
       const old = state.ordini.find(x=>x.id===editingOrdId);
       if(old){
-        const oldMat = state.anagrafica.find(a => a.id === old.materialeId);
-        const oldCod = oldMat ? oldMat.codice : old.codice;
-        state.armadietto[oldCod] = (state.armadietto[oldCod]||0) - old.qta;
+        state.armadietto[old.materialeId] = (state.armadietto[old.materialeId]||0) - old.qta;
       }
       const updated = {
         id: editingOrdId, numero, data, destinatario,
@@ -1260,7 +1264,7 @@ function salvaOrdine(){
         ddt: (old && Array.isArray(old.ddt)) ? old.ddt : []
       };
       state.ordini = state.ordini.map(x => x.id===editingOrdId ? updated : x);
-      state.armadietto[mat.codice] = (state.armadietto[mat.codice]||0) + qta;
+      state.armadietto[matId] = (state.armadietto[matId]||0) + qta;
     } else {
       state.ordini.push({
         id:Date.now(), numero, data, destinatario,
@@ -1268,7 +1272,7 @@ function salvaOrdine(){
         fornitore:f.nome, prezzo:f.prezzo, qta, totale:f.prezzo*qta,
         ddt: []
       });
-      state.armadietto[mat.codice]=(state.armadietto[mat.codice]||0)+qta;
+      state.armadietto[matId]=(state.armadietto[matId]||0)+qta;
     }
     saveState();
     closeModal('modal-ordine');
@@ -1282,9 +1286,7 @@ async function eliminaOrdine(id){
   setTimeout(()=>{
     const o=state.ordini.find(x=>x.id===id);
     if(o){
-      const mat = state.anagrafica.find(a => a.id === o.materialeId);
-      const cod = mat ? mat.codice : o.codice;
-      state.armadietto[cod] = (state.armadietto[cod]||0) - o.qta;
+      state.armadietto[o.materialeId] = (state.armadietto[o.materialeId]||0) - o.qta;
     }
     state.ordini=state.ordini.filter(x=>x.id!==id);
     saveState(); showSuccess('Eliminato!'); filtra();
@@ -1393,7 +1395,7 @@ function updateConsegnaInfo(){
   const info=document.getElementById('m-c-info');
   const mat=state.anagrafica.find(a=>a.id===matId);
   if(!mat){ info.textContent='Seleziona un materiale per vedere giacenza e dati.'; return; }
-  const g=state.armadietto[mat.codice]||0;
+  const g=state.armadietto[mat.id]||0;
   info.innerHTML = '<b>N\u00b0 Codifica:</b> '+escapeHtml(mat.numeroCodifica||'\u2014')+' &nbsp;\u00b7&nbsp; <b>Codice conto:</b> '+escapeHtml(mat.codice)+' &nbsp;\u00b7&nbsp; <b>Classe:</b> '+escapeHtml(mat.classe||'\u2014')+' &nbsp;\u00b7&nbsp; <b>Giacenza:</b> <span style="color:'+(g>0?'var(--green)':'var(--red)')+';font-weight:800;">'+g+'</span>';
 }
 async function salvaConsegna(){
@@ -1408,16 +1410,12 @@ async function salvaConsegna(){
   if(editingConsId){
     const old = state.consegne.find(x=>x.id===editingConsId);
     if(old){
-      const oldMat = state.anagrafica.find(a => a.id === old.materialeId);
-      const oldCod = oldMat ? oldMat.codice : old.codice;
-      state.armadietto[oldCod] = (state.armadietto[oldCod]||0) + old.qta;
+      state.armadietto[old.materialeId] = (state.armadietto[old.materialeId]||0) + old.qta;
     }
-    const g = state.armadietto[newCod] || 0;
+    const g = state.armadietto[matId] || 0;
     if(qta > g && !await showConfirm('Giacenza attuale di '+mat.tipologia+': '+g+'. Vuoi comunque consegnare '+qta+'? La giacenza diventera negativa.','Giacenza insufficiente','Conferma consegna')){
       if(old){
-        const oldMat = state.anagrafica.find(a => a.id === old.materialeId);
-        const oldCod = oldMat ? oldMat.codice : old.codice;
-        state.armadietto[oldCod] = (state.armadietto[oldCod]||0) - old.qta;
+        state.armadietto[old.materialeId] = (state.armadietto[old.materialeId]||0) - old.qta;
       }
       return;
     }
@@ -1427,16 +1425,16 @@ async function salvaConsegna(){
       materialeId: matId, materiale: mat.tipologia, codice: newCod, numeroCodifica: mat.numeroCodifica||'', qta
     };
     state.consegne = state.consegne.map(x => x.id===editingConsId ? updated : x);
-    state.armadietto[newCod] = g - qta;
+    state.armadietto[matId] = g - qta;
   } else {
-    const g = state.armadietto[newCod] || 0;
+    const g = state.armadietto[matId] || 0;
     if(qta > g && !await showConfirm('Giacenza attuale di '+mat.tipologia+': '+g+'. Vuoi comunque consegnare '+qta+'? La giacenza diventera negativa.','Giacenza insufficiente','Conferma consegna')) return;
     showSpinner('Salvataggio consegna...');
     state.consegne.push({
       id: Date.now(), data, linea,
       materialeId: matId, materiale: mat.tipologia, codice: newCod, numeroCodifica: mat.numeroCodifica||'', qta
     });
-    state.armadietto[newCod] = g - qta;
+    state.armadietto[matId] = g - qta;
   }
   setTimeout(()=>{
     saveState();
@@ -1451,9 +1449,7 @@ async function eliminaConsegna(id){
   setTimeout(()=>{
     const c = state.consegne.find(x=>x.id===id);
     if(c){
-      const mat = state.anagrafica.find(a => a.id === c.materialeId);
-      const cod = mat ? mat.codice : c.codice;
-      state.armadietto[cod] = (state.armadietto[cod]||0) + c.qta;
+      state.armadietto[c.materialeId] = (state.armadietto[c.materialeId]||0) + c.qta;
     }
     state.consegne = state.consegne.filter(x=>x.id!==id);
     saveState(); showSuccess('Eliminato!'); filtra();
@@ -1462,34 +1458,34 @@ async function eliminaConsegna(id){
 // ===========================================================
 // ARMADIETTO - edit stock inline
 // ===========================================================
-function editStock(codice){
-  const cell=document.getElementById('stock-'+CSS.escape(codice));
+function editStock(id){
+  const cell=document.getElementById('stock-'+id);
   if(!cell) return;
-  const cur=state.armadietto[codice]||0;
-  cell.outerHTML = '<input type="number" class="stock-input" id="stock-'+codice+'" value="'+cur+'" onblur="saveStock(\''+codice.replace(/'/g,"\\'")+'\',this.value)" onkeypress="if(event.key===\'Enter\')this.blur()">';
-  const inp=document.getElementById('stock-'+codice);
+  const cur=state.armadietto[id]||0;
+  cell.outerHTML = '<input type="number" class="stock-input" id="stock-'+id+'" value="'+cur+'" onblur="saveStock('+id+',this.value)" onkeypress="if(event.key===\'Enter\')this.blur()">';
+  const inp=document.getElementById('stock-'+id);
   if(inp){ inp.focus(); inp.select(); }
 }
-function saveStock(codice,val){
+function saveStock(id,val){
   const n=parseInt(val);
   const newVal = isNaN(n)?0:n;
-  const oldVal = state.armadietto[codice]||0;
+  const oldVal = state.armadietto[id]||0;
   if(newVal === oldVal){ filtra(); return; }
   showSpinner('Aggiornamento giacenza...');
   setTimeout(()=>{
-    state.armadietto[codice]=newVal;
+    state.armadietto[id]=newVal;
     saveState();
     showSuccess('Giacenza aggiornata!');
     filtra();
   }, 350);
 }
 // Modal-based giacenza edit
-let editingGiacenzaCodice = null;
+let editingGiacenzaId = null;
 function apriModificaGiacenza(matId){
   const a = state.anagrafica.find(x=>x.id===matId);
   if(!a){ showAlert('Materiale non trovato','err'); return; }
-  editingGiacenzaCodice = a.codice;
-  const cur = state.armadietto[a.codice] || 0;
+  editingGiacenzaId = a.id;
+  const cur = state.armadietto[a.id] || 0;
   document.getElementById('m-g-materiale').textContent = a.tipologia;
   document.getElementById('m-g-numero-codifica').textContent = a.numeroCodifica || '\u2014';
   document.getElementById('m-g-codice-conto').textContent = a.codice;
@@ -1502,19 +1498,19 @@ function apriModificaGiacenza(matId){
   }, 100);
 }
 function salvaGiacenza(){
-  if(!editingGiacenzaCodice){ showAlert('Errore: materiale non selezionato','err'); return; }
+  if(!editingGiacenzaId){ showAlert('Errore: materiale non selezionato','err'); return; }
   const nuovaVal = document.getElementById('m-g-nuova').value;
   const n = parseInt(nuovaVal);
   if(isNaN(n)){ showAlert('Inserisci un valore numerico valido','err'); return; }
-  const oldVal = state.armadietto[editingGiacenzaCodice] || 0;
-  if(n === oldVal){ closeModal('modal-giacenza'); editingGiacenzaCodice = null; return; }
-  const codice = editingGiacenzaCodice;
+  const oldVal = state.armadietto[editingGiacenzaId] || 0;
+  if(n === oldVal){ closeModal('modal-giacenza'); editingGiacenzaId = null; return; }
+  const gid = editingGiacenzaId;
   showSpinner('Salvataggio giacenza...');
   setTimeout(()=>{
-    state.armadietto[codice] = n;
+    state.armadietto[gid] = n;
     saveState();
     closeModal('modal-giacenza');
-    editingGiacenzaCodice = null;
+    editingGiacenzaId = null;
     showSuccess('Giacenza aggiornata!');
     filtra();
   }, 350);
@@ -1807,7 +1803,7 @@ function renderArmadietto(){
     tb.innerHTML='<tr><td colspan="6" class="empty">Nessun materiale</td></tr>';
   } else {
     tb.innerHTML=rows.map(a=>{
-      const stock=state.armadietto[a.codice]||0;
+      const stock=state.armadietto[a.id]||0;
       let cls='';
       if(stock===0) cls=' zero';
       else if(stock<=5) cls=' low';
@@ -1819,14 +1815,14 @@ function renderArmadietto(){
         '<td style="font-weight:700;">'+escapeHtml(a.tipologia)+'</td>'+
         '<td><code class="codice">'+escapeHtml(a.codice)+'</code></td>'+
         '<td>'+escapeHtml(a.classe||'\u2014')+'</td>'+
-        '<td><span class="stock-cell'+cls+'" id="stock-'+escapeHtml(a.codice)+'" onclick="editStock(\''+a.codice.replace(/'/g,"\\'")+'\')" title="Clicca per modifica rapida">'+stock+'</span></td>'+
+        '<td><span class="stock-cell'+cls+'" id="stock-'+a.id+'" onclick="editStock('+a.id+')" title="Clicca per modifica rapida">'+stock+'</span></td>'+
       '</tr>';
     }).join('');
   }
-  const tot=state.anagrafica.reduce((s,a)=>s+(state.armadietto[a.codice]||0),0);
+  const tot=state.anagrafica.reduce((s,a)=>s+(state.armadietto[a.id]||0),0);
   document.getElementById('kpi-arm-tot').textContent=tot;
   const valore = state.anagrafica.reduce((s,a)=>{
-    const stock = state.armadietto[a.codice]||0;
+    const stock = state.armadietto[a.id]||0;
     const prezzo = (a.fornitori && a.fornitori.length) ? (parseFloat(a.fornitori[0].prezzo)||0) : 0;
     return s + stock * prezzo;
   }, 0);
@@ -1843,7 +1839,7 @@ function renderPie(){
   const ctx=canvas.getContext('2d');
   ctx.clearRect(0,0,200,200);
   const data=state.anagrafica
-    .map(a=>({nome:a.tipologia,codice:a.codice,qta:state.armadietto[a.codice]||0}))
+    .map(a=>({nome:a.tipologia,codice:a.codice,qta:state.armadietto[a.id]||0}))
     .filter(d=>d.qta>0).sort((a,b)=>b.qta-a.qta);
   const top=data.slice(0,8);
   const altre=data.slice(8).reduce((s,d)=>s+d.qta,0);
@@ -1887,7 +1883,7 @@ function renderPie(){
 // Non c'e' piu' configurazione manuale; localStorage viene ignorato per le credenziali.
 const DEFAULT_API_URL   = 'https://mc-vt-api.devid-billi.workers.dev';
 const DEFAULT_API_TOKEN = '524352cb0554682c82bdfc1d3162cd5f64130e7dfa693bb0408bc8ccfd95f0ba';
-const DEFAULT_SHEET_URL = 'https://script.google.com/macros/s/AKfycbwmuVtKxnkEBZAc_V91J_HNkU_4Cq6BNRq3wdxw8Qg6CtXvsbfzbY24FBbbieyZ42vo/exec';
+const DEFAULT_SHEET_URL = 'https://script.google.com/macros/s/AKfycbwZWeANHx7OsVVeiw1yf4tpSzZvZJ_33Z_TANbf3XZrgMvsgWOBuCKUiBDVQJgUdFMV/exec';
 
 function getApiConfig(){
   return { url: DEFAULT_API_URL.replace(/\/$/, ''), token: DEFAULT_API_TOKEN };
@@ -2113,12 +2109,12 @@ function computeDiff(oldS, newS, allowDeletes){
   }
   const oldArm = oldS.armadietto || {};
   const newArm = newS.armadietto || {};
-  for(const codice in newArm){
-    if(oldArm[codice] !== newArm[codice]) ops.push({ entity:'armadietto', action:'set', codice, giacenza: newArm[codice] });
+  for(const mid in newArm){
+    if(oldArm[mid] !== newArm[mid]) ops.push({ entity:'armadietto', action:'set', id: Number(mid), giacenza: newArm[mid] });
   }
   if(allowDeletes){
-    for(const codice in oldArm){
-      if(!(codice in newArm)) ops.push({ entity:'armadietto', action:'delete', codice });
+    for(const mid in oldArm){
+      if(!(mid in newArm)) ops.push({ entity:'armadietto', action:'delete', id: Number(mid) });
     }
   }
   return ops;
