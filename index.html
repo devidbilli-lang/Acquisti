@@ -2072,20 +2072,141 @@ async function testSheetUrl(){
 
 // ----- Auto-push to D1 (debounced) -----
 let pushTimer = null;
+let lastServerState = null;   // snapshot di cio' che e' sul server (baseline per il diff)
+let localDirty = false;       // true tra una modifica locale e il push riuscito
+let pushInFlight = false;     // true durante un push in corso
+let pollTimer = null;
+
+function snapshot(s){ return JSON.parse(JSON.stringify(s)); }
+
+function normalizeServer(data){
+  const s = {
+    anagrafica: data.anagrafica || [],
+    ordini: data.ordini || [],
+    consegne: data.consegne || [],
+    armadietto: data.armadietto || {}
+  };
+  s.ordini.forEach(o => { if(!Array.isArray(o.ddt)) o.ddt = []; });
+  s.anagrafica.forEach(a => { if(a.numeroCodifica == null) a.numeroCodifica = ''; });
+  s.ordini.forEach(o => { if(o.numeroCodifica == null) o.numeroCodifica = ''; });
+  s.consegne.forEach(c => { if(c.numeroCodifica == null) c.numeroCodifica = ''; });
+  return s;
+}
+
+// Calcola le operazioni granulari tra due stati (cosa e' cambiato localmente)
+function computeDiff(oldS, newS, allowDeletes){
+  const ops = [];
+  const map = { anagrafica:'materiali', ordini:'ordini', consegne:'consegne' };
+  for(const key of ['anagrafica','ordini','consegne']){
+    const oldArr = oldS[key] || [];
+    const newArr = newS[key] || [];
+    const oldById = new Map(oldArr.map(r=>[String(r.id), r]));
+    const newById = new Map(newArr.map(r=>[String(r.id), r]));
+    for(const [id, rec] of newById){
+      const o = oldById.get(id);
+      if(!o || JSON.stringify(o) !== JSON.stringify(rec)){
+        ops.push({ entity: map[key], action:'upsert', data: rec });
+      }
+    }
+    if(allowDeletes){
+      for(const [id, rec] of oldById){
+        if(!newById.has(id)) ops.push({ entity: map[key], action:'delete', id: rec.id });
+      }
+    }
+  }
+  const oldArm = oldS.armadietto || {};
+  const newArm = newS.armadietto || {};
+  for(const codice in newArm){
+    if(oldArm[codice] !== newArm[codice]) ops.push({ entity:'armadietto', action:'set', codice, giacenza: newArm[codice] });
+  }
+  if(allowDeletes){
+    for(const codice in oldArm){
+      if(!(codice in newArm)) ops.push({ entity:'armadietto', action:'delete', codice });
+    }
+  }
+  return ops;
+}
+
 function pushToCloud(){
   const cfg = getApiConfig();
   if(!cfg.url) return;
+  localDirty = true;
   clearTimeout(pushTimer);
-  pushTimer = setTimeout(async () => {
-    updateConnPill('syncing');
-    try{
-      await apiFetch('/api/state', { method: 'POST', body: JSON.stringify(state) });
-      updateConnPill('synced');
-    } catch(e){
-      console.warn('Cloud push failed:', e);
-      updateConnPill('error');
+  pushTimer = setTimeout(doPush, 300);
+}
+
+async function doPush(){
+  const cfg = getApiConfig();
+  if(!cfg.url) return;
+  pushInFlight = true;
+  updateConnPill('syncing');
+  try{
+    if(!lastServerState){
+      // Nessun baseline (boot fallito): stabiliscilo dal server, sync upsert-only (niente delete)
+      let server = null;
+      try{ server = normalizeServer(await apiFetch('/api/state', { method:'GET' })); }catch(_){ server = null; }
+      if(server){
+        const ops = computeDiff(server, state, false);
+        if(ops.length > 0) await apiFetch('/api/ops', { method:'POST', body: JSON.stringify({ ops }) });
+        // Riallinea baseline + vista locale allo stato server aggiornato
+        const merged = normalizeServer(await apiFetch('/api/state', { method:'GET' }));
+        state = merged;
+        lastServerState = snapshot(merged);
+        try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(_){}
+        filtra();
+      } else {
+        // Davvero offline: full-replace come ultima risorsa
+        await apiFetch('/api/state', { method:'POST', body: JSON.stringify(state) });
+        lastServerState = snapshot(state);
+      }
+    } else {
+      const ops = computeDiff(lastServerState, state, true);
+      if(ops.length > 0){
+        await apiFetch('/api/ops', { method:'POST', body: JSON.stringify({ ops }) });
+        lastServerState = snapshot(state);
+      }
     }
-  }, 300);
+    localDirty = false;
+    updateConnPill('synced');
+  } catch(e){
+    console.warn('Cloud push failed:', e);
+    updateConnPill('error');
+  } finally {
+    pushInFlight = false;
+  }
+}
+
+// ----- Polling: rileggi da D1 ogni 10s per vedere le modifiche altrui -----
+function anyModalOpen(){
+  return !!document.querySelector('.modal-overlay.open');
+}
+function startPolling(){
+  const cfg = getApiConfig();
+  if(!cfg.url) return;
+  clearInterval(pollTimer);
+  pollTimer = setInterval(pollRefresh, 10000);
+}
+async function pollRefresh(){
+  const cfg = getApiConfig();
+  if(!cfg.url) return;
+  if(localDirty || pushInFlight) return;   // c'e' una nostra modifica in volo
+  if(anyModalOpen()) return;               // utente sta editando, non disturbare
+  try{
+    const server = normalizeServer(await apiFetch('/api/state', { method:'GET' }));
+    // Ricontrolla dopo l'await: l'utente potrebbe aver iniziato a editare nel frattempo
+    if(localDirty || pushInFlight || anyModalOpen()) return;
+    if(JSON.stringify(server) === JSON.stringify(state)){
+      lastServerState = snapshot(server);
+      return;
+    }
+    state = server;
+    lastServerState = snapshot(server);
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(_){}
+    filtra();
+    updateConnPill('synced');
+  } catch(e){
+    console.warn('Poll failed:', e);
+  }
 }
 
 // ----- Auto-push to Google Sheets (longer debounce: Apps Script e' lento) -----
@@ -2127,6 +2248,7 @@ async function syncAll(){
   if(apiCfg.url){
     try{
       await apiFetch('/api/state', { method: 'POST', body: JSON.stringify(state) });
+      lastServerState = snapshot(state);
       results.push({ok:true, name:'D1'});
     } catch(e){ results.push({ok:false, name:'D1', error:e.message}); }
   }
@@ -2209,19 +2331,25 @@ async function bootCloudFirst(){
       state.ordini.forEach(o => { if(o.numeroCodifica == null) o.numeroCodifica = ''; });
       state.consegne.forEach(c => { if(c.numeroCodifica == null) c.numeroCodifica = ''; });
       try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+      lastServerState = snapshot(state);
       filtra();
     } else {
       // Remote is empty: push the local snapshot to bootstrap D1
       if(state.anagrafica.length || state.ordini.length || state.consegne.length){
         try{
           await apiFetch('/api/state', { method: 'POST', body: JSON.stringify(state) });
+          lastServerState = snapshot(state);
         } catch(e){ console.warn('Bootstrap push failed:', e); }
+      } else {
+        lastServerState = snapshot(state);
       }
     }
     updateConnPill('synced');
+    startPolling();
   } catch(e){
     console.warn('Boot from cloud failed, using local cache:', e);
     updateConnPill('error');
+    startPolling();
   }
 }
 
