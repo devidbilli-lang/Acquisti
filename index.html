@@ -362,7 +362,7 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:13px;background:#cdf6f
   <div class="brand-name">Materiali Consumabili (VT)</div>
   <div class="header-right">
     <div class="clock" id="clk">--:--</div>
-    <div class="conn-pill ok" id="conn-pill">Locale</div>
+    <div class="conn-pill ok" id="conn-pill" onclick="diagConnection()" style="cursor:pointer;" title="Clicca per verificare la connessione">Locale</div>
   </div>
 </header>
 <!-- LAYOUT 2 colonne -->
@@ -2017,6 +2017,31 @@ let pushInFlight = false;     // true durante un push in corso
 let pollTimer = null;
 
 function snapshot(s){ return JSON.parse(JSON.stringify(s)); }
+
+// Diagnostica connessione: click sulla pillola di stato
+async function diagConnection(){
+  const cfg = getApiConfig();
+  showSpinner('Verifica connessione a D1...');
+  try{
+    const data = await apiFetch('/api/state', { method:'GET' });
+    hideSpinner();
+    const nMat = (data.anagrafica||[]).length;
+    const nOrd = (data.ordini||[]).length;
+    const nCons = (data.consegne||[]).length;
+    const localMat = (state.anagrafica||[]).length;
+    showAlert('Connesso a D1 OK. Sul server: '+nMat+' materiali, '+nOrd+' ordini, '+nCons+' consegne. In locale ora: '+localMat+' materiali.', 'ok');
+    // Se il server ha dati ma in locale non li vediamo, forziamo il refresh
+    if(nMat > 0 || nOrd > 0 || nCons > 0){
+      state = normalizeServer(data);
+      lastServerState = snapshot(state);
+      try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(_){}
+      filtra();
+    }
+  }catch(e){
+    hideSpinner();
+    showAlert('Connessione FALLITA: '+e.message+'  (URL: '+cfg.url+')', 'err');
+  }
+}
 
 function normalizeServer(data){
   const s = {
