@@ -1080,6 +1080,10 @@ function salvaAnagrafica(){
   const codice=toTitleCase(document.getElementById('m-a-codice').value);
   const classe=toTitleCase(document.getElementById('m-a-classe').value);
   if(!tipologia||!codice){ showAlert('Materiale e codice conto sono obbligatori','err'); return; }
+  // Blocca i nomi duplicati: il Nome Materiale deve essere unico
+  const nomeKey = tipologia.trim().toLowerCase();
+  const dupNome = state.anagrafica.find(x => x.id !== editingAnagId && (x.tipologia||'').trim().toLowerCase() === nomeKey);
+  if(dupNome){ showAlert('Esiste gi\u00e0 un materiale con questo nome: "'+dupNome.tipologia+'"','err'); return; }
   const fornitori=[];
   document.querySelectorAll('.supplier-block').forEach(r=>{
     const nome=toTitleCase(r.querySelector('.sup-name').value);
