@@ -120,8 +120,8 @@ header{
 /* FILTERS */
 .filters{
   display:flex;gap:10px;flex-wrap:wrap;align-items:center;
-  position:sticky;top:16px;z-index:31;
-  background:#edf3fa;padding:8px 0 10px;margin-bottom:6px;
+  position:sticky;top:0;z-index:31;
+  background:#edf3fa;padding:10px 0;margin-bottom:6px;
   box-shadow:0 6px 8px -6px rgba(0,0,0,0.12);
 }
 .search-wrap{position:relative;display:inline-flex;align-items:center;}
@@ -1758,7 +1758,7 @@ function setStickyOffsets(){
   if(!panel) return;
   const f = panel.querySelector('.filters');
   const h = f ? f.offsetHeight : 0;
-  document.documentElement.style.setProperty('--thead-top', (16 + h) + 'px');
+  document.documentElement.style.setProperty('--thead-top', h + 'px');
 }
 window.addEventListener('resize', setStickyOffsets);
 function filtra(){
