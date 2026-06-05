@@ -169,6 +169,8 @@ header{
 tr.row-hl>td{background:#fff7b8 !important;}
 .btn-pdf{background:#b91c1c;color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:800;letter-spacing:.5px;cursor:pointer;padding:5px 9px;line-height:1;margin-left:6px;vertical-align:middle;}
 .btn-pdf:hover{background:#991b1b;}
+.btn-pdf-data{background:#b91c1c;color:#fff;border:none;border-radius:10px;font-size:12px;font-weight:800;letter-spacing:.3px;cursor:pointer;padding:9px 16px;font-family:'Montserrat',sans-serif;white-space:nowrap;}
+.btn-pdf-data:hover{background:#991b1b;}
 .btn-link{background:none;border:1.5px dashed rgba(57,224,244,0.4);color:var(--accent);font-weight:800;cursor:pointer;padding:8px 14px;border-radius:10px;font-size:12px;letter-spacing:1px;font-family:'Montserrat',sans-serif;}
 .btn-link:hover{background:rgba(57,224,244,0.05);}
 /* LAYOUT — main content with right sidebar */
@@ -464,6 +466,7 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:13px;background:#cdf6f
       <input type="text" id="f-o-fornitore" placeholder="Fornitore..." style="width:160px;" oninput="filtra()"/>
       <button class="clear-btn" onclick="document.getElementById('f-o-fornitore').value='';filtra()">×</button>
     </div>
+    <button class="btn-pdf-data" onclick="apriPdfData()" title="Esporta in PDF gli ordini per data">PDF per data</button>
   </div>
   <div class="layout">
     <div class="table-wrap">
@@ -621,6 +624,22 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:13px;background:#cdf6f
     </div>
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeModal('modal-ddt')">Chiudi</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PDF PER DATA -->
+<div class="modal-overlay" id="modal-pdf-data">
+  <div class="modal" style="max-width:420px;">
+    <div class="modal-title">Esporta PDF ordini per data</div>
+    <div class="modal-info">Seleziona il periodo. Per un solo giorno imposta la stessa data nei due campi.</div>
+    <div class="modal-grid" style="grid-template-columns:1fr 1fr;">
+      <div class="fg"><label>Da *</label><input type="date" id="m-pdfdata-da"></div>
+      <div class="fg"><label>A *</label><input type="date" id="m-pdfdata-a"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('modal-pdf-data')">Annulla</button>
+      <button class="btn-pdf" onclick="generaPdfOrdiniData()" style="padding:9px 16px;">Genera PDF</button>
     </div>
   </div>
 </div>
@@ -1451,6 +1470,67 @@ function esportaPdfOrdine(id){
   const w = window.open('', '_blank');
   if(!w){ showAlert('Abilita i popup del browser per esportare il PDF','err'); return; }
   w.document.open(); w.document.write(doc); w.document.close();
+}
+
+// ---- Esporta in PDF gli ordini di un periodo ----
+function apriPdfData(){
+  const t = todayLocal();
+  document.getElementById('m-pdfdata-da').value = t;
+  document.getElementById('m-pdfdata-a').value = t;
+  openModal('modal-pdf-data');
+}
+function generaPdfOrdiniData(){
+  let from = document.getElementById('m-pdfdata-da').value;
+  let to   = document.getElementById('m-pdfdata-a').value;
+  if(!from || !to){ showAlert('Seleziona le date','err'); return; }
+  if(from > to){ const tmp=from; from=to; to=tmp; }
+  const list = state.ordini
+    .filter(o => o.data && o.data >= from && o.data <= to)
+    .slice()
+    .sort((x,y)=> (x.data||'').localeCompare(y.data||'') || (x.numero||'').localeCompare(y.numero||''));
+  if(!list.length){ showAlert('Nessun ordine nel periodo selezionato','err'); return; }
+  const fmt = (n)=> Number(n||0).toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const totale = list.reduce((acc,o)=> acc + (Number(o.totale)||0), 0);
+  const titolo = (from === to) ? ('Ordini del '+formatDataIT(from)) : ('Ordini dal '+formatDataIT(from)+' al '+formatDataIT(to));
+  const rows = list.map(o =>
+    '<tr>'+
+      '<td><code class="codice">'+escapeHtml(o.numero||'')+'</code></td>'+
+      '<td>'+formatDataIT(o.data||'')+'</td>'+
+      '<td><b>'+escapeHtml(o.materiale||'')+'</b></td>'+
+      '<td><span class="badge">'+(o.qta||0)+'</span></td>'+
+      '<td>\u20ac'+fmt(o.prezzo)+'</td>'+
+      '<td><span class="badge">\u20ac'+fmt(o.totale)+'</span></td>'+
+    '</tr>'
+  ).join('');
+  const doc =
+    '<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+escapeHtml(titolo)+'</title>'+
+    '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">'+
+    '<style>@page{size:A4;margin:0;}*{box-sizing:border-box;}'+
+    'body{font-family:Montserrat,Arial,sans-serif;color:#111;margin:0;padding:16mm;font-size:13px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}'+
+    '.logo-wrap{text-align:center;margin-bottom:30px;}.logo-wrap img{width:60%;max-width:420px;height:auto;}'+
+    '.pdf-title{font-size:19px;font-weight:800;margin-bottom:20px;letter-spacing:.3px;text-align:center;}'+
+    'table{width:100%;border-collapse:collapse;margin-top:8px;table-layout:auto;}'+
+    'thead th{background:linear-gradient(135deg,#39e0f4,#0ea5b8);padding:10px 6px;text-align:center;font-size:11px;font-weight:800;letter-spacing:.3px;color:#fff;white-space:nowrap;}'+
+    'tbody td{padding:9px 6px;text-align:center;border-bottom:1px solid #e8e8f0;color:#1a1a2e;font-weight:500;font-size:11px;vertical-align:middle;}'+
+    'tbody tr:nth-child(even){background:#f8f8fd;}'+
+    'tfoot td{padding:11px 6px;font-weight:800;font-size:12px;border-top:2px solid #0ea5b8;color:#0c6b78;}'+
+    '.codice{font-family:Montserrat,Arial,sans-serif;font-size:10px;background:#cdf6fb;color:#0c6b78;padding:3px 7px;border-radius:4px;font-weight:700;letter-spacing:.3px;white-space:nowrap;}'+
+    '.badge{display:inline-block;padding:4px 11px;border-radius:20px;font-size:11px;font-weight:800;background:#cdf6fb;color:#0c6b78;}'+
+    '</style></head>'+
+    '<body>'+
+    '<div class="logo-wrap"><img src="'+LOGO_PDF+'"></div>'+
+    '<div class="pdf-title">'+escapeHtml(titolo)+'</div>'+
+    '<table><thead><tr>'+
+      '<th>N\u00b0</th><th>Data</th><th>Nome Materiale</th><th>Qt\u00e0</th><th>Prezzo</th><th>Totale</th>'+
+    '</tr></thead><tbody>'+rows+'</tbody>'+
+    '<tfoot><tr><td colspan="5" style="text-align:right;">Totale ('+list.length+' ordini)</td><td><span class="badge">\u20ac'+fmt(totale)+'</span></td></tr></tfoot>'+
+    '</table>'+
+    '<scr'+'ipt>function go(){window.focus();window.print();}if(document.fonts&&document.fonts.ready){document.fonts.ready.then(function(){setTimeout(go,300);});}else{window.onload=function(){setTimeout(go,600);};}</scr'+'ipt>'+
+    '</body></html>';
+  const w = window.open('', '_blank');
+  if(!w){ showAlert('Abilita i popup del browser per esportare il PDF','err'); return; }
+  w.document.open(); w.document.write(doc); w.document.close();
+  closeModal('modal-pdf-data');
 }
 
 // ===========================================================
