@@ -1405,21 +1405,15 @@ function esportaPdfOrdine(id){
     .filter(x => x && String(x).trim())
     .map(x => '<div>'+escapeHtml(String(x))+'</div>').join('');
   const fmt = (n)=> Number(n||0).toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2});
-  const ddtList = Array.isArray(o.ddt) ? o.ddt : [];
-  const arrivata = ddtList.reduce((acc,d)=>acc+(parseFloat(d.qta)||0),0);
-  const delta = (o.qta||0) - arrivata;
-  const isComplete = arrivata >= (o.qta||0);
-  const ddtClass = ddtList.length===0 ? 'empty-ddt' : (isComplete ? 'complete' : 'partial');
-  const ddtText = ddtList.length+' DDT \u00b7 <span class="ddt-arr">'+arrivata+'</span>/'+(o.qta||0);
-  const deltaBadge = '<span class="ddt-delta '+(isComplete?'delta-green':'delta-red')+'">'+(isComplete?'\u2713':'\u2212'+delta)+'</span>';
   const leftLines =
     '<div><span class="lbl">N\u00b0 Ordine:</span> '+escapeHtml(o.numero||'')+'</div>'+
     '<div><span class="lbl">Data:</span> '+formatDataIT(o.data||'')+'</div>'+
     (o.destinatario ? '<div><span class="lbl">Destinatario:</span> '+escapeHtml(o.destinatario)+'</div>' : '');
   const doc =
     '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Ordine '+escapeHtml(o.numero||'')+'</title>'+
+    '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">'+
     '<style>@page{size:A4;margin:0;}*{box-sizing:border-box;}'+
-    'body{font-family:Arial,Helvetica,sans-serif;color:#111;margin:0;padding:16mm;font-size:13px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}'+
+    'body{font-family:Montserrat,Arial,sans-serif;color:#111;margin:0;padding:16mm;font-size:13px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}'+
     '.logo-wrap{text-align:center;margin-bottom:40px;}.logo-wrap img{width:64%;max-width:440px;height:auto;}'+
     '.head{display:flex;justify-content:space-between;gap:30px;margin-bottom:26px;}'+
     '.head>div{line-height:1.55;}.lbl{font-weight:bold;}.sup-title{font-weight:bold;margin-bottom:8px;}'+
@@ -1427,7 +1421,7 @@ function esportaPdfOrdine(id){
     'thead th{background:linear-gradient(135deg,#39e0f4,#0ea5b8);padding:10px 6px;text-align:center;font-size:11px;font-weight:800;letter-spacing:.3px;color:#fff;white-space:nowrap;}'+
     'tbody td{padding:9px 6px;text-align:center;border-bottom:1px solid #e8e8f0;color:#1a1a2e;font-weight:500;font-size:11px;vertical-align:middle;}'+
     'tbody tr:nth-child(even){background:#f8f8fd;}'+
-    '.codice{font-family:Arial,sans-serif;font-size:10px;background:#cdf6fb;color:#0c6b78;padding:3px 7px;border-radius:4px;font-weight:700;letter-spacing:.3px;white-space:nowrap;}'+
+    '.codice{font-family:Montserrat,Arial,sans-serif;font-size:10px;background:#cdf6fb;color:#0c6b78;padding:3px 7px;border-radius:4px;font-weight:700;letter-spacing:.3px;white-space:nowrap;}'+
     '.badge{display:inline-block;padding:4px 11px;border-radius:20px;font-size:11px;font-weight:800;background:#cdf6fb;color:#0c6b78;}'+
     '.ddt-cell{display:inline-block;padding:5px 9px;border-radius:8px;font-weight:700;font-size:10px;background:#fff7ed;color:#9a3412;border:1.5px solid #fed7aa;white-space:nowrap;}'+
     '.ddt-cell.complete{background:#86efac;color:#1a1a2e;border-color:#22c55e;}'+
@@ -1443,21 +1437,16 @@ function esportaPdfOrdine(id){
     '<div class="head"><div class="left">'+leftLines+'</div>'+
     '<div class="right"><div class="sup-title">SPTT.LE FORNITORE</div>'+supLines+'</div></div>'+
     '<table><thead><tr>'+
-      '<th>N\u00b0</th><th>Data</th><th>N\u00b0 Codifica</th><th>Nome Materiale</th><th>Destinatario</th>'+
-      '<th>Fornitore</th><th>Qt\u00e0</th><th>Prezzo</th><th>Totale</th><th>DDT</th>'+
+      '<th>N\u00b0</th><th>Data</th><th>Nome Materiale</th><th>Qt\u00e0</th><th>Prezzo</th><th>Totale</th>'+
     '</tr></thead><tbody><tr>'+
       '<td><code class="codice">'+escapeHtml(o.numero||'')+'</code></td>'+
       '<td>'+formatDataIT(o.data||'')+'</td>'+
-      '<td><code class="codice">'+escapeHtml(o.numeroCodifica||'\u2014')+'</code></td>'+
-      '<td><b>'+escapeHtml(o.materiale||'')+'</b><br><code class="codice">'+escapeHtml(o.codice||'')+'</code></td>'+
-      '<td>'+escapeHtml(o.destinatario||'')+'</td>'+
-      '<td>'+escapeHtml(o.fornitore||'')+'</td>'+
+      '<td><b>'+escapeHtml(o.materiale||'')+'</b></td>'+
       '<td><span class="badge">'+(o.qta||0)+'</span></td>'+
       '<td>\u20ac'+fmt(o.prezzo)+'</td>'+
       '<td><span class="badge">\u20ac'+fmt(o.totale)+'</span></td>'+
-      '<td><span class="ddt-cell '+ddtClass+'">'+ddtText+'</span>'+deltaBadge+'</td>'+
     '</tr></tbody></table>'+
-    '<scr'+'ipt>window.onload=function(){setTimeout(function(){window.print();},350);};</scr'+'ipt>'+
+    '<scr'+'ipt>function go(){window.focus();window.print();}if(document.fonts&&document.fonts.ready){document.fonts.ready.then(function(){setTimeout(go,300);});}else{window.onload=function(){setTimeout(go,600);};}</scr'+'ipt>'+
     '</body></html>';
   const w = window.open('', '_blank');
   if(!w){ showAlert('Abilita i popup del browser per esportare il PDF','err'); return; }
