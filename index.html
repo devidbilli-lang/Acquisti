@@ -666,6 +666,26 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:13px;background:#cdf6f
     </div>
   </div>
 </div>
+
+<!-- MODAL NUOVA GIACENZA -->
+<div class="modal-overlay" id="modal-giacenza-nuova">
+  <div class="modal" style="max-width:460px;">
+    <div class="modal-title">Aggiungi giacenza</div>
+    <div class="modal-grid">
+      <div class="fg" style="position:relative;"><label>Nome Materiale *</label>
+        <input type="hidden" id="m-gn-materiale-id" value="">
+        <input type="text" id="m-gn-materiale" autocomplete="off" placeholder="Cerca per nome o codifica..." oninput="searchGiacenzaNuovaMateriale()" onfocus="searchGiacenzaNuovaMateriale()" onblur="hideGiacenzaNuovaMateriale()">
+        <div class="dropdown-list" id="giacenza-nuova-dropdown" style="position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1.5px solid var(--accent);border-radius:10px;max-height:220px;overflow-y:auto;z-index:200;display:none;box-shadow:0 8px 24px rgba(57,224,244,0.15);"></div>
+      </div>
+      <div class="fg"><label>Giacenza *</label><input type="number" id="m-gn-giacenza"></div>
+    </div>
+    <div class="modal-info" id="m-gn-info">Seleziona un materiale dall'anagrafica e imposta la sua giacenza.</div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('modal-giacenza-nuova')">Annulla</button>
+      <button class="btn-primary" onclick="salvaGiacenzaNuova()">Salva giacenza</button>
+    </div>
+  </div>
+</div>
 <!-- MODAL ORDINE -->
 <div class="modal-overlay" id="modal-ordine">
   <div class="modal">
@@ -1940,11 +1960,78 @@ function apriFab(){
   if(activeTab==='anagrafica') apriAnagrafica();
   else if(activeTab==='ordini') apriOrdine();
   else if(activeTab==='consegne') apriConsegna();
-  else if(activeTab==='armadietto'){
-    document.querySelector('.tab-btn[data-tab="anagrafica"]').click();
-    setTimeout(apriAnagrafica,150);
-  }
+  else if(activeTab==='armadietto') apriGiacenzaNuova();
 }
+// ===========================================================
+// Nuova giacenza (Armadietto): inserisci materiale + giacenza
+// ===========================================================
+function apriGiacenzaNuova(){
+  document.getElementById('m-gn-materiale').value='';
+  document.getElementById('m-gn-materiale-id').value='';
+  document.getElementById('m-gn-giacenza').value='';
+  const info=document.getElementById('m-gn-info');
+  if(info) info.textContent="Seleziona un materiale dall'anagrafica e imposta la sua giacenza.";
+  const dd=document.getElementById('giacenza-nuova-dropdown'); if(dd) dd.style.display='none';
+  openModal('modal-giacenza-nuova');
+}
+function searchGiacenzaNuovaMateriale(){
+  const inp = document.getElementById('m-gn-materiale');
+  const dd = document.getElementById('giacenza-nuova-dropdown');
+  if(!inp || !dd) return;
+  const q = inp.value.trim().toUpperCase();
+  document.getElementById('m-gn-materiale-id').value = '';
+  const render = (arr) => arr.map(a =>
+    '<div class="catalog-item" onmousedown="selectGiacenzaNuovaMateriale('+a.id+')">'+
+      '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'+
+        (a.numeroCodifica ? '<span style="background:#cffafe;color:#155e75;border-radius:6px;padding:1px 8px;font-size:12px;font-weight:800;">'+escapeHtml(a.numeroCodifica)+'</span>' : '')+
+        '<span style="font-weight:700;font-size:13px;color:var(--text);">'+escapeHtml(a.tipologia)+'</span>'+
+      '</div>'+
+    '</div>'
+  ).join('');
+  if(!q){
+    if(document.activeElement === inp && state.anagrafica.length){
+      dd.innerHTML = render(state.anagrafica); dd.style.display = 'block';
+    } else { dd.style.display = 'none'; }
+    return;
+  }
+  const tokens = q.split(/\s+/).filter(Boolean);
+  const results = state.anagrafica.filter(a => {
+    const hay = ((a.numeroCodifica||'')+' '+a.tipologia+' '+(a.codice||'')+' '+(a.classe||'')).toUpperCase();
+    return tokens.every(t => hay.includes(t));
+  });
+  if(!results.length){
+    dd.innerHTML = '<div style="padding:14px;text-align:center;color:var(--text-muted);font-size:12px;font-weight:600;">Nessun materiale trovato</div>';
+    dd.style.display = 'block'; return;
+  }
+  dd.innerHTML = render(results); dd.style.display = 'block';
+}
+function hideGiacenzaNuovaMateriale(){
+  setTimeout(()=>{ const dd=document.getElementById('giacenza-nuova-dropdown'); if(dd) dd.style.display='none'; }, 200);
+}
+function selectGiacenzaNuovaMateriale(id){
+  const a = state.anagrafica.find(x=>x.id===id); if(!a) return;
+  document.getElementById('m-gn-materiale').value = a.tipologia;
+  document.getElementById('m-gn-materiale-id').value = id;
+  document.getElementById('giacenza-nuova-dropdown').style.display = 'none';
+  const attuale = state.armadietto[id] || 0;
+  const info=document.getElementById('m-gn-info');
+  if(info) info.innerHTML = 'Giacenza attuale: <b>'+attuale+'</b>. Il valore inserito sostituira\' quello attuale.';
+  const g=document.getElementById('m-gn-giacenza'); if(g) g.focus();
+}
+function salvaGiacenzaNuova(){
+  const matId = parseInt(document.getElementById('m-gn-materiale-id').value, 10);
+  const val = document.getElementById('m-gn-giacenza').value;
+  if(!matId || isNaN(matId)){ showAlert('Seleziona un materiale','err'); return; }
+  if(val === '' || isNaN(parseFloat(val))){ showAlert('Inserisci una giacenza valida','err'); return; }
+  const n = parseFloat(val);
+  if(n < 0){ showAlert('La giacenza non puo\' essere negativa','err'); return; }
+  state.armadietto[matId] = n;
+  saveState();
+  closeModal('modal-giacenza-nuova');
+  showSuccess('Giacenza salvata!');
+  filtra();
+}
+
 // ===========================================================
 // FAB Drag (mouse + touch) - default inline a fine layout,
 // trascinabile dovunque sul viewport, posizione persistita
