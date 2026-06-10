@@ -570,11 +570,6 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:13px;background:#cdf6f
     <div class="right-sticky">
       <div class="dual-card">
         <div class="dual-half">
-          <span class="dual-lbl">Totale Pcs</span>
-          <span class="dual-val" id="kpi-arm-tot">0</span>
-        </div>
-        <div class="dual-divider"></div>
-        <div class="dual-half">
           <span class="dual-lbl">Totale Armadietto</span>
           <span class="dual-val" id="kpi-arm-valore">0</span>
         </div>
@@ -991,6 +986,13 @@ function escapeHtml(s){
   return String(s==null?'':s).replace(/[&<>"']/g,c=>(
     {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
   ));
+}
+function fmtMigliaia(n){
+  const num = Math.round(parseFloat(n)||0);
+  const neg = num < 0;
+  let str = Math.abs(num).toString();
+  str = str.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return (neg ? '-' : '') + str;
 }
 function toTitleCase(s){
   if(s==null) return '';
@@ -2399,18 +2401,16 @@ function renderArmadietto(){
         '<td style="font-weight:700;">'+escapeHtml(a.tipologia)+'</td>'+
         '<td><code class="codice">'+escapeHtml(a.codice)+'</code></td>'+
         '<td>'+escapeHtml(a.classe||'\u2014')+'</td>'+
-        '<td><span class="stock-cell'+cls+'" id="stock-'+a.id+'" onclick="editStock('+a.id+')" title="Clicca per modifica rapida">'+stock+'</span></td>'+
+        '<td><span class="stock-cell'+cls+'" id="stock-'+a.id+'" onclick="editStock('+a.id+')" title="Clicca per modifica rapida">'+fmtMigliaia(stock)+'</span></td>'+
       '</tr>';
     }).join('');
   }
-  const tot=state.anagrafica.reduce((s,a)=>s+(state.armadietto[a.id]||0),0);
-  document.getElementById('kpi-arm-tot').textContent=tot;
   const valore = state.anagrafica.reduce((s,a)=>{
     const stock = state.armadietto[a.id]||0;
     const prezzo = (a.fornitori && a.fornitori.length) ? (parseFloat(a.fornitori[0].prezzo)||0) : 0;
     return s + stock * prezzo;
   }, 0);
-  document.getElementById('kpi-arm-valore').textContent = Math.round(valore).toLocaleString('it-IT')+'\u20ac';
+  document.getElementById('kpi-arm-valore').textContent = fmtMigliaia(valore)+'\u20ac';
   renderPie();
 }
 // ===========================================================
@@ -2422,6 +2422,7 @@ function renderPie(){
   if(!canvas||!legend) return;
   const ctx=canvas.getContext('2d');
   ctx.clearRect(0,0,200,200);
+  const totReale=state.anagrafica.reduce((s,a)=>s+(state.armadietto[a.id]||0),0);
   const data=state.anagrafica
     .map(a=>({nome:a.tipologia,codice:a.codice,qta:state.armadietto[a.id]||0}))
     .filter(d=>d.qta>0).sort((a,b)=>b.qta-a.qta);
@@ -2433,7 +2434,12 @@ function renderPie(){
   if(!total){
     ctx.fillStyle='#e8e8f0'; ctx.beginPath(); ctx.arc(100,100,90,0,Math.PI*2); ctx.fill();
     ctx.beginPath(); ctx.arc(100,100,44,0,Math.PI*2); ctx.fillStyle='#fff'; ctx.fill();
-    legend.innerHTML='<div style="font-size:12px;color:var(--text-muted);text-align:center">Nessuna giacenza</div>';
+    if(totReale!==0){
+      ctx.fillStyle='#1a1a2e'; ctx.font='bold 22px Montserrat,sans-serif';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(fmtMigliaia(totReale),100,100);
+    }
+    legend.innerHTML='<div style="font-size:12px;color:var(--text-muted);text-align:center">Nessuna giacenza positiva</div>';
     return;
   }
   let start=-Math.PI/2;
@@ -2451,12 +2457,12 @@ function renderPie(){
   ctx.fillStyle='#1a1a2e';
   ctx.font='bold 22px Montserrat,sans-serif';
   ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillText(total,100,100);
+  ctx.fillText(fmtMigliaia(totReale),100,100);
   legend.innerHTML='<div style="display:flex;flex-direction:column;gap:4px;text-align:left;font-size:11px;">'+
     top.map((d,i)=>'<div style="display:flex;align-items:center;gap:6px;">'+
       '<span style="width:12px;height:12px;border-radius:3px;background:'+COLORS[i%COLORS.length]+';flex-shrink:0;"></span>'+
       '<span style="flex:1;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escapeHtml(d.nome)+'</span>'+
-      '<span style="font-weight:800;">'+d.qta+'</span>'+
+      '<span style="font-weight:800;">'+fmtMigliaia(d.qta)+'</span>'+
     '</div>').join('')+'</div>';
 }
 function renderPieConsegne(){
