@@ -2407,6 +2407,7 @@ function renderArmadietto(){
   }
   const valore = state.anagrafica.reduce((s,a)=>{
     const stock = state.armadietto[a.id]||0;
+    if(stock === 0) return s;
     const prezzo = (a.fornitori && a.fornitori.length) ? (parseFloat(a.fornitori[0].prezzo)||0) : 0;
     return s + stock * prezzo;
   }, 0);
@@ -2422,13 +2423,13 @@ function renderPie(){
   if(!canvas||!legend) return;
   const ctx=canvas.getContext('2d');
   ctx.clearRect(0,0,200,200);
-  const totReale=state.anagrafica.reduce((s,a)=>s+(state.armadietto[a.id]||0),0);
-  const data=state.anagrafica
+  // solo materiali effettivamente presenti nell'armadietto (giacenza diversa da 0)
+  const presenti=state.anagrafica.filter(a=>(state.armadietto[a.id]||0)!==0);
+  const totReale=presenti.reduce((s,a)=>s+(state.armadietto[a.id]||0),0);
+  const data=presenti
     .map(a=>({nome:a.tipologia,codice:a.codice,qta:state.armadietto[a.id]||0}))
     .filter(d=>d.qta>0).sort((a,b)=>b.qta-a.qta);
-  const top=data.slice(0,8);
-  const altre=data.slice(8).reduce((s,d)=>s+d.qta,0);
-  if(altre>0) top.push({nome:'Altri',codice:'',qta:altre});
+  const top=data;
   const total=top.reduce((s,d)=>s+d.qta,0);
   const COLORS=['#39e0f4','#0ea5b8','#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#a78bfa'];
   if(!total){
