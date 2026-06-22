@@ -1499,10 +1499,11 @@ function apriPdfSingoloDa(d){
     '<div class="head"><div class="left">'+leftLines+'</div>'+
     '<div class="right"><div class="sup-title">SPTT.LE FORNITORE</div>'+supLines+'</div></div>'+
     '<table><thead><tr>'+
-      '<th>N\u00b0</th><th>Data</th><th>Nome Materiale</th><th>Qt\u00e0</th><th>Prezzo</th><th>Totale</th>'+
+      '<th>N\u00b0</th><th>Data</th><th>N\u00b0 Codifica</th><th>Nome Materiale</th><th>Qt\u00e0</th><th>Prezzo</th><th>Totale</th>'+
     '</tr></thead><tbody><tr>'+
       '<td><code class="codice">'+escapeHtml(d.numero||'')+'</code></td>'+
       '<td>'+formatDataIT(d.data||'')+'</td>'+
+      '<td><code class="codice">'+escapeHtml(d.numeroCodifica||'\u2014')+'</code></td>'+
       '<td><b>'+escapeHtml(d.materiale||'')+'</b></td>'+
       '<td><span class="badge">'+(d.qta||0)+'</span></td>'+
       '<td>\u20ac'+fmt(d.prezzo)+'</td>'+
@@ -1535,7 +1536,7 @@ function apriPdfData(){
   document.getElementById('m-pdfdata-a').value = t;
   openModal('modal-pdf-data');
 }
-function ordineToRiga(o){ return {numero:o.numero, data:o.data, materiale:o.materiale, qta:o.qta, prezzo:o.prezzo, totale:o.totale}; }
+function ordineToRiga(o){ return {numero:o.numero, data:o.data, numeroCodifica:o.numeroCodifica, materiale:o.materiale, qta:o.qta, prezzo:o.prezzo, totale:o.totale}; }
 // Builder PDF condiviso: riceve un elenco di righe ordine e un titolo
 function apriPdfMultiplo(righe, titolo){
   if(!righe || !righe.length){ showAlert('Nessuna riga da esportare','err'); return; }
@@ -1545,6 +1546,7 @@ function apriPdfMultiplo(righe, titolo){
     '<tr>'+
       '<td><code class="codice">'+escapeHtml(r.numero||'')+'</code></td>'+
       '<td>'+formatDataIT(r.data||'')+'</td>'+
+      '<td><code class="codice">'+escapeHtml(r.numeroCodifica||'\u2014')+'</code></td>'+
       '<td><b>'+escapeHtml(r.materiale||'')+'</b></td>'+
       '<td><span class="badge">'+(r.qta||0)+'</span></td>'+
       '<td>\u20ac'+fmt(r.prezzo)+'</td>'+
@@ -1570,9 +1572,9 @@ function apriPdfMultiplo(righe, titolo){
     '<div class="logo-wrap"><img src="'+LOGO_PDF+'"></div>'+
     '<div class="pdf-title">'+escapeHtml(titolo)+'</div>'+
     '<table><thead><tr>'+
-      '<th>N\u00b0</th><th>Data</th><th>Nome Materiale</th><th>Qt\u00e0</th><th>Prezzo</th><th>Totale</th>'+
+      '<th>N\u00b0</th><th>Data</th><th>N\u00b0 Codifica</th><th>Nome Materiale</th><th>Qt\u00e0</th><th>Prezzo</th><th>Totale</th>'+
     '</tr></thead><tbody>'+rows+'</tbody>'+
-    '<tfoot><tr><td colspan="5" style="text-align:right;">Totale ('+righe.length+' ordini)</td><td><span class="badge">\u20ac'+fmt(totale)+'</span></td></tr></tfoot>'+
+    '<tfoot><tr><td colspan="6" style="text-align:right;">Totale ('+righe.length+' ordini)</td><td><span class="badge">\u20ac'+fmt(totale)+'</span></td></tr></tfoot>'+
     '</table>'+
     '<scr'+'ipt>function go(){window.focus();window.print();}if(document.fonts&&document.fonts.ready){document.fonts.ready.then(function(){setTimeout(go,300);});}else{window.onload=function(){setTimeout(go,600);};}</scr'+'ipt>'+
     '</body></html>';
@@ -2445,7 +2447,7 @@ function esportaPdfOrdineNumero(gi){
   const d = {
     numero:g.numero, data:g.data, destinatario:g.destinatario,
     forn:{ nome:fornNome, indirizzo:info.indirizzo, cap:info.cap, citta:info.citta, nazione:info.nazione },
-    righe: g.lines.map(o=>({ numero:g.numero, data:o.data||g.data, materiale:o.materiale, qta:o.qta, prezzo:o.prezzo, totale:o.totale }))
+    righe: g.lines.map(o=>({ numero:g.numero, data:o.data||g.data, numeroCodifica:o.numeroCodifica, materiale:o.materiale, qta:o.qta, prezzo:o.prezzo, totale:o.totale }))
   };
   apriPdfOrdineCompleto(d);
   salvaInArchivioOrdine('Ordine '+(g.numero||''), d);
@@ -2465,6 +2467,7 @@ function apriPdfOrdineCompleto(d){
   const totQta = righe.reduce((acc,r)=> acc + (Number(r.qta)||0), 0);
   const rows = righe.map(r =>
     '<tr>'+
+      '<td><code class="codice">'+escapeHtml(r.numeroCodifica||'\u2014')+'</code></td>'+
       '<td><b>'+escapeHtml(r.materiale||'')+'</b></td>'+
       '<td><span class="badge">'+(r.qta||0)+'</span></td>'+
       '<td>\u20ac'+fmt(r.prezzo)+'</td>'+
@@ -2492,9 +2495,9 @@ function apriPdfOrdineCompleto(d){
     '<div class="head"><div class="left">'+leftLines+'</div>'+
     '<div class="right"><div class="sup-title">SPTT.LE FORNITORE</div>'+supLines+'</div></div>'+
     '<table><thead><tr>'+
-      '<th>Nome Materiale</th><th>Qt\u00e0</th><th>Prezzo</th><th>Totale</th>'+
+      '<th>N\u00b0 Codifica</th><th>Nome Materiale</th><th>Qt\u00e0</th><th>Prezzo</th><th>Totale</th>'+
     '</tr></thead><tbody>'+rows+'</tbody>'+
-    '<tfoot><tr><td style="text-align:right;">Totale ('+righe.length+' material'+(righe.length===1?'e':'i')+', Qt\u00e0 '+totQta+')</td><td></td><td></td><td><span class="badge">\u20ac'+fmt(totale)+'</span></td></tr></tfoot>'+
+    '<tfoot><tr><td colspan="4" style="text-align:right;">Totale ('+righe.length+' material'+(righe.length===1?'e':'i')+', Qt\u00e0 '+totQta+')</td><td><span class="badge">\u20ac'+fmt(totale)+'</span></td></tr></tfoot>'+
     '</table>'+
     '<scr'+'ipt>function go(){window.focus();window.print();}if(document.fonts&&document.fonts.ready){document.fonts.ready.then(function(){setTimeout(go,300);});}else{window.onload=function(){setTimeout(go,600);};}</scr'+'ipt>'+
     '</body></html>';
@@ -2504,7 +2507,7 @@ function apriPdfOrdineCompleto(d){
 }
 function salvaInArchivioOrdine(titolo, d){
   const a=getArchivio();
-  const righe = (d.righe||[]).map(r=>({ numero:d.numero, data:r.data||d.data, materiale:r.materiale, qta:r.qta, prezzo:r.prezzo, totale:r.totale }));
+  const righe = (d.righe||[]).map(r=>({ numero:d.numero, data:r.data||d.data, numeroCodifica:r.numeroCodifica, materiale:r.materiale, qta:r.qta, prezzo:r.prezzo, totale:r.totale }));
   a.unshift({ id:Date.now(), ts:new Date().toISOString(), titolo:titolo, tipo:'ordine', dati:d, righe:righe });
   if(a.length>100) a.length=100;
   setArchivioList(a);
