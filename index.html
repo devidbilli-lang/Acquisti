@@ -231,6 +231,14 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:13px;background:#cdf6f
 .dual-card .dual-divider{width:1px;background:rgba(255,255,255,0.5);align-self:stretch;}
 /* Compact status cards (Ordini sidebar) */
 .status-card{background:#fff;border:2px solid var(--accent);border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 0 12px rgba(57,224,244,0.4),0 0 28px rgba(57,224,244,0.15);}
+.status-card.clickable{cursor:pointer;transition:transform .08s,box-shadow .15s;}
+.status-card.clickable:hover{transform:translateY(-1px);}
+.status-card.card-active{outline:3px solid var(--accent2);outline-offset:2px;box-shadow:0 0 20px rgba(57,224,244,0.85),0 0 40px rgba(57,224,244,0.4);}
+.ord-master>td{background:rgba(57,224,244,0.07);font-weight:600;}
+.ord-detail>td{background:#fafdff;font-size:12px;}
+.ord-detail>td:nth-child(2){box-shadow:inset 5px 0 0 var(--accent2);}
+.btn-exp{background:var(--accent2);color:#fff;border:none;border-radius:7px;min-width:24px;height:24px;font-size:12px;cursor:pointer;vertical-align:middle;margin-right:5px;font-weight:800;line-height:1;padding:0 5px;}
+.btn-exp:hover{filter:brightness(1.1);}
 .status-card.cyan{background:linear-gradient(135deg,#39e0f4,#0ea5b8);border-color:#39e0f4;box-shadow:0 0 16px rgba(57,224,244,0.7),0 0 36px rgba(57,224,244,0.3);}
 .status-card.cyan .status-lbl{color:#fff;opacity:0.95;}
 .status-card.cyan .status-val{color:#fff;}
@@ -491,16 +499,16 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:13px;background:#cdf6f
       </table>
     </div>
     <div class="right-sticky">
-      <div class="status-card cyan">
+      <div class="status-card cyan clickable" id="card-ord-tot" onclick="filtraOrdiniStato(null)" title="Mostra tutti gli ordini">
         <span class="status-lbl">Totale Ordini</span>
         <span class="status-val" id="kpi-ordini-count">0</span>
       </div>
-      <div class="status-card neon-yellow">
+      <div class="status-card neon-yellow clickable" id="card-ord-aperti" onclick="filtraOrdiniStato('aperti')" title="Filtra solo ordini aperti">
         <span class="status-dot dot-yellow"></span>
         <span class="status-lbl">Ordini Aperti</span>
         <span class="status-val" id="kpi-ordini-aperti">0</span>
       </div>
-      <div class="status-card neon-green">
+      <div class="status-card neon-green clickable" id="card-ord-chiusi" onclick="filtraOrdiniStato('chiusi')" title="Filtra solo ordini chiusi">
         <span class="status-dot dot-green"></span>
         <span class="status-lbl">Ordini Chiusi</span>
         <span class="status-val" id="kpi-ordini-chiusi">0</span>
@@ -1591,12 +1599,12 @@ function generaPdfOrdiniData(){
 // Esporta in un unico PDF le righe selezionate con le caselle
 function esportaSelezionatiPdf(){
   const checks = Array.prototype.slice.call(document.querySelectorAll('#tb-ordini .ord-check:checked'));
-  if(!checks.length){ showAlert('Seleziona almeno una riga (casella a sinistra)','err'); return; }
-  const ids = checks.map(c => parseInt(c.dataset.id,10));
-  const list = ids.map(id => state.ordini.find(o=>o.id===id)).filter(Boolean)
+  if(!checks.length){ showAlert('Seleziona almeno un ordine (casella a sinistra)','err'); return; }
+  const numeri = checks.map(c => c.dataset.numero);
+  const list = state.ordini.filter(o => numeri.includes(String(o.numero==null?'':o.numero)))
     .sort((x,y)=> (x.data||'').localeCompare(y.data||'') || (x.numero||'').localeCompare(y.numero||''));
-  if(!list.length){ showAlert('Righe selezionate non trovate','err'); return; }
-  const titolo = 'Ordini selezionati ('+list.length+')';
+  if(!list.length){ showAlert('Ordini selezionati non trovati','err'); return; }
+  const titolo = 'Ordini selezionati ('+numeri.length+')';
   const righe = list.map(ordineToRiga);
   apriPdfMultiplo(righe, titolo);
   salvaInArchivio(titolo, righe);
@@ -1650,6 +1658,7 @@ function riapriEsportazione(id){
   const e=getArchivio().find(x=>x.id===id);
   if(!e){ showAlert('Documento non trovato','err'); return; }
   if(e.tipo==='singolo' && e.dati){ apriPdfSingoloDa(e.dati); }
+  else if(e.tipo==='ordine' && e.dati){ apriPdfOrdineCompleto(e.dati); }
   else { apriPdfMultiplo(e.righe||[], e.titolo||'Esportazione'); }
 }
 async function eliminaEsportazione(id){
@@ -2275,65 +2284,142 @@ function renderAnagrafica(){
     }).join('');
   }
 }
+let ordExpanded = new Set();
+let ordStatusFilter = null;
+let ordGroupsRender = [];
+function ordStato(lines){
+  let hasQta=false, tuttiCompleti=true;
+  lines.forEach(o=>{
+    const arr=(Array.isArray(o.ddt)?o.ddt:[]).reduce((s,d)=>s+(parseFloat(d.qta)||0),0);
+    if((o.qta||0)>0){ hasQta=true; if(arr < o.qta) tuttiCompleti=false; }
+  });
+  return (hasQta && tuttiCompleti) ? 'chiuso' : 'aperto';
+}
+function gruppiOrdini(){
+  const map = new Map();
+  state.ordini.forEach((o,idx)=>{
+    const k = o.numero==null ? '' : String(o.numero);
+    if(!map.has(k)) map.set(k, {numero:o.numero, data:o.data, destinatario:o.destinatario, lines:[], _idx:idx});
+    const g = map.get(k);
+    g.lines.push(o);
+    if(!g.data && o.data) g.data=o.data;
+    if(!g.destinatario && o.destinatario) g.destinatario=o.destinatario;
+    g._idx = idx;
+  });
+  const arr = Array.from(map.values());
+  arr.forEach(g=>{
+    g.qta = g.lines.reduce((s,o)=>s+(Number(o.qta)||0),0);
+    g.totale = g.lines.reduce((s,o)=>s+(Number(o.totale)||0),0);
+    g.arrivata = g.lines.reduce((s,o)=>s+((Array.isArray(o.ddt)?o.ddt:[]).reduce((a,d)=>a+(parseFloat(d.qta)||0),0)),0);
+    g.nDdt = g.lines.reduce((s,o)=>s+((Array.isArray(o.ddt)?o.ddt:[]).length),0);
+    const forns = Array.from(new Set(g.lines.map(o=>o.fornitore).filter(Boolean)));
+    g.fornitore = forns.length===1 ? forns[0] : (forns.length===0 ? '' : 'Vari');
+    g.fornitoriList = forns;
+    g.stato = ordStato(g.lines);
+    g.materiale = g.lines.length+' material'+(g.lines.length===1?'e':'i');
+    g.numeroCodifica = '';
+    g.prezzo = 0;
+  });
+  return arr;
+}
+function setOrdStatusCards(){
+  const ap=document.getElementById('card-ord-aperti');
+  const ch=document.getElementById('card-ord-chiusi');
+  const tt=document.getElementById('card-ord-tot');
+  if(ap){ ap.classList.toggle('card-active', ordStatusFilter==='aperti'); }
+  if(ch){ ch.classList.toggle('card-active', ordStatusFilter==='chiusi'); }
+  if(tt){ tt.classList.toggle('card-active', !ordStatusFilter); }
+}
+function filtraOrdiniStato(stato){
+  ordStatusFilter = (ordStatusFilter===stato) ? null : stato;
+  filtra();
+}
 function renderOrdini(){
   const fN=document.getElementById('f-o-numero').value.toLowerCase();
   const fM=document.getElementById('f-o-materiale').value.toLowerCase();
   const fD=document.getElementById('f-o-destinatario').value.toLowerCase();
   const fF=document.getElementById('f-o-fornitore').value.toLowerCase();
-  let rows=state.ordini.filter(o=>{
-    if(fN && !o.numero.toLowerCase().includes(fN)) return false;
-    if(fM && !(o.materiale.toLowerCase().includes(fM)||o.codice.toLowerCase().includes(fM)||(o.numeroCodifica||'').toLowerCase().includes(fM))) return false;
-    if(fD && !o.destinatario.toLowerCase().includes(fD)) return false;
-    if(fF && !o.fornitore.toLowerCase().includes(fF)) return false;
-    return true;
-  }).slice().reverse();
-  rows=applySort('ordini',rows);
-  const tb=document.getElementById('tb-ordini');
-  if(!rows.length){
-    tb.innerHTML='<tr><td colspan="12" class="empty">Nessun ordine</td></tr>';
-  } else {
-    tb.innerHTML=rows.map(o=>{
-      const ddtList = Array.isArray(o.ddt) ? o.ddt : [];
-      const arrivata = ddtList.reduce((s,d)=>s+(parseFloat(d.qta)||0),0);
-      const delta = o.qta - arrivata;
-      const isComplete = arrivata >= o.qta;
-      let ddtClass;
-      if(ddtList.length === 0) ddtClass = 'empty-ddt';
-      else if(isComplete) ddtClass = 'complete';
-      else ddtClass = 'partial';
-      const arrBig = '<span class="ddt-arr">'+arrivata+'</span>';
-      const ddtText = ddtList.length+' DDT \u00b7 '+arrBig+'/'+o.qta;
-      const deltaColor = isComplete ? 'delta-green' : 'delta-red';
-      const deltaContent = isComplete ? '\u2713' : '\u2212'+delta;
-      const deltaBadge = '<span class="ddt-delta '+deltaColor+'">'+deltaContent+'</span>';
-      return '<tr'+(isHL('ordini',o.id)?' class="row-hl"':'')+'>'+
-      '<td class="td-check"><input type="checkbox" class="ord-check" data-id="'+o.id+'"></td>'+
-      '<td style="white-space:nowrap;text-align:center;">'+
-        '<button class="btn-edit" onclick="modificaOrdine('+o.id+')" title="Modifica">\u270f\ufe0f</button>'+hlBtn('ordini',o.id)+'<button class="btn-pdf" onclick="esportaPdfOrdine('+o.id+')" title="Esporta PDF ordine">PDF</button>'+'<button class="btn-danger" onclick="eliminaOrdine('+o.id+')" style="margin-left:6px;vertical-align:middle;" title="Elimina">\u00d7</button>'+
-      '</td>'+
-      '<td><code class="codice">'+escapeHtml(o.numero)+'</code></td>'+
-      '<td>'+formatDataIT(o.data)+'</td>'+
-      '<td><code class="codice">'+escapeHtml(o.numeroCodifica||'\u2014')+'</code></td>'+
-      '<td><b>'+escapeHtml(o.materiale)+'</b><br><code class="codice">'+escapeHtml(o.codice)+'</code></td>'+
-      '<td>'+escapeHtml(o.destinatario)+'</td>'+
-      '<td>'+escapeHtml(o.fornitore)+'</td>'+
-      '<td><span class="badge badge-pink">'+o.qta+'</span></td>'+
-      '<td>\u20ac'+o.prezzo.toFixed(2)+'</td>'+
-      '<td><span class="badge">\u20ac'+o.totale.toFixed(2)+'</span></td>'+
-      '<td><span class="ddt-cell '+ddtClass+'" onclick="apriDdtModal('+o.id+')" title="Gestisci DDT">'+ddtText+'</span>'+deltaBadge+'</td>'+
-    '</tr>';
-    }).join('');
-  }
-  document.getElementById('kpi-ordini-count').textContent=state.ordini.length;
-  let aperti = 0, chiusi = 0;
-  state.ordini.forEach(o => {
-    const ddtList = Array.isArray(o.ddt) ? o.ddt : [];
-    const arrivata = ddtList.reduce((s,d)=>s+(parseFloat(d.qta)||0),0);
-    if(arrivata >= o.qta && o.qta > 0) chiusi++;
-    else aperti++;
-  });
+  const tuttiGruppi = gruppiOrdini();
+  let aperti=0, chiusi=0;
+  tuttiGruppi.forEach(g=>{ if(g.stato==='chiuso') chiusi++; else aperti++; });
+  document.getElementById('kpi-ordini-count').textContent = tuttiGruppi.length;
   document.getElementById('kpi-ordini-aperti').textContent = aperti;
   document.getElementById('kpi-ordini-chiusi').textContent = chiusi;
+  setOrdStatusCards();
+  let groups = tuttiGruppi.filter(g=>{
+    if(fN && !String(g.numero||'').toLowerCase().includes(fN)) return false;
+    if(fD && !String(g.destinatario||'').toLowerCase().includes(fD)) return false;
+    if(fF && !g.lines.some(o=>(o.fornitore||'').toLowerCase().includes(fF))) return false;
+    if(fM && !g.lines.some(o=> (o.materiale||'').toLowerCase().includes(fM) || (o.codice||'').toLowerCase().includes(fM) || (o.numeroCodifica||'').toLowerCase().includes(fM))) return false;
+    if(ordStatusFilter==='aperti' && g.stato!=='aperto') return false;
+    if(ordStatusFilter==='chiusi' && g.stato!=='chiuso') return false;
+    return true;
+  });
+  groups.sort((a,b)=> b._idx - a._idx);
+  groups = applySort('ordini', groups);
+  ordGroupsRender = groups;
+  const tb=document.getElementById('tb-ordini');
+  if(!groups.length){
+    tb.innerHTML='<tr><td colspan="12" class="empty">Nessun ordine</td></tr>';
+  } else {
+    tb.innerHTML = groups.map((g,gi)=>{
+      const aperto = g.stato!=='chiuso';
+      const exp = ordExpanded.has(String(g.numero));
+      const caret = exp ? '\u25be' : '\u25b8';
+      const statoBadge = aperto
+        ? '<span class="ddt-delta delta-red">Aperto</span>'
+        : '<span class="ddt-delta delta-green">Chiuso</span>';
+      const mDdtClass = (g.arrivata>=g.qta && g.qta>0) ? 'complete' : (g.nDdt===0 ? 'empty-ddt' : 'partial');
+      const master =
+      '<tr class="ord-master'+(aperto?'':' ord-chiuso')+'">'+
+      '<td class="td-check"><input type="checkbox" class="ord-check" data-numero="'+escapeHtml(String(g.numero||''))+'"></td>'+
+      '<td style="white-space:nowrap;text-align:center;">'+
+        '<button class="btn-exp" id="caret-'+gi+'" onclick="toggleOrdine('+gi+')" title="Mostra/nascondi materiali">'+caret+'</button>'+
+        '<button class="btn-pdf" onclick="esportaPdfOrdineNumero('+gi+')" title="Esporta PDF ordine completo">PDF</button>'+
+        '<button class="btn-danger" onclick="eliminaOrdineCompleto('+gi+')" style="margin-left:6px;vertical-align:middle;" title="Elimina intero ordine">\u00d7</button>'+
+      '</td>'+
+      '<td><code class="codice">'+escapeHtml(g.numero||'')+'</code><br>'+statoBadge+'</td>'+
+      '<td>'+formatDataIT(g.data)+'</td>'+
+      '<td>\u2014</td>'+
+      '<td><b>'+escapeHtml(g.materiale)+'</b></td>'+
+      '<td>'+escapeHtml(g.destinatario||'')+'</td>'+
+      '<td>'+escapeHtml(g.fornitore||'')+'</td>'+
+      '<td><span class="badge badge-pink">'+g.qta+'</span></td>'+
+      '<td>\u2014</td>'+
+      '<td><span class="badge">\u20ac'+g.totale.toFixed(2)+'</span></td>'+
+      '<td><span class="ddt-cell '+mDdtClass+'" onclick="toggleOrdine('+gi+')" title="Mostra/nascondi materiali">'+g.nDdt+' DDT \u00b7 '+g.arrivata+'/'+g.qta+'</span></td>'+
+      '</tr>';
+      const dets = g.lines.map(o=>{
+        const ddtList = Array.isArray(o.ddt)?o.ddt:[];
+        const arrivata = ddtList.reduce((s,d)=>s+(parseFloat(d.qta)||0),0);
+        const delta = o.qta - arrivata;
+        const isComplete = arrivata >= o.qta;
+        const ddtClass = ddtList.length===0?'empty-ddt':(isComplete?'complete':'partial');
+        const arrBig='<span class="ddt-arr">'+arrivata+'</span>';
+        const ddtText = ddtList.length+' DDT \u00b7 '+arrBig+'/'+o.qta;
+        const deltaColor = isComplete?'delta-green':'delta-red';
+        const deltaContent = isComplete?'\u2713':'\u2212'+delta;
+        const deltaBadge='<span class="ddt-delta '+deltaColor+'">'+deltaContent+'</span>';
+        return '<tr class="ord-detail'+(isHL('ordini',o.id)?' row-hl':'')+'" data-det-gi="'+gi+'"'+(exp?'':' style="display:none;"')+'>'+
+        '<td class="td-check"></td>'+
+        '<td style="white-space:nowrap;text-align:center;">'+
+          '<button class="btn-edit" onclick="modificaOrdine('+o.id+')" title="Modifica materiale">\u270f\ufe0f</button>'+hlBtn('ordini',o.id)+'<button class="btn-danger" onclick="eliminaOrdine('+o.id+')" style="margin-left:6px;vertical-align:middle;" title="Elimina materiale">\u00d7</button>'+
+        '</td>'+
+        '<td></td>'+
+        '<td></td>'+
+        '<td><code class="codice">'+escapeHtml(o.numeroCodifica||'\u2014')+'</code></td>'+
+        '<td><b>'+escapeHtml(o.materiale)+'</b><br><code class="codice">'+escapeHtml(o.codice)+'</code></td>'+
+        '<td></td>'+
+        '<td>'+escapeHtml(o.fornitore)+'</td>'+
+        '<td><span class="badge badge-pink">'+o.qta+'</span></td>'+
+        '<td>\u20ac'+o.prezzo.toFixed(2)+'</td>'+
+        '<td><span class="badge">\u20ac'+o.totale.toFixed(2)+'</span></td>'+
+        '<td><span class="ddt-cell '+ddtClass+'" onclick="apriDdtModal('+o.id+')" title="Gestisci DDT">'+ddtText+'</span>'+deltaBadge+'</td>'+
+        '</tr>';
+      }).join('');
+      return master + dets;
+    }).join('');
+  }
   const byF={};
   state.ordini.forEach(o=>{ byF[o.fornitore]=(byF[o.fornitore]||0)+o.totale; });
   const e=Object.entries(byF).sort((a,b)=>b[1]-a[1]);
@@ -2341,6 +2427,101 @@ function renderOrdini(){
   c.innerHTML = e.length
     ? e.map(([k,v])=>'<div class="list-row"><div class="info"><div class="nm">'+escapeHtml(k)+'</div></div><span class="qt">\u20ac'+v.toFixed(0)+'</span></div>').join('')
     : '<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:10px;">Nessun ordine</div>';
+}
+function toggleOrdine(gi){
+  const g = ordGroupsRender[gi]; if(!g) return;
+  const key = String(g.numero);
+  const exp = !ordExpanded.has(key);
+  if(exp) ordExpanded.add(key); else ordExpanded.delete(key);
+  document.querySelectorAll('#tb-ordini tr.ord-detail[data-det-gi="'+gi+'"]').forEach(r=>{ r.style.display = exp?'':'none'; });
+  const caret=document.getElementById('caret-'+gi); if(caret) caret.textContent = exp?'\u25be':'\u25b8';
+}
+function esportaPdfOrdineNumero(gi){
+  const g = ordGroupsRender[gi];
+  if(!g){ showAlert('Ordine non trovato','err'); return; }
+  const fornNome = (g.fornitoriList && g.fornitoriList.length===1) ? g.fornitoriList[0] : (g.lines[0] ? g.lines[0].fornitore : '');
+  const key = (fornNome||'').trim().toLowerCase();
+  const info = (state.fornitoriInfo && state.fornitoriInfo[key]) || {};
+  const d = {
+    numero:g.numero, data:g.data, destinatario:g.destinatario,
+    forn:{ nome:fornNome, indirizzo:info.indirizzo, cap:info.cap, citta:info.citta, nazione:info.nazione },
+    righe: g.lines.map(o=>({ numero:g.numero, data:o.data||g.data, materiale:o.materiale, qta:o.qta, prezzo:o.prezzo, totale:o.totale }))
+  };
+  apriPdfOrdineCompleto(d);
+  salvaInArchivioOrdine('Ordine '+(g.numero||''), d);
+}
+function apriPdfOrdineCompleto(d){
+  const forn = d.forn || {};
+  const righe = Array.isArray(d.righe) ? d.righe : [];
+  const fmt = (n)=> Number(n||0).toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const supLines = [forn.nome, forn.indirizzo, forn.cap, forn.citta, forn.nazione]
+    .filter(x => x && String(x).trim())
+    .map(x => '<div>'+escapeHtml(String(x))+'</div>').join('');
+  const leftLines =
+    '<div><span class="lbl">N\u00b0 Ordine:</span> '+escapeHtml(d.numero||'')+'</div>'+
+    '<div><span class="lbl">Data:</span> '+formatDataIT(d.data||'')+'</div>'+
+    (d.destinatario ? '<div><span class="lbl">Destinatario:</span> '+escapeHtml(d.destinatario)+'</div>' : '');
+  const totale = righe.reduce((acc,r)=> acc + (Number(r.totale)||0), 0);
+  const totQta = righe.reduce((acc,r)=> acc + (Number(r.qta)||0), 0);
+  const rows = righe.map(r =>
+    '<tr>'+
+      '<td><b>'+escapeHtml(r.materiale||'')+'</b></td>'+
+      '<td><span class="badge">'+(r.qta||0)+'</span></td>'+
+      '<td>\u20ac'+fmt(r.prezzo)+'</td>'+
+      '<td><span class="badge">\u20ac'+fmt(r.totale)+'</span></td>'+
+    '</tr>'
+  ).join('');
+  const doc =
+    '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Ordine '+escapeHtml(d.numero||'')+'</title>'+
+    '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">'+
+    '<style>@page{size:A4;margin:0;}*{box-sizing:border-box;}'+
+    'body{font-family:Montserrat,Arial,sans-serif;color:#111;margin:0;padding:16mm;font-size:13px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}'+
+    '.logo-wrap{text-align:center;margin-bottom:40px;}.logo-wrap img{width:64%;max-width:440px;height:auto;}'+
+    '.head{display:flex;justify-content:space-between;gap:30px;margin-bottom:26px;}'+
+    '.head>div{line-height:1.55;}.lbl{font-weight:bold;}.sup-title{font-weight:bold;margin-bottom:8px;}'+
+    'table{width:100%;border-collapse:collapse;margin-top:20px;table-layout:auto;}'+
+    'thead th{background:linear-gradient(135deg,#39e0f4,#0ea5b8);padding:10px 6px;text-align:center;font-size:11px;font-weight:800;letter-spacing:.3px;color:#fff;white-space:nowrap;}'+
+    'tbody td{padding:9px 6px;text-align:center;border-bottom:1px solid #e8e8f0;color:#1a1a2e;font-weight:500;font-size:11px;vertical-align:middle;}'+
+    'tbody tr:nth-child(even){background:#f8f8fd;}'+
+    'tfoot td{padding:11px 6px;font-weight:800;font-size:12px;border-top:2px solid #0ea5b8;color:#0c6b78;}'+
+    '.codice{font-family:Montserrat,Arial,sans-serif;font-size:10px;background:#cdf6fb;color:#0c6b78;padding:3px 7px;border-radius:4px;font-weight:700;letter-spacing:.3px;white-space:nowrap;}'+
+    '.badge{display:inline-block;padding:4px 11px;border-radius:20px;font-size:11px;font-weight:800;background:#cdf6fb;color:#0c6b78;}'+
+    '</style></head>'+
+    '<body>'+
+    '<div class="logo-wrap"><img src="'+LOGO_PDF+'"></div>'+
+    '<div class="head"><div class="left">'+leftLines+'</div>'+
+    '<div class="right"><div class="sup-title">SPTT.LE FORNITORE</div>'+supLines+'</div></div>'+
+    '<table><thead><tr>'+
+      '<th>Nome Materiale</th><th>Qt\u00e0</th><th>Prezzo</th><th>Totale</th>'+
+    '</tr></thead><tbody>'+rows+'</tbody>'+
+    '<tfoot><tr><td style="text-align:right;">Totale ('+righe.length+' material'+(righe.length===1?'e':'i')+', Qt\u00e0 '+totQta+')</td><td></td><td></td><td><span class="badge">\u20ac'+fmt(totale)+'</span></td></tr></tfoot>'+
+    '</table>'+
+    '<scr'+'ipt>function go(){window.focus();window.print();}if(document.fonts&&document.fonts.ready){document.fonts.ready.then(function(){setTimeout(go,300);});}else{window.onload=function(){setTimeout(go,600);};}</scr'+'ipt>'+
+    '</body></html>';
+  const w = window.open('', '_blank');
+  if(!w){ showAlert('Abilita i popup del browser per esportare il PDF','err'); return; }
+  w.document.open(); w.document.write(doc); w.document.close();
+}
+function salvaInArchivioOrdine(titolo, d){
+  const a=getArchivio();
+  const righe = (d.righe||[]).map(r=>({ numero:d.numero, data:r.data||d.data, materiale:r.materiale, qta:r.qta, prezzo:r.prezzo, totale:r.totale }));
+  a.unshift({ id:Date.now(), ts:new Date().toISOString(), titolo:titolo, tipo:'ordine', dati:d, righe:righe });
+  if(a.length>100) a.length=100;
+  setArchivioList(a);
+}
+async function eliminaOrdineCompleto(gi){
+  const g = ordGroupsRender[gi]; if(!g) return;
+  if(!await showConfirm('Eliminare l\'intero ordine '+(g.numero||'')+' ('+g.lines.length+' material'+(g.lines.length===1?'e':'i')+')? La giacenza dei DDT gia\' caricati verra\' ridotta.','Elimina intero ordine')) return;
+  showSpinner('Eliminazione ordine...');
+  setTimeout(()=>{
+    const ids = new Set(g.lines.map(o=>o.id));
+    g.lines.forEach(o=>{
+      const arrivata = (Array.isArray(o.ddt)?o.ddt:[]).reduce((acc,d)=>acc+(parseFloat(d.qta)||0),0);
+      if(o.materialeId!=null) state.armadietto[o.materialeId] = (state.armadietto[o.materialeId]||0) - arrivata;
+    });
+    state.ordini = state.ordini.filter(o=>!ids.has(o.id));
+    saveState(); showSuccess('Ordine eliminato!'); filtra();
+  }, 350);
 }
 function renderConsegne(){
   const fL=document.getElementById('f-c-linea').value.toLowerCase();
