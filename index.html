@@ -2497,7 +2497,7 @@ function apriPdfOrdineCompleto(d){
     '<table><thead><tr>'+
       '<th>N\u00b0 Codifica</th><th>Nome Materiale</th><th>Qt\u00e0</th><th>Prezzo</th><th>Totale</th>'+
     '</tr></thead><tbody>'+rows+'</tbody>'+
-    '<tfoot><tr><td colspan="4" style="text-align:right;">Totale ('+righe.length+' material'+(righe.length===1?'e':'i')+', Qt\u00e0 '+totQta+')</td><td><span class="badge">\u20ac'+fmt(totale)+'</span></td></tr></tfoot>'+
+    '<tfoot><tr><td colspan="4" style="border-top:none;"></td><td><span style="display:inline-block;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:800;background:#fff3b0;color:#7a5d00;">\u20ac'+fmt(totale)+'</span></td></tr></tfoot>'+
     '</table>'+
     '<scr'+'ipt>function go(){window.focus();window.print();}if(document.fonts&&document.fonts.ready){document.fonts.ready.then(function(){setTimeout(go,300);});}else{window.onload=function(){setTimeout(go,600);};}</scr'+'ipt>'+
     '</body></html>';
