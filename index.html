@@ -2609,8 +2609,7 @@ function apriPdfOrdineCompleto(d){
     .map(x => '<div>'+escapeHtml(String(x))+'</div>').join('');
   const leftLines =
     '<div><span class="lbl">N\u00b0 Ordine:</span> '+escapeHtml(d.numero||'')+'</div>'+
-    '<div><span class="lbl">Data:</span> '+formatDataIT(d.data||'')+'</div>'+
-    (d.destinatario ? '<div><span class="lbl">Destinatario:</span> '+escapeHtml(d.destinatario)+'</div>' : '');
+    '<div><span class="lbl">Data:</span> '+formatDataIT(d.data||'')+'</div>';
   const totale = righe.reduce((acc,r)=> acc + (Number(r.totale)||0), 0);
   const totQta = righe.reduce((acc,r)=> acc + (Number(r.qta)||0), 0);
   const rows = righe.map(r =>
@@ -2629,7 +2628,7 @@ function apriPdfOrdineCompleto(d){
     'body{font-family:Montserrat,Arial,sans-serif;color:#111;margin:0;padding:16mm;font-size:13px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}'+
     '.logo-wrap{text-align:center;margin-bottom:40px;}.logo-wrap img{width:64%;max-width:440px;height:auto;}'+
     '.head{display:flex;justify-content:space-between;gap:30px;margin-bottom:26px;}'+
-    '.head>div{line-height:1.55;}.lbl{font-weight:bold;}.sup-title{font-weight:bold;margin-bottom:8px;}'+
+    '.head>div{line-height:1.6;font-size:16px;}.lbl{font-weight:bold;}.sup-title{font-weight:bold;margin-bottom:8px;font-size:16px;}'+
     'table{width:100%;border-collapse:collapse;margin-top:20px;table-layout:auto;}'+
     'thead th{background:linear-gradient(135deg,#39e0f4,#0ea5b8);padding:10px 6px;text-align:center;font-size:11px;font-weight:800;letter-spacing:.3px;color:#fff;white-space:nowrap;}'+
     'tbody td{padding:9px 6px;text-align:center;border-bottom:1px solid #e8e8f0;color:#1a1a2e;font-weight:500;font-size:11px;vertical-align:middle;}'+
