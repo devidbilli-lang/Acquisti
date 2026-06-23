@@ -487,7 +487,6 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:13px;background:#cdf6f
     </div>
     <button class="btn-pdf-data" onclick="apriPdfData()" title="Esporta in PDF gli ordini per data">PDF per data</button>
     <button class="btn-pdf-data" onclick="esportaSelezionatiPdf()" title="Esporta in PDF le righe selezionate">PDF selezionati</button>
-    <button class="btn-mail-data" onclick="condividiSelezionatiPdf()" title="Invia per email o salva i selezionati da allegare">✉ Email selez.</button>
     <button class="btn-secondary" onclick="apriArchivio()" title="Documenti PDF salvati su questo dispositivo">Archivio PDF</button>
   </div>
   <div class="layout">
@@ -659,7 +658,6 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:13px;background:#cdf6f
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeModal('modal-pdf-data')">Annulla</button>
       <button class="btn-pdf" onclick="generaPdfOrdiniData()" style="padding:9px 16px;">Genera PDF</button>
-      <button class="btn-mail" onclick="condividiPdfData()" style="padding:9px 16px;">✉ Email</button>
     </div>
   </div>
 </div>
@@ -1783,7 +1781,6 @@ function condividiSelezionatiPdf(){
   var titolo = 'Ordini selezionati ('+numeri.length+')';
   eseguiCondivisione({kind:'multi', righe:list.map(ordineToRiga), titolo:titolo}, titolo);
 }
-setTimeout(function(){ if(typeof loadJsPDF==='function') loadJsPDF().catch(function(){}); }, 6000);
 function apriArchivio(){ renderArchivioList(); openModal('modal-archivio'); }
 function renderArchivioList(){
   const a=getArchivio();
@@ -2528,7 +2525,7 @@ function renderOrdini(){
       '<td class="td-check"><input type="checkbox" class="ord-check" data-numero="'+escapeHtml(String(g.numero||''))+'"></td>'+
       '<td style="white-space:nowrap;text-align:center;">'+
         '<button class="btn-exp" id="caret-'+gi+'" onclick="toggleOrdine('+gi+')" title="Mostra/nascondi materiali">'+caret+'</button>'+
-        '<button class="btn-pdf" onclick="esportaPdfOrdineNumero('+gi+')" title="Esporta PDF ordine completo">PDF</button>'+'<button class="btn-mail" onclick="condividiPdfOrdine('+gi+')" title="Invia per email (telefono) o salva il PDF da allegare (desktop)" style="margin-left:4px;">\u2709</button>'+
+        '<button class="btn-pdf" onclick="esportaPdfOrdineNumero('+gi+')" title="Esporta PDF ordine completo">PDF</button>'+
         '<button class="btn-danger" onclick="eliminaOrdineCompleto('+gi+')" style="margin-left:6px;vertical-align:middle;" title="Elimina intero ordine">\u00d7</button>'+
       '</td>'+
       '<td><code class="codice">'+escapeHtml(g.numero||'')+'</code><br>'+statoBadge+'</td>'+
@@ -2648,7 +2645,7 @@ function apriPdfOrdineCompleto(d){
     '<table><thead><tr>'+
       '<th>N\u00b0 Codifica</th><th>Nome Materiale</th><th>Qt\u00e0</th><th>Prezzo</th><th>Totale</th>'+
     '</tr></thead><tbody>'+rows+'</tbody>'+
-    '<tfoot><tr><td colspan="4" style="border-top:none;"></td><td><span style="display:inline-block;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:800;background:#fff3b0;color:#7a5d00;">\u20ac'+fmt(totale)+'</span></td></tr></tfoot>'+
+    '<tfoot><tr><td colspan="4" style="border-top:none;"></td><td style="text-align:center;"><span style="display:inline-block;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:800;background:#fff3b0;color:#7a5d00;">\u20ac'+fmt(totale)+'</span></td></tr></tfoot>'+
     '</table>'+
     '<scr'+'ipt>function go(){window.focus();window.print();}if(document.fonts&&document.fonts.ready){document.fonts.ready.then(function(){setTimeout(go,300);});}else{window.onload=function(){setTimeout(go,600);};}</scr'+'ipt>'+
     '</body></html>';
