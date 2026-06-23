@@ -483,6 +483,7 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:13px;background:#cdf6f
     </div>
     <button class="btn-pdf-data" onclick="apriPdfData()" title="Esporta in PDF gli ordini per data">PDF per data</button>
     <button class="btn-pdf-data" onclick="esportaSelezionatiPdf()" title="Esporta in PDF le righe selezionate">PDF selezionati</button>
+    <button class="btn-pdf-data" onclick="condividiSelezionatiPdf()" title="Invia per email / Condividi i selezionati">✉ Email selez.</button>
     <button class="btn-secondary" onclick="apriArchivio()" title="Documenti PDF salvati su questo dispositivo">Archivio PDF</button>
   </div>
   <div class="layout">
@@ -654,6 +655,7 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:13px;background:#cdf6f
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeModal('modal-pdf-data')">Annulla</button>
       <button class="btn-pdf" onclick="generaPdfOrdiniData()" style="padding:9px 16px;">Genera PDF</button>
+      <button class="btn-pdf" onclick="condividiPdfData()" style="padding:9px 16px;">✉ Email</button>
     </div>
   </div>
 </div>
@@ -1633,6 +1635,140 @@ function salvaInArchivioSingolo(titolo, d){
   if(a.length>100) a.length=100;
   setArchivioList(a);
 }
+function loadScript(src){
+  return new Promise(function(res,rej){
+    var sc=document.createElement('script'); sc.src=src;
+    sc.onload=function(){res();}; sc.onerror=function(){rej(new Error('Caricamento non riuscito: '+src));};
+    document.head.appendChild(sc);
+  });
+}
+async function loadJsPDF(){
+  if(window.jspdf && window.jspdf.jsPDF && window.jspdf.jsPDF.API && window.jspdf.jsPDF.API.autoTable) return;
+  if(!(window.jspdf && window.jspdf.jsPDF)) await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+  if(!(window.jspdf && window.jspdf.jsPDF && window.jspdf.jsPDF.API && window.jspdf.jsPDF.API.autoTable)) await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js');
+  if(!(window.jspdf && window.jspdf.jsPDF)) throw new Error('jsPDF non disponibile');
+}
+function buildPdfBlob(spec){
+  var jsPDF = window.jspdf.jsPDF;
+  var doc = new jsPDF({unit:'mm', format:'a4', orientation:'portrait'});
+  var fmt = function(n){ return Number(n||0).toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2}); };
+  var logoW = 110, logoH = 26;
+  try{ var p=doc.getImageProperties(LOGO_PDF); if(p && p.width && p.height) logoH = logoW * p.height / p.width; }catch(e){}
+  try{ doc.addImage(LOGO_PDF, 'JPEG', (210-logoW)/2, 12, logoW, logoH); }catch(e){}
+  var y = 12 + logoH + 12;
+  if(spec.kind==='ordine'){
+    var d = spec.d || {}; var forn = d.forn || {};
+    doc.setFontSize(10);
+    var lineLR = function(x,yy,label,value){
+      doc.setFont('helvetica','bold'); doc.text(label, x, yy);
+      var w = doc.getTextWidth(label);
+      doc.setFont('helvetica','normal'); doc.text(' '+(value==null?'':String(value)), x+w, yy);
+    };
+    lineLR(14, y, 'N. Ordine:', d.numero||'');
+    lineLR(14, y+5.5, 'Data:', formatDataIT(d.data||''));
+    if(d.destinatario) lineLR(14, y+11, 'Destinatario:', d.destinatario);
+    doc.setFont('helvetica','bold'); doc.text('SPTT.LE FORNITORE', 196, y, {align:'right'});
+    doc.setFont('helvetica','normal');
+    var sup=[forn.nome,forn.indirizzo,forn.cap,forn.citta,forn.nazione].filter(function(x){return x && String(x).trim();});
+    var sy=y+5.5; sup.forEach(function(line){ doc.text(String(line), 196, sy, {align:'right'}); sy+=5; });
+    var startY = Math.max(y+16, sy+2);
+    var righe = Array.isArray(d.righe)?d.righe:[];
+    var total = righe.reduce(function(s,r){return s+(Number(r.totale)||0);},0);
+    doc.autoTable({
+      startY: startY,
+      head: [['N. Codifica','Nome Materiale','Qta','Prezzo','Totale']],
+      body: righe.map(function(r){ return [ r.numeroCodifica||'-', r.materiale||'', String(r.qta||0), '\u20ac'+fmt(r.prezzo), '\u20ac'+fmt(r.totale) ]; }),
+      foot: [[ {content:'', colSpan:4, styles:{fillColor:[255,255,255]}}, {content:'\u20ac'+fmt(total), styles:{fillColor:[255,243,176], textColor:[122,93,0], fontStyle:'bold'}} ]],
+      styles:{font:'helvetica', fontSize:9, halign:'center', valign:'middle', cellPadding:2.4, lineColor:[230,230,240], lineWidth:0.1},
+      headStyles:{fillColor:[14,165,184], textColor:255, fontStyle:'bold'},
+      columnStyles:{1:{halign:'left', fontStyle:'bold'}},
+      alternateRowStyles:{fillColor:[248,248,253]},
+      margin:{left:14, right:14}
+    });
+  } else {
+    doc.setFont('helvetica','bold'); doc.setFontSize(13);
+    doc.text(String(spec.titolo||'Esportazione'), 105, y, {align:'center'});
+    var righe2 = Array.isArray(spec.righe)?spec.righe:[];
+    var total2 = righe2.reduce(function(s,r){return s+(Number(r.totale)||0);},0);
+    doc.autoTable({
+      startY: y+6,
+      head: [['N.','Data','N. Codifica','Nome Materiale','Qta','Prezzo','Totale']],
+      body: righe2.map(function(r){ return [ r.numero||'', formatDataIT(r.data||''), r.numeroCodifica||'-', r.materiale||'', String(r.qta||0), '\u20ac'+fmt(r.prezzo), '\u20ac'+fmt(r.totale) ]; }),
+      foot: [[ {content:'Totale ('+righe2.length+' righe)', colSpan:6, styles:{halign:'right', fontStyle:'bold'}}, {content:'\u20ac'+fmt(total2), styles:{fillColor:[205,246,251], textColor:[12,107,120], fontStyle:'bold'}} ]],
+      styles:{font:'helvetica', fontSize:8.5, halign:'center', valign:'middle', cellPadding:2, lineColor:[230,230,240], lineWidth:0.1},
+      headStyles:{fillColor:[14,165,184], textColor:255, fontStyle:'bold'},
+      columnStyles:{3:{halign:'left', fontStyle:'bold'}},
+      alternateRowStyles:{fillColor:[248,248,253]},
+      margin:{left:10, right:10}
+    });
+  }
+  return doc.output('blob');
+}
+async function sharePdfBlob(blob, filename){
+  try{
+    var file = new File([blob], filename, {type:'application/pdf'});
+    if(navigator.canShare && navigator.canShare({files:[file]}) && navigator.share){
+      await navigator.share({files:[file], title:filename.replace(/\.pdf$/i,'')});
+      return;
+    }
+  }catch(e){
+    if(e && e.name==='AbortError') return;
+  }
+  var url = URL.createObjectURL(blob);
+  var a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 8000);
+  var sub = encodeURIComponent(filename.replace(/\.pdf$/i,''));
+  var body = encodeURIComponent('In allegato il PDF (e stato scaricato sul dispositivo: allegalo a questa email).');
+  setTimeout(function(){ try{ window.location.href='mailto:?subject='+sub+'&body='+body; }catch(e){} }, 500);
+}
+async function eseguiCondivisione(spec, nomeBase){
+  try{
+    showSpinner('Preparazione PDF...');
+    await loadJsPDF();
+    var blob = buildPdfBlob(spec);
+    hideSpinner();
+    var fn = String(nomeBase||'documento').replace(/[\\/:*?"<>|]+/g,'_').slice(0,80)+'.pdf';
+    await sharePdfBlob(blob, fn);
+  }catch(e){
+    hideSpinner();
+    showAlert('Condivisione non riuscita: '+((e&&e.message)||e),'err');
+  }
+}
+function condividiPdfOrdine(gi){
+  var g = ordGroupsRender[gi];
+  if(!g){ showAlert('Ordine non trovato','err'); return; }
+  var fornNome = (g.fornitoriList && g.fornitoriList.length===1) ? g.fornitoriList[0] : (g.lines[0] ? g.lines[0].fornitore : '');
+  var key = (fornNome||'').trim().toLowerCase();
+  var info = (state.fornitoriInfo && state.fornitoriInfo[key]) || {};
+  var d = {
+    numero:g.numero, data:g.data, destinatario:g.destinatario,
+    forn:{ nome:fornNome, indirizzo:info.indirizzo, cap:info.cap, citta:info.citta, nazione:info.nazione },
+    righe: g.lines.map(function(o){ return { numeroCodifica:o.numeroCodifica, materiale:o.materiale, qta:o.qta, prezzo:o.prezzo, totale:o.totale }; })
+  };
+  eseguiCondivisione({kind:'ordine', d:d}, 'Ordine '+(g.numero||''));
+}
+function condividiPdfData(){
+  var da = document.getElementById('pdf-data-da').value;
+  var a = document.getElementById('pdf-data-a').value;
+  if(!da || !a){ showAlert('Seleziona entrambe le date','err'); return; }
+  var list = state.ordini.filter(function(o){ return o.data && o.data>=da && o.data<=a; })
+    .sort(function(x,y){ return (x.data||'').localeCompare(y.data||'') || (String(x.numero||'')).localeCompare(String(y.numero||'')); });
+  if(!list.length){ showAlert('Nessun ordine nel periodo selezionato','err'); return; }
+  closeModal('modal-pdf-data');
+  var titolo = 'Ordini dal '+formatDataIT(da)+' al '+formatDataIT(a);
+  eseguiCondivisione({kind:'multi', righe:list.map(ordineToRiga), titolo:titolo}, titolo);
+}
+function condividiSelezionatiPdf(){
+  var checks = Array.prototype.slice.call(document.querySelectorAll('#tb-ordini .ord-check:checked'));
+  if(!checks.length){ showAlert('Seleziona almeno un ordine (casella a sinistra)','err'); return; }
+  var numeri = checks.map(function(c){ return c.dataset.numero; });
+  var list = state.ordini.filter(function(o){ return numeri.indexOf(String(o.numero==null?'':o.numero))>=0; })
+    .sort(function(x,y){ return (x.data||'').localeCompare(y.data||'') || (String(x.numero||'')).localeCompare(String(y.numero||'')); });
+  if(!list.length){ showAlert('Ordini selezionati non trovati','err'); return; }
+  var titolo = 'Ordini selezionati ('+numeri.length+')';
+  eseguiCondivisione({kind:'multi', righe:list.map(ordineToRiga), titolo:titolo}, titolo);
+}
+setTimeout(function(){ if(typeof loadJsPDF==='function') loadJsPDF().catch(function(){}); }, 6000);
 function apriArchivio(){ renderArchivioList(); openModal('modal-archivio'); }
 function renderArchivioList(){
   const a=getArchivio();
@@ -2377,7 +2513,7 @@ function renderOrdini(){
       '<td class="td-check"><input type="checkbox" class="ord-check" data-numero="'+escapeHtml(String(g.numero||''))+'"></td>'+
       '<td style="white-space:nowrap;text-align:center;">'+
         '<button class="btn-exp" id="caret-'+gi+'" onclick="toggleOrdine('+gi+')" title="Mostra/nascondi materiali">'+caret+'</button>'+
-        '<button class="btn-pdf" onclick="esportaPdfOrdineNumero('+gi+')" title="Esporta PDF ordine completo">PDF</button>'+
+        '<button class="btn-pdf" onclick="esportaPdfOrdineNumero('+gi+')" title="Esporta PDF ordine completo">PDF</button>'+'<button class="btn-pdf" onclick="condividiPdfOrdine('+gi+')" title="Invia ordine per email / Condividi" style="margin-left:4px;">\u2709</button>'+
         '<button class="btn-danger" onclick="eliminaOrdineCompleto('+gi+')" style="margin-left:6px;vertical-align:middle;" title="Elimina intero ordine">\u00d7</button>'+
       '</td>'+
       '<td><code class="codice">'+escapeHtml(g.numero||'')+'</code><br>'+statoBadge+'</td>'+
