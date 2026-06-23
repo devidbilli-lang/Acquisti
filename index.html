@@ -171,6 +171,10 @@ tr.row-hl>td{background:#fff7b8 !important;}
 .btn-pdf:hover{background:linear-gradient(135deg,rgba(255,198,102,1),rgba(255,198,102,0.75));}
 .btn-pdf-data{background:linear-gradient(135deg,rgba(255,198,102,0.92),rgba(255,198,102,0.60));backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:#1a1a2e;border:1px solid rgba(214,150,40,0.55);border-radius:10px;font-size:12px;font-weight:800;letter-spacing:.3px;cursor:pointer;padding:9px 16px;font-family:'Montserrat',sans-serif;white-space:nowrap;box-shadow:inset 0 1px 0 rgba(255,255,255,0.55),0 2px 8px rgba(255,198,102,0.35);}
 .btn-pdf-data:hover{background:linear-gradient(135deg,rgba(255,198,102,1),rgba(255,198,102,0.75));}
+.btn-mail{background:linear-gradient(135deg,rgba(57,224,244,0.92),rgba(57,224,244,0.55));backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:#08323a;border:1px solid rgba(14,165,184,0.6);border-radius:8px;font-size:11px;font-weight:800;letter-spacing:.5px;cursor:pointer;padding:5px 9px;line-height:1;margin-left:6px;vertical-align:middle;box-shadow:inset 0 1px 0 rgba(255,255,255,0.55),0 2px 6px rgba(57,224,244,0.35);}
+.btn-mail:hover{background:linear-gradient(135deg,rgba(57,224,244,1),rgba(57,224,244,0.72));}
+.btn-mail-data{background:linear-gradient(135deg,rgba(57,224,244,0.92),rgba(57,224,244,0.55));backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:#08323a;border:1px solid rgba(14,165,184,0.6);border-radius:10px;font-size:12px;font-weight:800;letter-spacing:.3px;cursor:pointer;padding:9px 16px;font-family:'Montserrat',sans-serif;white-space:nowrap;box-shadow:inset 0 1px 0 rgba(255,255,255,0.55),0 2px 8px rgba(57,224,244,0.35);}
+.btn-mail-data:hover{background:linear-gradient(135deg,rgba(57,224,244,1),rgba(57,224,244,0.72));}
 .th-check,.td-check{width:38px;text-align:center;}
 .ord-check,#ord-check-all{width:16px;height:16px;cursor:pointer;accent-color:var(--accent2);}
 .archivio-list{max-height:52vh;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin:6px 0 14px;}
@@ -483,7 +487,7 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:13px;background:#cdf6f
     </div>
     <button class="btn-pdf-data" onclick="apriPdfData()" title="Esporta in PDF gli ordini per data">PDF per data</button>
     <button class="btn-pdf-data" onclick="esportaSelezionatiPdf()" title="Esporta in PDF le righe selezionate">PDF selezionati</button>
-    <button class="btn-pdf-data" onclick="condividiSelezionatiPdf()" title="Invia per email / Condividi i selezionati">✉ Email selez.</button>
+    <button class="btn-mail-data" onclick="condividiSelezionatiPdf()" title="Invia per email / Condividi i selezionati">✉ Email selez.</button>
     <button class="btn-secondary" onclick="apriArchivio()" title="Documenti PDF salvati su questo dispositivo">Archivio PDF</button>
   </div>
   <div class="layout">
@@ -655,7 +659,7 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:13px;background:#cdf6f
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeModal('modal-pdf-data')">Annulla</button>
       <button class="btn-pdf" onclick="generaPdfOrdiniData()" style="padding:9px 16px;">Genera PDF</button>
-      <button class="btn-pdf" onclick="condividiPdfData()" style="padding:9px 16px;">✉ Email</button>
+      <button class="btn-mail" onclick="condividiPdfData()" style="padding:9px 16px;">✉ Email</button>
     </div>
   </div>
 </div>
@@ -1719,7 +1723,7 @@ async function sharePdfBlob(blob, filename){
   setTimeout(function(){ URL.revokeObjectURL(url); }, 8000);
   var sub = encodeURIComponent(filename.replace(/\.pdf$/i,''));
   var body = encodeURIComponent('In allegato il PDF (e stato scaricato sul dispositivo: allegalo a questa email).');
-  setTimeout(function(){ try{ window.location.href='mailto:?subject='+sub+'&body='+body; }catch(e){} }, 500);
+  try{ window.open('https://mail.google.com/mail/?view=cm&fs=1&su='+sub+'&body='+body, '_blank'); }catch(e){}
 }
 async function eseguiCondivisione(spec, nomeBase){
   try{
@@ -2513,7 +2517,7 @@ function renderOrdini(){
       '<td class="td-check"><input type="checkbox" class="ord-check" data-numero="'+escapeHtml(String(g.numero||''))+'"></td>'+
       '<td style="white-space:nowrap;text-align:center;">'+
         '<button class="btn-exp" id="caret-'+gi+'" onclick="toggleOrdine('+gi+')" title="Mostra/nascondi materiali">'+caret+'</button>'+
-        '<button class="btn-pdf" onclick="esportaPdfOrdineNumero('+gi+')" title="Esporta PDF ordine completo">PDF</button>'+'<button class="btn-pdf" onclick="condividiPdfOrdine('+gi+')" title="Invia ordine per email / Condividi" style="margin-left:4px;">\u2709</button>'+
+        '<button class="btn-pdf" onclick="esportaPdfOrdineNumero('+gi+')" title="Esporta PDF ordine completo">PDF</button>'+'<button class="btn-mail" onclick="condividiPdfOrdine('+gi+')" title="Invia ordine per email / Condividi" style="margin-left:4px;">\u2709</button>'+
         '<button class="btn-danger" onclick="eliminaOrdineCompleto('+gi+')" style="margin-left:6px;vertical-align:middle;" title="Elimina intero ordine">\u00d7</button>'+
       '</td>'+
       '<td><code class="codice">'+escapeHtml(g.numero||'')+'</code><br>'+statoBadge+'</td>'+
