@@ -2643,20 +2643,22 @@ function apriPdfOrdineCompleto(d){
     'tfoot td{padding:11px 6px;font-weight:800;font-size:12px;border-top:2px solid #0ea5b8;color:#0c6b78;}'+
     '.codice{font-family:Montserrat,Arial,sans-serif;font-size:10px;background:#cdf6fb;color:#0c6b78;padding:3px 7px;border-radius:4px;font-weight:700;letter-spacing:.3px;white-space:nowrap;}'+
     '.badge{display:inline-block;padding:4px 11px;border-radius:20px;font-size:11px;font-weight:800;background:#cdf6fb;color:#0c6b78;}'+
-    '.sped{width:100%;border-collapse:collapse;margin-top:0;table-layout:fixed;}'+
-    '.sped th{background:linear-gradient(135deg,#39e0f4,#0ea5b8);color:#fff;font-family:Montserrat,Arial,sans-serif;font-weight:800;font-size:12px;letter-spacing:.5px;text-align:left;padding:9px 12px;border:1px solid #0ea5b8;}'+
-    '.sped td{border:1px solid #bfe9ef;padding:8px 12px;font-family:Montserrat,Arial,sans-serif;font-size:12px;vertical-align:middle;}'+
-    '.sped td.lbl-sped{background:#eafcff;font-weight:800;color:#0c6b78;width:28%;}'+
-    '.sped td.dest{color:#d11;font-weight:800;}'+
+    '.sped{width:100%;border-collapse:collapse;margin-top:0;table-layout:auto;}'+
+    '.sped th{background:linear-gradient(135deg,#ffb84d,#e8820c);color:#fff;font-family:Montserrat,Arial,sans-serif;font-weight:800;font-size:12px;letter-spacing:.5px;text-align:left;padding:8px 12px;border:1px solid #e8820c;}'+
+    '.sped td{border:1px solid #e8a24d;padding:7px 11px;font-family:Montserrat,Arial,sans-serif;font-size:11px;vertical-align:middle;}'+
+    '.sped .lbl-sped{font-weight:800;color:#8a5a00;}'+
+    '.sped .dest-val{color:#d11;font-weight:800;}'+
     '</style></head>'+
     '<body>'+
     '<div class="logo-wrap"><img src="'+LOGO_PDF+'"></div>'+
     '<div class="head"><div class="left">'+leftLines+'</div>'+
     '<div class="center"><table class="sped">'+
-      '<tr><th colspan="2">DATI SPEDIZIONE</th></tr>'+
-      '<tr><td class="lbl-sped">Corriere</td><td>GLS</td></tr>'+
-      '<tr><td class="lbl-sped">Cod. Cliente</td><td>1522</td></tr>'+
-      '<tr><td class="lbl-sped">Destinazione</td><td class="dest">DIMAR GROUP SPA - VIA DELL\'INDUSTRIA 9, 01018 VALENTANO (VT)</td></tr>'+
+      '<tr><th colspan="3">DATI SPEDIZIONE</th></tr>'+
+      '<tr>'+
+        '<td><span class="lbl-sped">Corriere:</span> GLS</td>'+
+        '<td><span class="lbl-sped">Cod. Cliente:</span> 1522</td>'+
+        '<td><span class="lbl-sped">Destinazione:</span> <span class="dest-val">DIMAR GROUP SPA - VIA DELL\'INDUSTRIA 9, 01018 VALENTANO (VT)</span></td>'+
+      '</tr>'+
     '</table></div>'+
     '<div class="right"><div class="sup-title">SPTT.LE FORNITORE</div>'+supLines+'</div></div>'+
     '<table><thead><tr>'+
