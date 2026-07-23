@@ -611,6 +611,7 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:13px;background:#cdf6f
       </div>
       <div class="fg"><label>Codice Conto *</label><input type="text" id="m-a-codice"></div>
       <div class="fg"><label>Classe</label><input type="text" id="m-a-classe"></div>
+      <div class="fg"><label>Unità di Misura</label><input type="text" id="m-a-um" placeholder="es. pz, mt, kg, cf"></div>
     </div>
     <div class="suppliers-section">
       <div class="suppliers-section-head">
@@ -1232,7 +1233,7 @@ function apriAnagrafica(){
   editingAnagId=null;
   lastSelectedCatalogItem=null;
   document.getElementById('modal-anag-title').textContent='Aggiungi Materiale';
-  ['m-a-numero-codifica','m-a-tipologia','m-a-codice','m-a-classe'].forEach(id=>document.getElementById(id).value='');
+  ['m-a-numero-codifica','m-a-tipologia','m-a-codice','m-a-classe','m-a-um'].forEach(id=>document.getElementById(id).value='');
   const dd=document.getElementById('catalog-dropdown');
   if(dd) dd.style.display='none';
   resetSupplierRows();
@@ -1246,6 +1247,7 @@ function modificaAnagrafica(id){
   document.getElementById('m-a-tipologia').value=a.tipologia;
   document.getElementById('m-a-codice').value=a.codice;
   document.getElementById('m-a-classe').value=a.classe||'';
+  document.getElementById('m-a-um').value=a.um||'';
   resetSupplierRows(a.fornitori);
   openModal('modal-anagrafica');
 }
@@ -1254,6 +1256,7 @@ function salvaAnagrafica(){
   const tipologia=toTitleCase(document.getElementById('m-a-tipologia').value);
   const codice=toTitleCase(document.getElementById('m-a-codice').value);
   const classe=toTitleCase(document.getElementById('m-a-classe').value);
+  const um=(document.getElementById('m-a-um').value||'').trim();
   if(!tipologia||!codice){ showAlert('Materiale e codice conto sono obbligatori','err'); return; }
   // Blocca i nomi duplicati: il Nome Materiale deve essere unico
   const nomeKey = tipologia.trim().toLowerCase();
@@ -1280,9 +1283,9 @@ function salvaAnagrafica(){
   setTimeout(()=>{
     if(editingAnagId){
       const a=state.anagrafica.find(x=>x.id===editingAnagId);
-      a.numeroCodifica=numeroCodifica; a.tipologia=tipologia; a.codice=codice; a.classe=classe; a.fornitori=fornitori;
+      a.numeroCodifica=numeroCodifica; a.tipologia=tipologia; a.codice=codice; a.classe=classe; a.um=um; a.fornitori=fornitori;
     } else {
-      const item={ id:Date.now(), numeroCodifica, tipologia, codice, classe, fornitori };
+      const item={ id:Date.now(), numeroCodifica, tipologia, codice, classe, um, fornitori };
       state.anagrafica.push(item);
       if(!(item.id in state.armadietto)) state.armadietto[item.id]=0;
     }
@@ -2595,7 +2598,7 @@ function esportaPdfOrdineNumero(gi){
   const d = {
     numero:g.numero, data:g.data, destinatario:g.destinatario,
     forn:{ nome:fornNome, indirizzo:info.indirizzo, cap:info.cap, citta:info.citta, nazione:info.nazione },
-    righe: g.lines.map(o=>({ numero:g.numero, data:o.data||g.data, numeroCodifica:o.numeroCodifica, materiale:o.materiale, qta:o.qta, prezzo:o.prezzo, totale:o.totale }))
+    righe: g.lines.map(o=>({ numero:g.numero, data:o.data||g.data, numeroCodifica:o.numeroCodifica, materiale:o.materiale, um:((state.anagrafica.find(function(x){return x.id===o.materialeId;})||{}).um)||'', qta:o.qta, prezzo:o.prezzo, totale:o.totale }))
   };
   apriPdfOrdineCompleto(d);
   salvaInArchivioOrdine('Ordine '+(g.numero||''), d);
@@ -2604,9 +2607,12 @@ function apriPdfOrdineCompleto(d){
   const forn = d.forn || {};
   const righe = Array.isArray(d.righe) ? d.righe : [];
   const fmt = (n)=> Number(n||0).toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2});
-  const supLines = [forn.nome, forn.indirizzo, forn.cap, forn.citta, forn.nazione]
-    .filter(x => x && String(x).trim())
-    .map(x => '<div>'+escapeHtml(String(x))+'</div>').join('');
+  const _capCitta = [forn.cap, forn.citta].filter(x => x && String(x).trim()).map(x => String(x).trim()).join(' ');
+  const supLines =
+    (forn.nome ? '<div style="font-weight:bold;">'+escapeHtml(String(forn.nome))+'</div>' : '')+
+    [forn.indirizzo, _capCitta, forn.nazione]
+      .filter(x => x && String(x).trim())
+      .map(x => '<div>'+escapeHtml(String(x))+'</div>').join('');
   const leftLines =
     '<div><span class="lbl">N\u00b0 Ordine:</span> '+escapeHtml(d.numero||'')+'</div>'+
     '<div><span class="lbl">Data:</span> '+formatDataIT(d.data||'')+'</div>';
@@ -2616,6 +2622,7 @@ function apriPdfOrdineCompleto(d){
     '<tr>'+
       '<td><code class="codice">'+escapeHtml(r.numeroCodifica||'\u2014')+'</code></td>'+
       '<td><b>'+escapeHtml(r.materiale||'')+'</b></td>'+
+      '<td>'+escapeHtml(r.um||'\u2014')+'</td>'+
       '<td><span class="badge">'+(r.qta||0)+'</span></td>'+
       '<td>\u20ac'+fmt(r.prezzo)+'</td>'+
       '<td><span class="badge">\u20ac'+fmt(r.totale)+'</span></td>'+
@@ -2642,9 +2649,9 @@ function apriPdfOrdineCompleto(d){
     '<div class="head"><div class="left">'+leftLines+'</div>'+
     '<div class="right"><div class="sup-title">SPTT.LE FORNITORE</div>'+supLines+'</div></div>'+
     '<table><thead><tr>'+
-      '<th>N\u00b0 Codifica</th><th>Nome Materiale</th><th>Qt\u00e0</th><th>Prezzo</th><th>Totale</th>'+
+      '<th>N\u00b0 Codifica</th><th>Nome Materiale</th><th>U.M.</th><th>Qt\u00e0</th><th>Prezzo</th><th>Totale</th>'+
     '</tr></thead><tbody>'+rows+'</tbody>'+
-    '<tfoot><tr><td colspan="4" style="border-top:none;"></td><td style="text-align:center;"><span style="display:inline-block;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:800;background:#fff3b0;color:#7a5d00;">\u20ac'+fmt(totale)+'</span></td></tr></tfoot>'+
+    '<tfoot><tr><td colspan="5" style="border-top:none;"></td><td style="text-align:center;"><span style="display:inline-block;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:800;background:#fff3b0;color:#7a5d00;">\u20ac'+fmt(totale)+'</span></td></tr></tfoot>'+
     '</table>'+
     '<scr'+'ipt>function go(){window.focus();window.print();}if(document.fonts&&document.fonts.ready){document.fonts.ready.then(function(){setTimeout(go,300);});}else{window.onload=function(){setTimeout(go,600);};}</scr'+'ipt>'+
     '</body></html>';
