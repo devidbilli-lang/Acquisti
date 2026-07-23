@@ -2634,7 +2634,7 @@ function apriPdfOrdineCompleto(d){
     '<style>@page{size:A4;margin:0;}*{box-sizing:border-box;}'+
     'body{font-family:Montserrat,Arial,sans-serif;color:#111;margin:0;padding:16mm;font-size:13px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}'+
     '.logo-wrap{text-align:center;margin-bottom:40px;}.logo-wrap img{width:64%;max-width:440px;height:auto;}'+
-    '.head{display:flex;justify-content:space-between;gap:30px;margin-bottom:26px;}'+
+    '.head{display:flex;justify-content:space-between;align-items:flex-start;gap:22px;margin-bottom:26px;}.center{flex:1;}'+
     '.head>div{line-height:1.6;font-size:16px;}.lbl{font-weight:bold;}.sup-title{font-weight:bold;margin-bottom:8px;font-size:16px;}'+
     'table{width:100%;border-collapse:collapse;margin-top:20px;table-layout:auto;}'+
     'thead th{background:linear-gradient(135deg,#39e0f4,#0ea5b8);padding:10px 6px;text-align:center;font-size:11px;font-weight:800;letter-spacing:.3px;color:#fff;white-space:nowrap;}'+
@@ -2643,7 +2643,7 @@ function apriPdfOrdineCompleto(d){
     'tfoot td{padding:11px 6px;font-weight:800;font-size:12px;border-top:2px solid #0ea5b8;color:#0c6b78;}'+
     '.codice{font-family:Montserrat,Arial,sans-serif;font-size:10px;background:#cdf6fb;color:#0c6b78;padding:3px 7px;border-radius:4px;font-weight:700;letter-spacing:.3px;white-space:nowrap;}'+
     '.badge{display:inline-block;padding:4px 11px;border-radius:20px;font-size:11px;font-weight:800;background:#cdf6fb;color:#0c6b78;}'+
-    '.sped{width:100%;border-collapse:collapse;margin-top:34px;table-layout:fixed;}'+
+    '.sped{width:100%;border-collapse:collapse;margin-top:0;table-layout:fixed;}'+
     '.sped th{background:linear-gradient(135deg,#39e0f4,#0ea5b8);color:#fff;font-family:Montserrat,Arial,sans-serif;font-weight:800;font-size:12px;letter-spacing:.5px;text-align:left;padding:9px 12px;border:1px solid #0ea5b8;}'+
     '.sped td{border:1px solid #bfe9ef;padding:8px 12px;font-family:Montserrat,Arial,sans-serif;font-size:12px;vertical-align:middle;}'+
     '.sped td.lbl-sped{background:#eafcff;font-weight:800;color:#0c6b78;width:28%;}'+
@@ -2652,17 +2652,17 @@ function apriPdfOrdineCompleto(d){
     '<body>'+
     '<div class="logo-wrap"><img src="'+LOGO_PDF+'"></div>'+
     '<div class="head"><div class="left">'+leftLines+'</div>'+
+    '<div class="center"><table class="sped">'+
+      '<tr><th colspan="2">DATI SPEDIZIONE</th></tr>'+
+      '<tr><td class="lbl-sped">Corriere</td><td>GLS</td></tr>'+
+      '<tr><td class="lbl-sped">Cod. Cliente</td><td>1522</td></tr>'+
+      '<tr><td class="lbl-sped">Destinazione</td><td class="dest">DIMAR GROUP SPA - VIA DELL\'INDUSTRIA 9, 01018 VALENTANO (VT)</td></tr>'+
+    '</table></div>'+
     '<div class="right"><div class="sup-title">SPTT.LE FORNITORE</div>'+supLines+'</div></div>'+
     '<table><thead><tr>'+
       '<th>N\u00b0 Codifica</th><th>Nome Materiale</th><th>U.M.</th><th>Qt\u00e0</th><th>Prezzo</th><th>Totale</th>'+
     '</tr></thead><tbody>'+rows+'</tbody>'+
     '<tfoot><tr><td colspan="5" style="border-top:none;"></td><td style="text-align:center;"><span style="display:inline-block;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:800;background:#fff3b0;color:#7a5d00;">\u20ac'+fmt(totale)+'</span></td></tr></tfoot>'+
-    '</table>'+
-    '<table class="sped">'+
-      '<tr><th colspan="2">DATI SPEDIZIONE</th></tr>'+
-      '<tr><td class="lbl-sped">Corriere</td><td>GLS</td></tr>'+
-      '<tr><td class="lbl-sped">Cod. Cliente</td><td>1522</td></tr>'+
-      '<tr><td class="lbl-sped">Destinazione</td><td class="dest">DIMAR GROUP SPA - VIA DELL\'INDUSTRIA 9, 01018 VALENTANO (VT)</td></tr>'+
     '</table>'+
     '<scr'+'ipt>function go(){window.focus();window.print();}if(document.fonts&&document.fonts.ready){document.fonts.ready.then(function(){setTimeout(go,300);});}else{window.onload=function(){setTimeout(go,600);};}</scr'+'ipt>'+
     '</body></html>';
