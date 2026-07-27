@@ -2636,11 +2636,12 @@ function apriPdfOrdineCompleto(d){
     '.logo-wrap{text-align:center;margin-bottom:40px;}.logo-wrap img{width:64%;max-width:440px;height:auto;}'+
     '.head{display:flex;justify-content:space-between;align-items:flex-start;gap:22px;margin-bottom:26px;}.center{flex:1;}'+
     '.head>div{line-height:1.6;font-size:16px;}.lbl{font-weight:bold;}.sup-title{font-weight:bold;margin-bottom:8px;font-size:16px;}'+
-    'table{width:100%;border-collapse:collapse;margin-top:20px;table-layout:auto;}'+
-    'thead th{background:linear-gradient(135deg,#39e0f4,#0ea5b8);padding:10px 6px;text-align:center;font-size:11px;font-weight:800;letter-spacing:.3px;color:#fff;white-space:nowrap;}'+
-    'tbody td{padding:9px 6px;text-align:center;border-bottom:1px solid #e8e8f0;color:#1a1a2e;font-weight:500;font-size:11px;vertical-align:middle;}'+
-    'tbody tr:nth-child(even){background:#f8f8fd;}'+
-    'tfoot td{padding:11px 6px;font-weight:800;font-size:12px;border-top:2px solid #0ea5b8;color:#0c6b78;}'+
+    'table{width:100%;border-collapse:collapse;margin-top:0;table-layout:auto;background:transparent;}'+
+    '.tbl-glass{margin-top:22px;border-radius:20px;overflow:hidden;border:1.5px solid rgba(14,165,184,0.45);background:linear-gradient(135deg,rgba(57,224,244,0.16),rgba(57,224,244,0.04));box-shadow:inset 0 1px 0 rgba(255,255,255,0.85),0 4px 16px rgba(14,165,184,0.20);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);}'+
+    'thead th{background:linear-gradient(135deg,rgba(57,224,244,0.95),rgba(14,165,184,0.88));padding:10px 6px;text-align:center;font-size:11px;font-weight:800;letter-spacing:.3px;color:#fff;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,0.45);}'+
+    'tbody td{padding:9px 6px;text-align:center;border-bottom:1px solid rgba(14,165,184,0.16);color:#1a1a2e;font-weight:500;font-size:11px;vertical-align:middle;}'+
+    'tbody tr:nth-child(odd){background:rgba(255,255,255,0.55);}tbody tr:nth-child(even){background:rgba(255,255,255,0.25);}'+
+    'tfoot td{padding:11px 6px;font-weight:800;font-size:12px;border-top:2px solid rgba(14,165,184,0.55);color:#0c6b78;background:rgba(255,255,255,0.15);}'+
     '.codice{font-family:Montserrat,Arial,sans-serif;font-size:10px;background:#cdf6fb;color:#0c6b78;padding:3px 7px;border-radius:4px;font-weight:700;letter-spacing:.3px;white-space:nowrap;}'+
     '.badge{display:inline-block;padding:4px 11px;border-radius:20px;font-size:11px;font-weight:800;background:#cdf6fb;color:#0c6b78;}'+
     '.sped{width:100%;border-radius:20px;padding:9px;background:linear-gradient(135deg,rgba(255,198,102,0.45),rgba(255,168,56,0.20));border:1.5px solid rgba(214,150,40,0.55);box-shadow:inset 0 1px 0 rgba(255,255,255,0.8),0 4px 14px rgba(214,150,40,0.22);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);}'+
@@ -2662,11 +2663,11 @@ function apriPdfOrdineCompleto(d){
       '</div>'+
     '</div></div>'+
     '<div class="right"><div class="sup-title">SPTT.LE FORNITORE</div>'+supLines+'</div></div>'+
-    '<table><thead><tr>'+
+    '<div class="tbl-glass"><table><thead><tr>'+
       '<th>N\u00b0 Codifica</th><th>Nome Materiale</th><th>U.M.</th><th>Qt\u00e0</th><th>Prezzo</th><th>Totale</th>'+
     '</tr></thead><tbody>'+rows+'</tbody>'+
     '<tfoot><tr><td colspan="5" style="border-top:none;"></td><td style="text-align:center;"><span style="display:inline-block;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:800;background:#fff3b0;color:#7a5d00;">\u20ac'+fmt(totale)+'</span></td></tr></tfoot>'+
-    '</table>'+
+    '</table></div>'+
     '<scr'+'ipt>function go(){window.focus();window.print();}if(document.fonts&&document.fonts.ready){document.fonts.ready.then(function(){setTimeout(go,300);});}else{window.onload=function(){setTimeout(go,600);};}</scr'+'ipt>'+
     '</body></html>';
   const w = window.open('', '_blank');
