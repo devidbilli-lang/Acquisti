@@ -641,7 +641,7 @@ tbody tr:last-child td:last-child{border-bottom-right-radius:16px;}
   <div class="modal">
     <div class="modal-title" id="modal-anag-title">Aggiungi Materiale</div>
     <div class="modal-grid">
-      <div class="fg"><label>N° Codifica</label><input type="text" id="m-a-numero-codifica"></div>
+      <div class="fg"><label>N° Codifica</label><input type="text" id="m-a-numero-codifica" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()" autocapitalize="characters" spellcheck="false"></div>
       <div class="fg" style="position:relative;">
         <label>Nome Materiale *</label>
         <input type="text" id="m-a-tipologia" autocomplete="off" oninput="searchCatalog()" onfocus="searchCatalog()" onblur="hideCatalog()">
@@ -1299,7 +1299,7 @@ function modificaAnagrafica(id){
   openModal('modal-anagrafica');
 }
 function salvaAnagrafica(){
-  const numeroCodifica=toTitleCase(document.getElementById('m-a-numero-codifica').value);
+  const numeroCodifica=(document.getElementById('m-a-numero-codifica').value||'').trim().toUpperCase();
   const tipologia=toTitleCase(document.getElementById('m-a-tipologia').value);
   const codice=toTitleCase(document.getElementById('m-a-codice').value);
   const classe=toTitleCase(document.getElementById('m-a-classe').value);
@@ -1831,14 +1831,17 @@ function condividiSelezionatiPdf(){
   var titolo = 'Ordini selezionati ('+numeri.length+')';
   eseguiCondivisione({kind:'multi', righe:list.map(ordineToRiga), titolo:titolo}, titolo);
 }
-// Migrazione automatica: numeri ordine sempre in MAIUSCOLO
-function migraNumeriOrdineMaiuscoli(){
+// Migrazione automatica: numero ordine e N. Codifica sempre in MAIUSCOLO
+function migraMaiuscoli(){
   let cambiati = 0;
-  state.ordini.forEach(function(o){
-    if(o.numero == null) return;
-    const up = String(o.numero).trim().toUpperCase();
-    if(up !== String(o.numero)){ o.numero = up; cambiati++; }
-  });
+  const up = function(obj, campo){
+    if(obj[campo] == null) return;
+    const v = String(obj[campo]).trim().toUpperCase();
+    if(v !== String(obj[campo])){ obj[campo] = v; cambiati++; }
+  };
+  state.ordini.forEach(function(o){ up(o,'numero'); up(o,'numeroCodifica'); });
+  state.anagrafica.forEach(function(a){ up(a,'numeroCodifica'); });
+  state.consegne.forEach(function(c){ up(c,'numeroCodifica'); });
   return cambiati;
 }
 function apriArchivio(){ renderArchivioList(); openModal('modal-archivio'); }
@@ -3376,7 +3379,7 @@ function updateConnPill(syncState){
 // ----- Cloud-first boot: localStorage immediately, then refresh from D1 -----
 async function bootCloudFirst(){
   loadState();
-  migraNumeriOrdineMaiuscoli();
+  migraMaiuscoli();
   filtra();
   const cfg = getApiConfig();
   if(!cfg.url){ updateConnPill(); return; }
@@ -3403,7 +3406,7 @@ async function bootCloudFirst(){
       state.consegne.forEach(c => { if(c.numeroCodifica == null) c.numeroCodifica = ''; });
       try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
       lastServerState = snapshot(state);
-      if(migraNumeriOrdineMaiuscoli() > 0) saveState();
+      if(migraMaiuscoli() > 0) saveState();
       filtra();
     } else {
       // Remote is empty: push the local snapshot to bootstrap D1
