@@ -1045,6 +1045,15 @@ function fmtMigliaia(n){
   str = str.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   return (neg ? '-' : '') + str;
 }
+function fmtEuro(n,dec){
+  const d = (dec==null?2:dec);
+  const num = parseFloat(n)||0;
+  const neg = num < 0;
+  const str = Math.abs(num).toFixed(d);
+  const parts = str.split('.');
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return (neg?'-':'') + (parts.length>1 ? parts[0]+','+parts[1] : parts[0]);
+}
 function toTitleCase(s){
   if(s==null) return '';
   return String(s).trim().toLowerCase().replace(/(?:^|[\s\-_\/.])\S/g, c => c.toUpperCase());
@@ -1116,7 +1125,7 @@ function searchCatalog(){
     return;
   }
   dd.innerHTML = results.map((item, i) => {
-    const fornStr = item.fornitori.map(f => f.nome + (f.prezzo ? ' \u20ac'+f.prezzo.toFixed(2) : '')).join(' \u00b7 ');
+    const fornStr = item.fornitori.map(f => f.nome + (f.prezzo ? ' \u20ac'+fmtEuro(f.prezzo) : '')).join(' \u00b7 ');
     return '<div class="catalog-item" onmousedown="selectCatalogItem('+CATALOGO.indexOf(item)+')">'+
       '<div style="font-weight:700;font-size:13px;color:var(--text);">'+escapeHtml(item.tipologia)+'</div>'+
       '<div style="font-size:11px;color:var(--text-muted);margin-top:2px;">'+
@@ -1452,7 +1461,7 @@ function updateOrdineFornitori(){
     return;
   }
   sel.innerHTML='<option value="">Seleziona...</option>'+
-    mat.fornitori.map((f,i)=>'<option value="'+i+'">'+escapeHtml(f.nome)+' \u2014 \u20ac'+f.prezzo.toFixed(2)+'</option>').join('');
+    mat.fornitori.map((f,i)=>'<option value="'+i+'">'+escapeHtml(f.nome)+' \u2014 \u20ac'+fmtEuro(f.prezzo)+'</option>').join('');
   info.innerHTML = '<b>N\u00b0 Codifica:</b> '+escapeHtml(mat.numeroCodifica||'\u2014')+' &nbsp;\u00b7&nbsp; <b>Codice conto:</b> '+escapeHtml(mat.codice)+' &nbsp;\u00b7&nbsp; <b>Classe:</b> '+escapeHtml(mat.classe||'\u2014')+' &nbsp;\u00b7&nbsp; <b>Giacenza attuale:</b> '+(state.armadietto[mat.id]||0);
 }
 function salvaOrdine(){
@@ -1516,7 +1525,7 @@ const LOGO_PDF = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4QBIRXhpZgA
 // Builder del PDF di un singolo ordine, a partire da uno snapshot dei dati
 function apriPdfSingoloDa(d){
   const forn = d.forn || {};
-  const fmt = (n)=> Number(n||0).toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const fmt = (n)=> fmtEuro(n);
   const supLines = [forn.nome, forn.indirizzo, forn.cap, forn.citta, forn.nazione]
     .filter(x => x && String(x).trim())
     .map(x => '<div>'+escapeHtml(String(x))+'</div>').join('');
@@ -1550,7 +1559,7 @@ function apriPdfSingoloDa(d){
       '<td>'+formatDataIT(d.data||'')+'</td>'+
       '<td><code class="codice">'+escapeHtml(d.numeroCodifica||'\u2014')+'</code></td>'+
       '<td><b>'+escapeHtml(d.materiale||'')+'</b></td>'+
-      '<td><span class="badge">'+(d.qta||0)+'</span></td>'+
+      '<td><span class="badge">'+fmtMigliaia(d.qta)+'</span></td>'+
       '<td>\u20ac'+fmt(d.prezzo)+'</td>'+
       '<td><span class="badge">\u20ac'+fmt(d.totale)+'</span></td>'+
     '</tr></tbody></table>'+
@@ -1585,7 +1594,7 @@ function ordineToRiga(o){ return {numero:o.numero, data:o.data, numeroCodifica:o
 // Builder PDF condiviso: riceve un elenco di righe ordine e un titolo
 function apriPdfMultiplo(righe, titolo){
   if(!righe || !righe.length){ showAlert('Nessuna riga da esportare','err'); return; }
-  const fmt = (n)=> Number(n||0).toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const fmt = (n)=> fmtEuro(n);
   const totale = righe.reduce((acc,r)=> acc + (Number(r.totale)||0), 0);
   const rows = righe.map(r =>
     '<tr>'+
@@ -1593,7 +1602,7 @@ function apriPdfMultiplo(righe, titolo){
       '<td>'+formatDataIT(r.data||'')+'</td>'+
       '<td><code class="codice">'+escapeHtml(r.numeroCodifica||'\u2014')+'</code></td>'+
       '<td><b>'+escapeHtml(r.materiale||'')+'</b></td>'+
-      '<td><span class="badge">'+(r.qta||0)+'</span></td>'+
+      '<td><span class="badge">'+fmtMigliaia(r.qta)+'</span></td>'+
       '<td>\u20ac'+fmt(r.prezzo)+'</td>'+
       '<td><span class="badge">\u20ac'+fmt(r.totale)+'</span></td>'+
     '</tr>'
@@ -1694,7 +1703,7 @@ async function loadJsPDF(){
 function buildPdfBlob(spec){
   var jsPDF = window.jspdf.jsPDF;
   var doc = new jsPDF({unit:'mm', format:'a4', orientation:'portrait'});
-  var fmt = function(n){ return Number(n||0).toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2}); };
+  var fmt = function(n){ return fmtEuro(n); };
   var logoW = 110, logoH = 26;
   try{ var p=doc.getImageProperties(LOGO_PDF); if(p && p.width && p.height) logoH = logoW * p.height / p.width; }catch(e){}
   try{ doc.addImage(LOGO_PDF, 'JPEG', (210-logoW)/2, 12, logoW, logoH); }catch(e){}
@@ -1828,7 +1837,7 @@ function renderArchivioList(){
   const cont=document.getElementById('archivio-list');
   if(!cont) return;
   if(!a.length){ cont.innerHTML='<div class="empty" style="padding:24px;text-align:center;">Nessun documento salvato</div>'; return; }
-  const fmt = (n)=> Number(n||0).toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const fmt = (n)=> fmtEuro(n);
   cont.innerHTML = a.map(e=>{
     const tot = (e.righe||[]).reduce((s,r)=>s+(Number(r.totale)||0),0);
     const d = new Date(e.ts);
@@ -1892,7 +1901,7 @@ function apriDdtModal(ordId){
   if(!Array.isArray(o.ddt)) o.ddt = [];
   document.getElementById('m-ddt-info').innerHTML =
     '<b>'+escapeHtml(o.numero)+'</b> \u00b7 <code class="codice">'+escapeHtml(o.numeroCodifica||'\u2014')+'</code> \u00b7 '+escapeHtml(o.materiale)+' \u00b7 '+
-    '<span style="color:var(--text);">Qt\u00e0 ordinata: <b>'+o.qta+'</b></span>';
+    '<span style="color:var(--text);">Qt\u00e0 ordinata: <b>'+fmtMigliaia(o.qta)+'</b></span>';
   document.getElementById('m-ddt-num').value = '';
   document.getElementById('m-ddt-data').value = todayLocal();
   document.getElementById('m-ddt-qta').value = '';
@@ -1916,12 +1925,12 @@ function renderDdtList(){
     html += '<div style="display:grid;grid-template-columns:1.5fr 1fr 1fr 36px;gap:8px;align-items:center;padding:8px;border-bottom:1px solid var(--border);font-size:13px;">'+
       '<div><code class="codice">'+escapeHtml(d.numero)+'</code></div>'+
       '<div>'+formatDataIT(d.data)+'</div>'+
-      '<div style="text-align:center;font-weight:700;">'+d.qta+'</div>'+
+      '<div style="text-align:center;font-weight:700;">'+fmtMigliaia(d.qta)+'</div>'+
       '<button class="btn-danger" onclick="rimuoviDdt('+i+')" style="padding:4px 8px;font-size:14px;">\u00d7</button>'+
     '</div>';
   });
   html += '<div style="padding:10px 8px 0;text-align:right;font-size:13px;font-weight:800;color:'+(completo?'var(--green)':'var(--amber)')+';">';
-  html += 'Totale arrivato: '+arrivata+' / '+o.qta+' '+(completo?'\u2713 COMPLETO':'')+'</div>';
+  html += 'Totale arrivato: '+fmtMigliaia(arrivata)+' / '+fmtMigliaia(o.qta)+' '+(completo?'\u2713 COMPLETO':'')+'</div>';
   html += '</div>';
   div.innerHTML = html;
 }
@@ -2460,7 +2469,7 @@ function renderAnagrafica(){
   } else {
     tb.innerHTML=rows.map(a=>{
       const forn=a.fornitori.map(f=>
-        '<span class="supp-line"><span class="supp-name">'+escapeHtml(f.nome)+'</span><span class="supp-price">\u20ac'+f.prezzo.toFixed(2)+'</span></span>'
+        '<span class="supp-line"><span class="supp-name">'+escapeHtml(f.nome)+'</span><span class="supp-price">\u20ac'+fmtEuro(f.prezzo)+'</span></span>'
       ).join('');
       return '<tr'+(isHL('anagrafica',a.id)?' class="row-hl"':'')+'>'+
         '<td style="white-space:nowrap;text-align:center;">'+
@@ -2575,10 +2584,10 @@ function renderOrdini(){
       '<td><b>'+escapeHtml(g.materiale)+'</b></td>'+
       '<td>'+escapeHtml(g.destinatario||'')+'</td>'+
       '<td>'+escapeHtml(g.fornitore||'')+'</td>'+
-      '<td><span class="badge badge-pink">'+g.qta+'</span></td>'+
+      '<td><span class="badge badge-pink">'+fmtMigliaia(g.qta)+'</span></td>'+
       '<td>\u2014</td>'+
-      '<td><span class="badge">\u20ac'+g.totale.toFixed(2)+'</span></td>'+
-      '<td><span class="ddt-cell '+mDdtClass+'" onclick="toggleOrdine('+gi+')" title="Mostra/nascondi materiali">'+g.nDdt+' DDT \u00b7 '+g.arrivata+'/'+g.qta+'</span></td>'+
+      '<td><span class="badge">\u20ac'+fmtEuro(g.totale)+'</span></td>'+
+      '<td><span class="ddt-cell '+mDdtClass+'" onclick="toggleOrdine('+gi+')" title="Mostra/nascondi materiali">'+g.nDdt+' DDT \u00b7 '+fmtMigliaia(g.arrivata)+'/'+fmtMigliaia(g.qta)+'</span></td>'+
       '</tr>';
       const dets = g.lines.map(o=>{
         const ddtList = Array.isArray(o.ddt)?o.ddt:[];
@@ -2586,10 +2595,10 @@ function renderOrdini(){
         const delta = o.qta - arrivata;
         const isComplete = arrivata >= o.qta;
         const ddtClass = ddtList.length===0?'empty-ddt':(isComplete?'complete':'partial');
-        const arrBig='<span class="ddt-arr">'+arrivata+'</span>';
-        const ddtText = ddtList.length+' DDT \u00b7 '+arrBig+'/'+o.qta;
+        const arrBig='<span class="ddt-arr">'+fmtMigliaia(arrivata)+'</span>';
+        const ddtText = ddtList.length+' DDT \u00b7 '+arrBig+'/'+fmtMigliaia(o.qta);
         const deltaColor = isComplete?'delta-green':'delta-red';
-        const deltaContent = isComplete?'\u2713':'\u2212'+delta;
+        const deltaContent = isComplete?'\u2713':'\u2212'+fmtMigliaia(delta);
         const deltaBadge='<span class="ddt-delta '+deltaColor+'">'+deltaContent+'</span>';
         return '<tr class="ord-detail'+(isHL('ordini',o.id)?' row-hl':'')+'" data-det-gi="'+gi+'"'+(exp?'':' style="display:none;"')+'>'+
         '<td class="td-check"></td>'+
@@ -2602,9 +2611,9 @@ function renderOrdini(){
         '<td><b>'+escapeHtml(o.materiale)+'</b><br><code class="codice">'+escapeHtml(o.codice)+'</code></td>'+
         '<td></td>'+
         '<td>'+escapeHtml(o.fornitore)+'</td>'+
-        '<td><span class="badge badge-pink">'+o.qta+'</span></td>'+
-        '<td>\u20ac'+o.prezzo.toFixed(2)+'</td>'+
-        '<td><span class="badge">\u20ac'+o.totale.toFixed(2)+'</span></td>'+
+        '<td><span class="badge badge-pink">'+fmtMigliaia(o.qta)+'</span></td>'+
+        '<td>\u20ac'+fmtEuro(o.prezzo)+'</td>'+
+        '<td><span class="badge">\u20ac'+fmtEuro(o.totale)+'</span></td>'+
         '<td><span class="ddt-cell '+ddtClass+'" onclick="apriDdtModal('+o.id+')" title="Gestisci DDT">'+ddtText+'</span>'+deltaBadge+'</td>'+
         '</tr>';
       }).join('');
@@ -2616,7 +2625,7 @@ function renderOrdini(){
   const e=Object.entries(byF).sort((a,b)=>b[1]-a[1]);
   const c=document.getElementById('ordini-fornitori');
   c.innerHTML = e.length
-    ? e.map(([k,v])=>'<div class="list-row"><div class="info"><div class="nm">'+escapeHtml(k)+'</div></div><span class="qt">\u20ac'+v.toFixed(0)+'</span></div>').join('')
+    ? e.map(([k,v])=>'<div class="list-row"><div class="info"><div class="nm">'+escapeHtml(k)+'</div></div><span class="qt">\u20ac'+fmtEuro(v,0)+'</span></div>').join('')
     : '<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:10px;">Nessun ordine</div>';
 }
 function toggleOrdine(gi){
@@ -2644,7 +2653,7 @@ function esportaPdfOrdineNumero(gi){
 function apriPdfOrdineCompleto(d){
   const forn = d.forn || {};
   const righe = Array.isArray(d.righe) ? d.righe : [];
-  const fmt = (n)=> Number(n||0).toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const fmt = (n)=> fmtEuro(n);
   const _capCitta = [forn.cap, forn.citta].filter(x => x && String(x).trim()).map(x => String(x).trim()).join(' ');
   const supLines =
     (forn.nome ? '<div style="font-weight:bold;">'+escapeHtml(String(forn.nome))+'</div>' : '')+
@@ -2661,7 +2670,7 @@ function apriPdfOrdineCompleto(d){
       '<td><code class="codice">'+escapeHtml(r.numeroCodifica||'\u2014')+'</code></td>'+
       '<td><b>'+escapeHtml(r.materiale||'')+'</b></td>'+
       '<td>'+escapeHtml(r.um||'\u2014')+'</td>'+
-      '<td><span class="badge">'+(r.qta||0)+'</span></td>'+
+      '<td><span class="badge">'+fmtMigliaia(r.qta)+'</span></td>'+
       '<td>\u20ac'+fmt(r.prezzo)+'</td>'+
       '<td><span class="badge">\u20ac'+fmt(r.totale)+'</span></td>'+
     '</tr>'
@@ -2755,7 +2764,7 @@ function renderConsegne(){
       '<td><code class="codice">'+escapeHtml(c.numeroCodifica||'\u2014')+'</code></td>'+
       '<td>'+escapeHtml(c.materiale)+'</td>'+
       '<td><code class="codice">'+escapeHtml(c.codice)+'</code></td>'+
-      '<td><span class="badge badge-blue">'+c.qta+'</span></td>'+
+      '<td><span class="badge badge-blue">'+fmtMigliaia(c.qta)+'</span></td>'+
     '</tr>').join('');
   }
   const byL={};
@@ -2898,12 +2907,12 @@ function renderPieConsegne(){
   ctx.fillStyle='#1a1a2e';
   ctx.font='bold 22px Montserrat,sans-serif';
   ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillText(total,100,100);
+  ctx.fillText(fmtMigliaia(total),100,100);
   legend.innerHTML='<div style="display:flex;flex-direction:column;gap:4px;text-align:left;font-size:11px;">'+
     top.map((d,i)=>'<div style="display:flex;align-items:center;gap:6px;">'+
       '<span style="width:12px;height:12px;border-radius:3px;background:'+COLORS[i%COLORS.length]+';flex-shrink:0;"></span>'+
       '<span style="flex:1;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escapeHtml(d.nome)+'</span>'+
-      '<span style="font-weight:800;">'+d.qta+'</span>'+
+      '<span style="font-weight:800;">'+fmtMigliaia(d.qta)+'</span>'+
     '</div>').join('')+'</div>';
 }
 
