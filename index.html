@@ -737,7 +737,7 @@ tbody tr:last-child td:last-child{border-bottom-right-radius:16px;}
   <div class="modal">
     <div class="modal-title" id="modal-ord-title">Nuovo Ordine</div>
     <div class="modal-grid">
-      <div class="fg"><label>N° Ordine *</label><input type="text" id="m-o-numero"></div>
+      <div class="fg"><label>N° Ordine *</label><input type="text" id="m-o-numero" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()" autocapitalize="characters" spellcheck="false"></div>
       <div class="fg"><label>Data *</label><input type="date" id="m-o-data"></div>
       <div class="fg"><label>Destinatario *</label><input type="text" id="m-o-destinatario"></div>
     </div>
@@ -1465,7 +1465,7 @@ function updateOrdineFornitori(){
   info.innerHTML = '<b>N\u00b0 Codifica:</b> '+escapeHtml(mat.numeroCodifica||'\u2014')+' &nbsp;\u00b7&nbsp; <b>Codice conto:</b> '+escapeHtml(mat.codice)+' &nbsp;\u00b7&nbsp; <b>Classe:</b> '+escapeHtml(mat.classe||'\u2014')+' &nbsp;\u00b7&nbsp; <b>Giacenza attuale:</b> '+(state.armadietto[mat.id]||0);
 }
 function salvaOrdine(){
-  const numero=toTitleCase(document.getElementById('m-o-numero').value);
+  const numero=(document.getElementById('m-o-numero').value||'').trim().toUpperCase();
   const data=document.getElementById('m-o-data').value;
   const destinatario=toTitleCase(document.getElementById('m-o-destinatario').value);
   const matId=parseInt(document.getElementById('m-o-materiale-id').value);
@@ -1656,8 +1656,8 @@ function generaPdfOrdiniData(){
 function esportaSelezionatiPdf(){
   const checks = Array.prototype.slice.call(document.querySelectorAll('#tb-ordini .ord-check:checked'));
   if(!checks.length){ showAlert('Seleziona almeno un ordine (casella a sinistra)','err'); return; }
-  const numeri = checks.map(c => c.dataset.numero);
-  const list = state.ordini.filter(o => numeri.includes(String(o.numero==null?'':o.numero)))
+  const numeri = checks.map(c => (c.dataset.numero||'').trim().toUpperCase());
+  const list = state.ordini.filter(o => numeri.includes(String(o.numero==null?'':o.numero).trim().toUpperCase()))
     .sort((x,y)=> (x.data||'').localeCompare(y.data||'') || (x.numero||'').localeCompare(y.numero||''));
   if(!list.length){ showAlert('Ordini selezionati non trovati','err'); return; }
   const titolo = 'Ordini selezionati ('+numeri.length+')';
@@ -2498,7 +2498,7 @@ function ordStato(lines){
 function gruppiOrdini(){
   const map = new Map();
   state.ordini.forEach((o,idx)=>{
-    const k = o.numero==null ? '' : String(o.numero);
+    const k = (o.numero==null ? '' : String(o.numero)).trim().toUpperCase();
     if(!map.has(k)) map.set(k, {numero:o.numero, data:o.data, destinatario:o.destinatario, lines:[], _idx:idx});
     const g = map.get(k);
     g.lines.push(o);
