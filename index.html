@@ -2588,7 +2588,7 @@ function renderOrdini(){
         '<button class="btn-pdf" onclick="esportaPdfOrdineNumero('+gi+')" title="Esporta PDF ordine completo">PDF</button>'+
         '<button class="btn-danger" onclick="eliminaOrdineCompleto('+gi+')" style="margin-left:6px;vertical-align:middle;" title="Elimina intero ordine">\u00d7</button>'+
       '</td>'+
-      '<td><code class="codice">'+escapeHtml(g.numero||'')+'</code><br>'+statoBadge+'</td>'+
+      '<td><code class="codice">'+escapeHtml(g.numero||'')+'</code></td>'+
       '<td>'+formatDataIT(g.data)+'</td>'+
       '<td>\u2014</td>'+
       '<td><b>'+escapeHtml(g.materiale)+'</b></td>'+
@@ -2597,7 +2597,7 @@ function renderOrdini(){
       '<td><span class="badge badge-pink">'+fmtMigliaia(g.qta)+'</span></td>'+
       '<td>\u2014</td>'+
       '<td><span class="badge">\u20ac'+fmtEuro(g.totale)+'</span></td>'+
-      '<td><span class="ddt-cell '+mDdtClass+'" onclick="toggleOrdine('+gi+')" title="Mostra/nascondi materiali">'+g.nDdt+' DDT \u00b7 '+fmtMigliaia(g.arrivata)+'/'+fmtMigliaia(g.qta)+'</span></td>'+
+      '<td><span style="display:inline-flex;align-items:center;gap:8px;white-space:nowrap;"><span class="ddt-cell '+mDdtClass+'" onclick="toggleOrdine('+gi+')" title="Mostra/nascondi materiali">'+g.nDdt+' DDT \u00b7 '+fmtMigliaia(g.arrivata)+'/'+fmtMigliaia(g.qta)+'</span>'+statoBadge+'</span></td>'+
       '</tr>';
       const dets = g.lines.map(o=>{
         const ddtList = Array.isArray(o.ddt)?o.ddt:[];
