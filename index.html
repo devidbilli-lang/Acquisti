@@ -1831,6 +1831,16 @@ function condividiSelezionatiPdf(){
   var titolo = 'Ordini selezionati ('+numeri.length+')';
   eseguiCondivisione({kind:'multi', righe:list.map(ordineToRiga), titolo:titolo}, titolo);
 }
+// Migrazione automatica: numeri ordine sempre in MAIUSCOLO
+function migraNumeriOrdineMaiuscoli(){
+  let cambiati = 0;
+  state.ordini.forEach(function(o){
+    if(o.numero == null) return;
+    const up = String(o.numero).trim().toUpperCase();
+    if(up !== String(o.numero)){ o.numero = up; cambiati++; }
+  });
+  return cambiati;
+}
 function apriArchivio(){ renderArchivioList(); openModal('modal-archivio'); }
 function renderArchivioList(){
   const a=getArchivio();
@@ -3366,6 +3376,7 @@ function updateConnPill(syncState){
 // ----- Cloud-first boot: localStorage immediately, then refresh from D1 -----
 async function bootCloudFirst(){
   loadState();
+  migraNumeriOrdineMaiuscoli();
   filtra();
   const cfg = getApiConfig();
   if(!cfg.url){ updateConnPill(); return; }
@@ -3392,6 +3403,7 @@ async function bootCloudFirst(){
       state.consegne.forEach(c => { if(c.numeroCodifica == null) c.numeroCodifica = ''; });
       try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
       lastServerState = snapshot(state);
+      if(migraNumeriOrdineMaiuscoli() > 0) saveState();
       filtra();
     } else {
       // Remote is empty: push the local snapshot to bootstrap D1
