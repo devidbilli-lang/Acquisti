@@ -2643,23 +2643,24 @@ function apriPdfOrdineCompleto(d){
     'tfoot td{padding:11px 6px;font-weight:800;font-size:12px;border-top:2px solid #0ea5b8;color:#0c6b78;}'+
     '.codice{font-family:Montserrat,Arial,sans-serif;font-size:10px;background:#cdf6fb;color:#0c6b78;padding:3px 7px;border-radius:4px;font-weight:700;letter-spacing:.3px;white-space:nowrap;}'+
     '.badge{display:inline-block;padding:4px 11px;border-radius:20px;font-size:11px;font-weight:800;background:#cdf6fb;color:#0c6b78;}'+
-    '.sped{width:100%;border-collapse:collapse;margin-top:0;table-layout:auto;}'+
-    '.sped th{background:linear-gradient(135deg,#ffb84d,#e8820c);color:#fff;font-family:Montserrat,Arial,sans-serif;font-weight:800;font-size:12px;letter-spacing:.5px;text-align:left;padding:8px 12px;border:1px solid #e8820c;}'+
-    '.sped td{border:1px solid #e8a24d;padding:7px 11px;font-family:Montserrat,Arial,sans-serif;font-size:11px;vertical-align:middle;}'+
+    '.sped{width:100%;border-radius:20px;padding:9px;background:linear-gradient(135deg,rgba(255,198,102,0.45),rgba(255,168,56,0.20));border:1.5px solid rgba(214,150,40,0.55);box-shadow:inset 0 1px 0 rgba(255,255,255,0.8),0 4px 14px rgba(214,150,40,0.22);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);}'+
+    '.sped-head{background:linear-gradient(135deg,rgba(255,184,77,0.98),rgba(232,130,12,0.92));color:#fff;font-family:Montserrat,Arial,sans-serif;font-weight:800;font-size:11px;letter-spacing:.8px;text-align:center;padding:6px 14px;border-radius:999px;border:1px solid rgba(214,150,40,0.5);box-shadow:inset 0 1px 0 rgba(255,255,255,0.6);}'+
+    '.sped-body{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;padding:10px 4px 3px;}'+
+    '.sped-item{flex:1;font-family:Montserrat,Arial,sans-serif;font-size:11px;line-height:1.55;text-align:center;}'+
     '.sped .lbl-sped{font-weight:800;color:#8a5a00;}'+
     '.sped .dest-val{color:#d11;font-weight:800;white-space:nowrap;}'+
     '</style></head>'+
     '<body>'+
     '<div class="logo-wrap"><img src="'+LOGO_PDF+'"></div>'+
     '<div class="head"><div class="left">'+leftLines+'</div>'+
-    '<div class="center"><table class="sped">'+
-      '<tr><th colspan="3">DATI SPEDIZIONE</th></tr>'+
-      '<tr>'+
-        '<td><span class="lbl-sped">Corriere:</span> GLS</td>'+
-        '<td><span class="lbl-sped">Cod. Cliente:</span> 1522</td>'+
-        '<td class="dest-cell"><span class="lbl-sped">Destinazione:</span><br><span class="dest-val">DIMAR GROUP SPA<br>VIA DELL\'ARTIGIANATO 11<br>01018 VALENTANO (VT)</span></td>'+
-      '</tr>'+
-    '</table></div>'+
+    '<div class="center"><div class="sped">'+
+      '<div class="sped-head">DATI SPEDIZIONE</div>'+
+      '<div class="sped-body">'+
+        '<div class="sped-item"><span class="lbl-sped">Corriere:</span><br>GLS</div>'+
+        '<div class="sped-item"><span class="lbl-sped">Cod. Cliente:</span><br>1522</div>'+
+        '<div class="sped-item"><span class="lbl-sped">Destinazione:</span><br><span class="dest-val">DIMAR GROUP SPA<br>VIA DELL\'ARTIGIANATO 11<br>01018 VALENTANO (VT)</span></div>'+
+      '</div>'+
+    '</div></div>'+
     '<div class="right"><div class="sup-title">SPTT.LE FORNITORE</div>'+supLines+'</div></div>'+
     '<table><thead><tr>'+
       '<th>N\u00b0 Codifica</th><th>Nome Materiale</th><th>U.M.</th><th>Qt\u00e0</th><th>Prezzo</th><th>Totale</th>'+
