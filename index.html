@@ -437,6 +437,52 @@ tbody tr:last-child td:last-child{border-bottom-right-radius:16px;}
 #modal-ddt .btn-primary:hover{background:linear-gradient(135deg,rgba(134,53,231,1),rgba(96,32,180,0.95));}
 #modal-ddt .btn-secondary{border-color:#8635e7;color:#8635e7;box-shadow:inset 0 1px 0 rgba(255,255,255,0.92),0 2px 8px rgba(134,53,231,0.3);}
 #modal-ddt .btn-secondary:hover{border-color:#8635e7;color:#6a26be;}
+
+/* ===== ORDINI — pagina tutta nello schermo, niente barra orizzontale ===== */
+.ddt-wrap{display:inline-flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;}
+.ddt-wrap .ddt-delta{margin-left:0;}
+#tab-ordini .filters{gap:8px;}
+#tab-ordini .filters .search-wrap{flex:1 1 120px;min-width:0;}
+#tab-ordini .filters .search-wrap input{width:100% !important;min-width:0;padding:9px 28px 9px 11px;font-size:13px;}
+#tab-ordini .filters .btn-pdf-data,#tab-ordini .filters .btn-secondary{flex:0 0 auto;padding:9px 12px;font-size:12px;white-space:nowrap;}
+#tab-ordini .layout{grid-template-columns:minmax(0,1fr) 235px;gap:14px;}
+#tab-ordini .right-sticky{gap:12px;}
+#tab-ordini .right-card{padding:14px;}
+#tab-ordini thead th{padding:9px 3px;font-size:12px;letter-spacing:.2px;white-space:normal;line-height:1.2;}
+#tab-ordini thead th.th-act{width:auto;min-width:0;}
+#tab-ordini thead th:last-child{width:17%;}
+#tab-ordini .th-check,#tab-ordini .td-check{width:26px;padding-left:4px;padding-right:2px;}
+#tab-ordini tbody td{padding:7px 3px;font-size:13px;line-height:1.3;}
+#tab-ordini .ord-detail>td{font-size:12px;}
+#tab-ordini code.codice{font-size:12px;padding:2px 5px;letter-spacing:0;white-space:nowrap;}
+#tab-ordini .badge{padding:3px 8px;font-size:13px;white-space:nowrap;}
+#tab-ordini .ddt-cell{padding:4px 7px;font-size:11.5px;}
+#tab-ordini .ddt-cell .ddt-arr{font-size:14px;}
+#tab-ordini .ddt-delta{padding:3px 6px;font-size:11px;margin-left:4px;}
+#tab-ordini .ddt-wrap{gap:4px;}
+#tab-ordini .ddt-wrap .ddt-delta{margin-left:0;}
+#tab-ordini .btn-exp{min-width:22px;height:22px;font-size:11px;margin-right:3px;padding:0 4px;}
+#tab-ordini .btn-pdf{padding:4px 6px;font-size:10px;margin-left:3px;}
+#tab-ordini tbody .btn-danger{padding:3px 7px;font-size:11px;margin-left:3px !important;}
+#tab-ordini .btn-edit{padding:3px 6px;font-size:12px;}
+#tab-ordini .btn-hl{padding:3px 5px;font-size:12px;margin-left:3px;}
+#tab-ordini .status-card{padding:9px 12px;}
+/* schermi meno larghi: le card di stato salgono sopra la tabella, il dettaglio fornitori va sotto */
+@media (max-width:1599px){
+  #tab-ordini .layout{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
+  #tab-ordini .right-sticky{display:contents;}
+  #tab-ordini .status-card{order:1;}
+  #tab-ordini .table-wrap{order:2;grid-column:1/-1;}
+  #tab-ordini .right-card{order:3;grid-column:1/-1;}
+  #tab-ordini .right-card-list{max-height:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));column-gap:18px;}
+}
+@media (max-width:700px){
+  #tab-ordini .layout{grid-template-columns:minmax(0,1fr);}
+}
+/* titolo leggermente piu' piccolo sugli schermi stretti, cosi' l'intestazione non sborda */
+@media (min-width:901px) and (max-width:1320px){
+  .brand-name{font-size:46px;}
+}
 </style>
 </head>
 <body>
@@ -2628,7 +2674,7 @@ function renderOrdini(){
       '<td><span class="badge badge-pink">'+fmtMigliaia(g.qta)+'</span></td>'+
       '<td>\u2014</td>'+
       '<td><span class="badge">\u20ac'+fmtEuro(g.totale)+'</span></td>'+
-      '<td><span style="display:inline-flex;align-items:center;gap:8px;white-space:nowrap;"><span class="ddt-cell '+mDdtClass+'" onclick="toggleOrdine('+gi+')" title="Mostra/nascondi materiali">'+g.nDdt+' DDT \u00b7 '+fmtMigliaia(g.arrivata)+'/'+fmtMigliaia(g.qta)+'</span>'+statoBadge+'</span></td>'+
+      '<td><span class="ddt-wrap"><span class="ddt-cell '+mDdtClass+'" onclick="toggleOrdine('+gi+')" title="Mostra/nascondi materiali">'+g.nDdt+' DDT \u00b7 '+fmtMigliaia(g.arrivata)+'/'+fmtMigliaia(g.qta)+'</span>'+statoBadge+'</span></td>'+
       '</tr>';
       const dets = g.lines.map(o=>{
         const ddtList = Array.isArray(o.ddt)?o.ddt:[];
