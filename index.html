@@ -576,9 +576,81 @@ tbody tr:last-child td:last-child{border-bottom-right-radius:16px;}
 .mat-strumenti{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap;}
 .mat-strumenti input{flex:1;min-width:140px;padding:8px 10px;border:1.5px solid rgba(134,53,231,0.45);border-radius:8px;font-size:13px;font-weight:600;font-family:'Montserrat',sans-serif;}
 .mat-strumenti button{padding:7px 10px;font-size:11px;}
+
+/* ===== ACCESSO CON PASSWORD ===== */
+.blocco-app{position:fixed;inset:0;z-index:8000;display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto;background:linear-gradient(135deg,#eef4fb 0%,#f8fafc 50%,#e6f7fa 100%);}
+.blocco-app[hidden]{display:none;}
+body.bloccata>*:not(#blocco-app):not(#alert-box):not(#saving-overlay):not(#success-toast):not(script){display:none !important;}
+.blocco-card{width:100%;max-width:440px;margin:auto;background:linear-gradient(135deg,rgba(255,255,255,0.95),rgba(255,255,255,0.72));border:2px solid var(--accent);border-radius:22px;padding:26px 28px 22px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.95),0 0 24px rgba(57,224,244,0.5),0 0 60px rgba(57,224,244,0.22),0 20px 60px rgba(0,0,0,0.1);text-align:center;}
+.blocco-logo{height:72px;width:auto;margin:0 auto 4px;display:block;}
+.blocco-titolo{font-family:'Dancing Script',cursive;font-weight:700;font-size:34px;line-height:1.1;color:#0ea5b8;margin-bottom:16px;text-shadow:0 0 6px rgba(57,224,244,0.9),0 0 16px rgba(57,224,244,0.6),0 0 30px rgba(57,224,244,0.35);}
+.blocco-attesa{display:flex;flex-direction:column;align-items:center;gap:12px;padding:18px 0 10px;font-weight:700;color:var(--accent2);}
+.blocco-attesa[hidden],.blocco-card form[hidden]{display:none;}
+.blocco-card form{text-align:left;}
+.blocco-card form>label:not(.blocco-check){display:block;font-size:12px;font-weight:800;letter-spacing:.4px;color:var(--accent2);margin:12px 0 5px;}
+.blocco-sotto{font-size:17px;font-weight:800;color:var(--text);text-align:center;}
+.blocco-testo{font-size:13px;font-weight:600;color:var(--text-muted);line-height:1.5;margin-top:6px;text-align:center;}
+.blocco-testo b{color:var(--text);}
+.pass-campo{position:relative;}
+.pass-campo input{width:100%;padding:12px 48px 12px 14px;border:1.5px solid var(--accent);border-radius:10px;font-size:16px;font-weight:600;font-family:'Montserrat',sans-serif;color:var(--text);background:#fff;box-shadow:0 0 6px rgba(57,224,244,0.2);text-transform:none !important;}
+.pass-campo input:focus{outline:none;border-color:var(--accent2);box-shadow:0 0 0 3px rgba(57,224,244,0.22);}
+.occhio{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:40px;height:40px;border:none;background:none;border-radius:8px;color:var(--accent2);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;}
+.occhio:hover{background:rgba(57,224,244,0.12);}
+.occhio:focus-visible{outline:2px solid var(--accent2);outline-offset:1px;}
+.occhio svg{width:22px;height:22px;display:block;}
+.occhio .occhio-sbarrato{display:none;}
+.occhio[aria-pressed="true"] .occhio-aperto{display:none;}
+.occhio[aria-pressed="true"] .occhio-sbarrato{display:block;}
+.blocco-check{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;}
+.blocco-check input{width:16px;height:16px;accent-color:var(--accent2);}
+.blocco-errore{margin-top:12px;padding:10px 12px;border-radius:10px;font-size:13px;font-weight:700;background:#fee2e2;color:#b91c1c;border:1px solid #fca5a5;}
+.blocco-errore[hidden]{display:none;}
+.blocco-btn{width:100%;margin-top:16px;padding:13px 18px;font-size:15px;}
+.blocco-btn[disabled]{opacity:.6;cursor:not-allowed;}
+.blocco-link{display:block;margin:12px auto 0;background:none;border:none;color:var(--accent2);font-size:13px;font-weight:700;cursor:pointer;font-family:'Montserrat',sans-serif;text-decoration:underline;text-underline-offset:3px;}
+.blocco-link[hidden]{display:none;}
+.side-accesso{display:flex;flex-direction:column;gap:6px;margin-top:18px;}
+.side-accesso[hidden]{display:none;}
+.side-btn{display:flex;align-items:center;gap:9px;width:100%;padding:9px 14px;border-radius:10px;border:1.5px solid rgba(57,224,244,0.5);background:linear-gradient(135deg,rgba(255,255,255,0.8),rgba(255,255,255,0.45));color:#0b6d7c;font-size:12px;font-weight:700;letter-spacing:.3px;cursor:pointer;font-family:'Montserrat',sans-serif;box-shadow:inset 0 1px 0 rgba(255,255,255,0.9);text-align:left;}
+.side-btn:hover{border-color:var(--accent2);background:rgba(57,224,244,0.14);}
+.side-btn svg{width:16px;height:16px;flex-shrink:0;}
+#modal-password .fg{margin-bottom:12px;}
+@media(max-width:800px){.side-accesso{flex-direction:row;margin-top:8px;}.side-btn{width:auto;}}
+@media(max-width:480px){.blocco-card{padding:22px 18px 18px;}.blocco-titolo{font-size:28px;}.blocco-logo{height:58px;}}
 </style>
 </head>
-<body>
+<body class="bloccata">
+<!-- ACCESSO: schermata di blocco -->
+<div class="blocco-app" id="blocco-app">
+  <div class="blocco-card">
+    <img class="blocco-logo" id="blocco-logo" alt="DiMar Group">
+    <div class="blocco-titolo">Materiali Consumabili (Valentano)</div>
+    <div class="blocco-attesa" id="blocco-attesa"><div class="spinner" style="width:38px;height:38px;border-width:5px;"></div><span>Controllo accesso…</span></div>
+    <form id="blocco-login" hidden onsubmit="inviaLogin(event)">
+      <label for="acc-password">Password</label>
+      <div class="pass-campo"><input type="password" id="acc-password" autocomplete="current-password" autocapitalize="off" spellcheck="false"><button type="button" class="occhio" data-occhio="acc-password" aria-label="Mostra la password" aria-pressed="false"><svg class="occhio-aperto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg><svg class="occhio-sbarrato" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1C11 5 11.5 5 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.3 4.2"/><path d="M6.2 6.3C3.6 8.1 2 12 2 12s3.6 7 10 7c1.6 0 3-.4 4.3-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg></button></div>
+      <label class="blocco-check"><input type="checkbox" id="acc-ricorda" checked> Ricordami su questo dispositivo</label>
+      <div class="blocco-errore" id="acc-errore" hidden role="alert"></div>
+      <button type="submit" class="btn-primary blocco-btn" id="acc-entra">Entra</button>
+      <button type="button" class="blocco-link" onclick="mostraBlocco('reimposta')">Password dimenticata?</button>
+    </form>
+    <form id="blocco-imposta" hidden onsubmit="inviaImposta(event)">
+      <div class="blocco-sotto" id="imp-titolo">Crea la password dell'app</div>
+      <p class="blocco-testo" id="imp-testo"></p>
+      <label for="imp-chiave">Chiave amministratore</label>
+      <div class="pass-campo"><input type="password" id="imp-chiave" autocomplete="off" autocapitalize="off" spellcheck="false"><button type="button" class="occhio" data-occhio="imp-chiave" aria-label="Mostra la password" aria-pressed="false"><svg class="occhio-aperto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg><svg class="occhio-sbarrato" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1C11 5 11.5 5 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.3 4.2"/><path d="M6.2 6.3C3.6 8.1 2 12 2 12s3.6 7 10 7c1.6 0 3-.4 4.3-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg></button></div>
+      <label for="imp-nuova">Nuova password (almeno 8 caratteri)</label>
+      <div class="pass-campo"><input type="password" id="imp-nuova" autocomplete="new-password" autocapitalize="off" spellcheck="false"><button type="button" class="occhio" data-occhio="imp-nuova" aria-label="Mostra la password" aria-pressed="false"><svg class="occhio-aperto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg><svg class="occhio-sbarrato" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1C11 5 11.5 5 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.3 4.2"/><path d="M6.2 6.3C3.6 8.1 2 12 2 12s3.6 7 10 7c1.6 0 3-.4 4.3-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg></button></div>
+      <label for="imp-ripeti">Ripeti la password</label>
+      <div class="pass-campo"><input type="password" id="imp-ripeti" autocomplete="new-password" autocapitalize="off" spellcheck="false"><button type="button" class="occhio" data-occhio="imp-ripeti" aria-label="Mostra la password" aria-pressed="false"><svg class="occhio-aperto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg><svg class="occhio-sbarrato" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1C11 5 11.5 5 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.3 4.2"/><path d="M6.2 6.3C3.6 8.1 2 12 2 12s3.6 7 10 7c1.6 0 3-.4 4.3-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg></button></div>
+      <label class="blocco-check"><input type="checkbox" id="imp-ricorda" checked> Ricordami su questo dispositivo</label>
+      <div class="blocco-errore" id="imp-errore" hidden role="alert"></div>
+      <button type="submit" class="btn-primary blocco-btn" id="imp-salva">Salva ed entra</button>
+      <button type="button" class="blocco-link" id="imp-indietro" onclick="mostraBlocco('login')">Torna all'accesso</button>
+      <button type="button" class="blocco-link" id="imp-ricarica" onclick="location.reload()">La password è già stata creata? Ricarica</button>
+    </form>
+  </div>
+</div>
 <div id="alert-box" class="alert-box"></div>
 <div class="saving-overlay" id="saving-overlay">
   <div class="saving-card">
@@ -633,6 +705,10 @@ tbody tr:last-child td:last-child{border-bottom-right-radius:16px;}
     Richieste
     <span class="tab-badge" id="badge-richieste" hidden>0</span>
   </button>
+</div>
+<div class="side-accesso" id="side-accesso" hidden>
+  <button class="side-btn" onclick="apriCambiaPassword()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M14 9l2 2"/></svg>Cambia password</button>
+  <button class="side-btn" onclick="esciApp()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><path d="M15 8l4 4-4 4M19 12H9"/></svg>Esci</button>
 </div>
 </aside>
 <main class="content">
@@ -1073,6 +1149,20 @@ tbody tr:last-child td:last-child{border-bottom-right-radius:16px;}
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeModal('modal-linea')">Annulla</button>
       <button class="btn-viola" onclick="salvaLinea()">Salva linea</button>
+    </div>
+  </div>
+</div>
+<!-- MODAL CAMBIA PASSWORD -->
+<div class="modal-overlay" id="modal-password">
+  <div class="modal" style="max-width:460px;">
+    <div class="modal-title">Cambia password</div>
+    <div class="fg"><label for="cp-attuale">Password attuale</label><div class="pass-campo"><input type="password" id="cp-attuale" autocomplete="current-password" autocapitalize="off" spellcheck="false"><button type="button" class="occhio" data-occhio="cp-attuale" aria-label="Mostra la password" aria-pressed="false"><svg class="occhio-aperto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg><svg class="occhio-sbarrato" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1C11 5 11.5 5 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.3 4.2"/><path d="M6.2 6.3C3.6 8.1 2 12 2 12s3.6 7 10 7c1.6 0 3-.4 4.3-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg></button></div></div>
+    <div class="fg"><label for="cp-nuova">Nuova password (almeno 8 caratteri)</label><div class="pass-campo"><input type="password" id="cp-nuova" autocomplete="new-password" autocapitalize="off" spellcheck="false"><button type="button" class="occhio" data-occhio="cp-nuova" aria-label="Mostra la password" aria-pressed="false"><svg class="occhio-aperto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg><svg class="occhio-sbarrato" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1C11 5 11.5 5 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.3 4.2"/><path d="M6.2 6.3C3.6 8.1 2 12 2 12s3.6 7 10 7c1.6 0 3-.4 4.3-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg></button></div></div>
+    <div class="fg"><label for="cp-ripeti">Ripeti la nuova password</label><div class="pass-campo"><input type="password" id="cp-ripeti" autocomplete="new-password" autocapitalize="off" spellcheck="false"><button type="button" class="occhio" data-occhio="cp-ripeti" aria-label="Mostra la password" aria-pressed="false"><svg class="occhio-aperto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg><svg class="occhio-sbarrato" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1C11 5 11.5 5 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.3 4.2"/><path d="M6.2 6.3C3.6 8.1 2 12 2 12s3.6 7 10 7c1.6 0 3-.4 4.3-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg></button></div></div>
+    <div class="modal-info">Dopo il cambio, gli altri dispositivi dovranno rientrare con la nuova password.</div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('modal-password')">Annulla</button>
+      <button class="btn-primary" onclick="salvaCambioPassword()">Salva</button>
     </div>
   </div>
 </div>
@@ -3251,7 +3341,7 @@ async function apiFetch(pathOrUrl, options = {}){
   const url = pathOrUrl.startsWith('http') ? pathOrUrl : (cfg.url + pathOrUrl);
   const headers = Object.assign(
     { 'Content-Type': 'application/json' },
-    cfg.token ? { 'Authorization': 'Bearer ' + cfg.token } : {},
+    getTokenApp() ? { 'Authorization': 'Bearer ' + getTokenApp() } : {},
     options.headers || {}
   );
   const r = await fetch(url, Object.assign({}, options, { headers }));
@@ -3259,6 +3349,7 @@ async function apiFetch(pathOrUrl, options = {}){
   let data;
   try { data = JSON.parse(text); }
   catch(e){ throw new Error('Risposta non JSON (HTTP '+r.status+'): '+text.substring(0,100)); }
+  if(data && data.accesso === false){ accessoPerso(); throw new Error('Accesso richiesto: inserisci la password'); }
   if(!r.ok || data.ok === false) throw new Error(data.error || ('HTTP ' + r.status));
   return data;
 }
@@ -3270,7 +3361,8 @@ function jsonpGet(path, params, timeoutMs){
     const cfg = getApiConfig();
     if(!cfg.url){ reject(new Error('Worker URL non configurato')); return; }
     const cbName = '_mcvt_cb' + (_jsonpId++);
-    const qs = new URLSearchParams(Object.assign({ callback: cbName, _t: Date.now() }, params || {})).toString();
+    const tok = getTokenApp();
+    const qs = new URLSearchParams(Object.assign({ callback: cbName, _t: Date.now() }, tok ? { t: tok } : {}, params || {})).toString();
     const src = cfg.url + path + (path.indexOf('?') >= 0 ? '&' : '?') + qs;
     const script = document.createElement('script');
     let done = false;
@@ -3285,6 +3377,7 @@ function jsonpGet(path, params, timeoutMs){
 // Legge lo stato completo da D1 via JSONP
 async function fetchState(){
   const data = await jsonpGet('/api/state', {});
+  if(data && data.accesso === false){ accessoPerso(); throw new Error('Accesso richiesto: inserisci la password'); }
   if(!data || data.ok === false) throw new Error((data && data.error) || 'Risposta non valida');
   if(data.version != null) lastVersion = String(data.version);
   setTimeout(controllaRichieste, 0);
@@ -3294,6 +3387,7 @@ async function fetchState(){
 async function fetchVersion(){
   try{
     const d = await jsonpGet('/api/version', {}, 8000);
+    if(d && d.accesso === false){ accessoPerso(); return null; }
     if(d && d.ok !== false && d.version != null) return String(d.version);
   }catch(_){}
   return null;
@@ -3556,6 +3650,7 @@ document.addEventListener('visibilitychange', () => { if(!document.hidden) pollR
 async function pollRefresh(){
   const cfg = getApiConfig();
   if(!cfg.url) return;
+  if(!document.getElementById('blocco-app').hidden) return;   // schermata di accesso aperta
   if(document.hidden) return;              // scheda in background: non leggere il DB
   if(localDirty || pushInFlight) return;   // c'e' una nostra modifica in volo
   if(anyModalOpen()) return;               // utente sta editando, non disturbare
@@ -4152,10 +4247,269 @@ async function eliminaLinea(id){
 }
 
 // ===========================================================
-// BOOT (cloud-first with local fallback)
+// ACCESSO CON PASSWORD
+// La password la controlla il Worker: nella pagina non c'e' e non viene mai salvata.
+// Qui resta solo la sessione (un token a scadenza) dopo l'accesso riuscito.
 // ===========================================================
-bootCloudFirst();
+const K_TOKEN_APP = 'mcvt_app_sessione';
+let appAvviata = false;       // true dopo il primo avvio dei dati
+let appProtetta = false;      // true se sul Worker e' impostata la password
+let bloccoVista = 'attesa';   // attesa | login | prima | reimposta
+let accessoInCorso = false;
+
+function getTokenApp(){
+  try{ return sessionStorage.getItem(K_TOKEN_APP) || localStorage.getItem(K_TOKEN_APP) || ''; }catch(_){ return ''; }
+}
+function tokenAppNonScaduto(){
+  const p = getTokenApp().split('.');
+  return p.length === 4 && p[0] === 'app' && Number(p[1]) > Date.now();
+}
+function tokenRicordato(){
+  try{ return !!localStorage.getItem(K_TOKEN_APP); }catch(_){ return false; }
+}
+// "Ricordami": il token resta sul dispositivo; altrimenti vale solo finche' la scheda resta aperta
+function setTokenApp(tok, ricorda){
+  try{
+    sessionStorage.removeItem(K_TOKEN_APP); localStorage.removeItem(K_TOKEN_APP);
+    (ricorda ? localStorage : sessionStorage).setItem(K_TOKEN_APP, tok);
+  }catch(_){}
+}
+function clearTokenApp(){
+  try{ sessionStorage.removeItem(K_TOKEN_APP); localStorage.removeItem(K_TOKEN_APP); }catch(_){}
+}
+
+// Occhietto: mostra o nasconde i caratteri del campo indicato in data-occhio
+document.addEventListener('click', (ev)=>{
+  const b = ev.target.closest('[data-occhio]');
+  if(!b) return;
+  const inp = document.getElementById(b.dataset.occhio);
+  if(!inp) return;
+  const visibile = inp.type === 'password';
+  inp.type = visibile ? 'text' : 'password';
+  b.setAttribute('aria-pressed', visibile ? 'true' : 'false');
+  b.setAttribute('aria-label', visibile ? 'Nascondi la password' : 'Mostra la password');
+  inp.focus();
+});
+function nascondiCampiPassword(ids){
+  ids.forEach(id=>{
+    const inp = document.getElementById(id); if(!inp) return;
+    inp.value = ''; inp.type = 'password';
+    const b = document.querySelector('[data-occhio="'+id+'"]');
+    if(b){ b.setAttribute('aria-pressed','false'); b.setAttribute('aria-label','Mostra la password'); }
+  });
+}
+
+// Con la schermata di accesso aperta il resto della pagina sparisce (regola CSS body.bloccata):
+// non e' raggiungibile nemmeno da tastiera e sul telefono la schermata resta a grandezza piena
+function impostaInerte(on){
+  document.body.classList.toggle('bloccata', on);
+  const liberi = ['blocco-app','alert-box','saving-overlay','success-toast'];
+  Array.from(document.body.children).forEach(el=>{
+    if(el.tagName === 'SCRIPT' || liberi.indexOf(el.id) >= 0) return;
+    el.inert = on;
+  });
+}
+function erroreBlocco(id, msg){
+  const e = document.getElementById(id);
+  e.textContent = msg || ''; e.hidden = !msg;
+}
+function mostraBlocco(vista, errore){
+  bloccoVista = vista;
+  document.getElementById('blocco-app').hidden = false;
+  impostaInerte(true);
+  const imposta = (vista === 'prima' || vista === 'reimposta');
+  document.getElementById('blocco-attesa').hidden = vista !== 'attesa';
+  document.getElementById('blocco-login').hidden = vista !== 'login';
+  document.getElementById('blocco-imposta').hidden = !imposta;
+  if(vista === 'login'){
+    nascondiCampiPassword(['acc-password']);
+    erroreBlocco('acc-errore', errore);
+    setTimeout(()=>document.getElementById('acc-password').focus(), 30);
+  }
+  if(imposta){
+    nascondiCampiPassword(['imp-chiave','imp-nuova','imp-ripeti']);
+    erroreBlocco('imp-errore', errore);
+    const prima = vista === 'prima';
+    document.getElementById('imp-titolo').textContent = prima ? 'Crea la password dell’app' : 'Reimposta la password';
+    document.getElementById('imp-testo').innerHTML = prima
+      ? 'Da adesso per entrare serve una password. Per crearla occorre la <b>chiave amministratore</b>: è il valore di <b>CHIAVE_WORKER</b> scritto in cima all’Apps Script del foglio.'
+      : 'Serve la <b>chiave amministratore</b>: è il valore di <b>CHIAVE_WORKER</b> scritto in cima all’Apps Script del foglio. Tutti i dispositivi dovranno rientrare con la nuova password.';
+    document.getElementById('imp-indietro').hidden = prima;
+    document.getElementById('imp-ricarica').hidden = !prima;
+    setTimeout(()=>document.getElementById('imp-chiave').focus(), 30);
+  }
+}
+function sbloccaApp(){
+  document.getElementById('blocco-app').hidden = true;
+  impostaInerte(false);
+  document.getElementById('side-accesso').hidden = !appProtetta;
+  setStickyOffsets();
+  if(!appAvviata){
+    appAvviata = true;
+    bootCloudFirst();
+  } else {
+    // rientro dopo una sessione scaduta: riprende a sincronizzare da dove era rimasta
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(_){}
+    updateConnPill();
+    startPolling();
+    if(localDirty) pushToCloud(); else pollRefresh();
+    caricaRichieste(true);
+  }
+}
+// Il Worker ha rifiutato la sessione (scaduta, o password cambiata da un altro dispositivo)
+function accessoPerso(){
+  if(!document.getElementById('blocco-app').hidden && bloccoVista !== 'attesa') return;
+  clearTokenApp();
+  clearInterval(pollTimer);
+  appProtetta = true;
+  if(!localDirty && !pushInFlight){ try{ localStorage.removeItem(STORAGE_KEY); }catch(_){} }
+  hideSpinner();
+  mostraBlocco('login', 'Sessione scaduta: inserisci di nuovo la password.');
+}
+
+async function postAccesso(path, body){
+  let r;
+  try{ r = await fetch(getApiConfig().url + path, { method:'POST', body: JSON.stringify(body || {}) }); }
+  catch(_){ throw new Error('Connessione non riuscita. Controlla la rete e riprova.'); }
+  try{ return await r.json(); }
+  catch(_){ throw new Error('Il server non ha risposto correttamente. Riprova tra poco.'); }
+}
+
+async function inviaLogin(ev){
+  ev.preventDefault();
+  if(accessoInCorso) return;
+  const password = document.getElementById('acc-password').value;
+  if(!password){ erroreBlocco('acc-errore', 'Inserisci la password'); return; }
+  const ricorda = document.getElementById('acc-ricorda').checked;
+  const btn = document.getElementById('acc-entra');
+  accessoInCorso = true; btn.disabled = true; btn.textContent = 'Controllo…';
+  try{
+    const d = await postAccesso('/api/app/login', { password, ricorda });
+    if(d.daImpostare){ mostraBlocco('prima'); return; }
+    if(!d.ok){
+      erroreBlocco('acc-errore', d.error || 'Accesso non riuscito');
+      const c = document.getElementById('acc-password'); c.select(); c.focus();
+      return;
+    }
+    setTokenApp(d.token, ricorda);
+    appProtetta = true;
+    nascondiCampiPassword(['acc-password']);
+    sbloccaApp();
+  }catch(e){
+    erroreBlocco('acc-errore', e.message || String(e));
+  }finally{
+    accessoInCorso = false; btn.disabled = false; btn.textContent = 'Entra';
+  }
+}
+
+async function inviaImposta(ev){
+  ev.preventDefault();
+  if(accessoInCorso) return;
+  const chiave = document.getElementById('imp-chiave').value.trim();
+  const nuova = document.getElementById('imp-nuova').value;
+  const ripeti = document.getElementById('imp-ripeti').value;
+  if(!chiave){ erroreBlocco('imp-errore', 'Inserisci la chiave amministratore'); return; }
+  if(nuova.length < 8){ erroreBlocco('imp-errore', 'La password deve avere almeno 8 caratteri'); return; }
+  if(nuova !== ripeti){ erroreBlocco('imp-errore', 'Le due password non coincidono'); return; }
+  const ricorda = document.getElementById('imp-ricorda').checked;
+  const btn = document.getElementById('imp-salva');
+  accessoInCorso = true; btn.disabled = true; btn.textContent = 'Salvataggio…';
+  try{
+    const d = await postAccesso('/api/app/imposta', { chiave, password: nuova, ricorda });
+    if(!d.ok){ erroreBlocco('imp-errore', d.error || 'Salvataggio non riuscito'); return; }
+    setTokenApp(d.token, ricorda);
+    appProtetta = true;
+    nascondiCampiPassword(['imp-chiave','imp-nuova','imp-ripeti']);
+    sbloccaApp();
+    showSuccess('Password salvata!');
+  }catch(e){
+    erroreBlocco('imp-errore', e.message || String(e));
+  }finally{
+    accessoInCorso = false; btn.disabled = false; btn.textContent = 'Salva ed entra';
+  }
+}
+
+function apriCambiaPassword(){
+  nascondiCampiPassword(['cp-attuale','cp-nuova','cp-ripeti']);
+  openModal('modal-password');
+  setTimeout(()=>document.getElementById('cp-attuale').focus(), 50);
+}
+async function salvaCambioPassword(){
+  if(accessoInCorso) return;
+  const attuale = document.getElementById('cp-attuale').value;
+  const nuova = document.getElementById('cp-nuova').value;
+  const ripeti = document.getElementById('cp-ripeti').value;
+  if(!attuale){ showAlert('Inserisci la password attuale','err'); return; }
+  if(nuova.length < 8){ showAlert('La nuova password deve avere almeno 8 caratteri','err'); return; }
+  if(nuova !== ripeti){ showAlert('Le due password nuove non coincidono','err'); return; }
+  accessoInCorso = true;
+  showSpinner('Cambio password...');
+  try{
+    const ricorda = tokenRicordato();
+    const d = await apiFetch('/api/app/cambia', { method:'POST', body: JSON.stringify({ attuale, nuova, ricorda }) });
+    setTokenApp(d.token, ricorda);
+    nascondiCampiPassword(['cp-attuale','cp-nuova','cp-ripeti']);
+    closeModal('modal-password');
+    showSuccess('Password cambiata!');
+  }catch(e){
+    hideSpinner();
+    showAlert(e.message || String(e), 'err');
+  }finally{
+    accessoInCorso = false;
+  }
+}
+
+async function esciApp(){
+  showSpinner('Uscita...');
+  let pulito = true;
+  try{ pulito = await svuotaCodaLocale(); }catch(_){ pulito = false; }
+  hideSpinner();
+  if(!pulito){
+    if(!await showConfirm('Alcune modifiche non sono ancora arrivate al server (manca la connessione?). Se esci adesso vanno perse. Uscire comunque?','Modifiche non salvate','Esci')) return;
+  }
+  // uscendo, sul dispositivo non resta la copia dei dati
+  try{ localStorage.removeItem(STORAGE_KEY); }catch(_){}
+  clearTokenApp();
+  uscitaVoluta = true;
+  location.reload();
+}
+
+// Chiusura o ricarica della pagina con modifiche non ancora arrivate al server: il browser chiede conferma
+let uscitaVoluta = false;
+window.addEventListener('beforeunload', (ev)=>{
+  if(uscitaVoluta) return;
+  if(localDirty || pushInFlight){ ev.preventDefault(); ev.returnValue = ''; }
+});
+
+// Avvio: prima l'accesso, poi i dati
+async function avvioApp(){
+  try{ document.getElementById('blocco-logo').src = document.querySelector('.brand-wordmark').src; }catch(_){}
+  mostraBlocco('attesa');
+  let st = null;
+  try{ st = await jsonpGet('/api/app/stato', {}, 10000); }catch(_){ st = null; }
+  if(st && st.ok === false && /Endpoint non trovato/i.test(st.error || '')){
+    // Worker non ancora aggiornato: nessuna password disponibile, l'app si apre come prima
+    appProtetta = false; sbloccaApp(); return;
+  }
+  if(!st || st.ok === false){
+    // server non raggiungibile: chi era gia' entrato su questo dispositivo lavora con i dati locali, come prima
+    if(tokenAppNonScaduto()){ appProtetta = true; sbloccaApp(); return; }
+    appProtetta = true;
+    mostraBlocco('login', 'Connessione non riuscita. Controlla la rete e riprova.');
+    return;
+  }
+  appProtetta = !!st.protetta;
+  if(!st.protetta){ mostraBlocco('prima'); return; }
+  if(st.valida){ sbloccaApp(); return; }
+  clearTokenApp();
+  mostraBlocco('login');
+}
+
+// ===========================================================
+// BOOT: prima l'accesso con password, poi i dati (cloud-first con copia locale)
+// ===========================================================
 setupFabDrag();
+avvioApp();
 </script>
 </body>
 </html>
