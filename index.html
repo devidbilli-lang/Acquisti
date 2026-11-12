@@ -1156,10 +1156,10 @@ body.bloccata>*:not(#blocco-app):not(#alert-box):not(#saving-overlay):not(#succe
 <div class="modal-overlay" id="modal-password">
   <div class="modal" style="max-width:460px;">
     <div class="modal-title">Cambia password</div>
-    <div class="fg"><label for="cp-attuale">Password attuale</label><div class="pass-campo"><input type="password" id="cp-attuale" autocomplete="current-password" autocapitalize="off" spellcheck="false"><button type="button" class="occhio" data-occhio="cp-attuale" aria-label="Mostra la password" aria-pressed="false"><svg class="occhio-aperto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg><svg class="occhio-sbarrato" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1C11 5 11.5 5 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.3 4.2"/><path d="M6.2 6.3C3.6 8.1 2 12 2 12s3.6 7 10 7c1.6 0 3-.4 4.3-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg></button></div></div>
+    <div class="fg"><label for="cp-chiave">Chiave amministratore</label><div class="pass-campo"><input type="password" id="cp-chiave" autocomplete="off" autocapitalize="off" spellcheck="false"><button type="button" class="occhio" data-occhio="cp-chiave" aria-label="Mostra la password" aria-pressed="false"><svg class="occhio-aperto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg><svg class="occhio-sbarrato" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1C11 5 11.5 5 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.3 4.2"/><path d="M6.2 6.3C3.6 8.1 2 12 2 12s3.6 7 10 7c1.6 0 3-.4 4.3-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg></button></div></div>
     <div class="fg"><label for="cp-nuova">Nuova password (almeno 8 caratteri)</label><div class="pass-campo"><input type="password" id="cp-nuova" autocomplete="new-password" autocapitalize="off" spellcheck="false"><button type="button" class="occhio" data-occhio="cp-nuova" aria-label="Mostra la password" aria-pressed="false"><svg class="occhio-aperto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg><svg class="occhio-sbarrato" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1C11 5 11.5 5 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.3 4.2"/><path d="M6.2 6.3C3.6 8.1 2 12 2 12s3.6 7 10 7c1.6 0 3-.4 4.3-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg></button></div></div>
     <div class="fg"><label for="cp-ripeti">Ripeti la nuova password</label><div class="pass-campo"><input type="password" id="cp-ripeti" autocomplete="new-password" autocapitalize="off" spellcheck="false"><button type="button" class="occhio" data-occhio="cp-ripeti" aria-label="Mostra la password" aria-pressed="false"><svg class="occhio-aperto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg><svg class="occhio-sbarrato" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1C11 5 11.5 5 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.3 4.2"/><path d="M6.2 6.3C3.6 8.1 2 12 2 12s3.6 7 10 7c1.6 0 3-.4 4.3-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg></button></div></div>
-    <div class="modal-info">Dopo il cambio, gli altri dispositivi dovranno rientrare con la nuova password.</div>
+    <div class="modal-info">La password si cambia solo con la <b>chiave amministratore</b> (il valore di CHIAVE_WORKER in cima all'Apps Script). Dopo il cambio, gli altri dispositivi dovranno rientrare con la nuova password.</div>
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeModal('modal-password')">Annulla</button>
       <button class="btn-primary" onclick="salvaCambioPassword()">Salva</button>
@@ -4430,25 +4430,27 @@ async function inviaImposta(ev){
 }
 
 function apriCambiaPassword(){
-  nascondiCampiPassword(['cp-attuale','cp-nuova','cp-ripeti']);
+  nascondiCampiPassword(['cp-chiave','cp-nuova','cp-ripeti']);
   openModal('modal-password');
-  setTimeout(()=>document.getElementById('cp-attuale').focus(), 50);
+  setTimeout(()=>document.getElementById('cp-chiave').focus(), 50);
 }
+// Il cambio richiede la chiave amministratore: chi conosce solo la password dell'app non puo' cambiarla
 async function salvaCambioPassword(){
   if(accessoInCorso) return;
-  const attuale = document.getElementById('cp-attuale').value;
+  const chiave = document.getElementById('cp-chiave').value.trim();
   const nuova = document.getElementById('cp-nuova').value;
   const ripeti = document.getElementById('cp-ripeti').value;
-  if(!attuale){ showAlert('Inserisci la password attuale','err'); return; }
+  if(!chiave){ showAlert('Inserisci la chiave amministratore','err'); return; }
   if(nuova.length < 8){ showAlert('La nuova password deve avere almeno 8 caratteri','err'); return; }
   if(nuova !== ripeti){ showAlert('Le due password nuove non coincidono','err'); return; }
   accessoInCorso = true;
   showSpinner('Cambio password...');
   try{
     const ricorda = tokenRicordato();
-    const d = await apiFetch('/api/app/cambia', { method:'POST', body: JSON.stringify({ attuale, nuova, ricorda }) });
+    const d = await postAccesso('/api/app/imposta', { chiave, password: nuova, ricorda });
+    if(!d.ok) throw new Error(d.error || 'Cambio non riuscito');
     setTokenApp(d.token, ricorda);
-    nascondiCampiPassword(['cp-attuale','cp-nuova','cp-ripeti']);
+    nascondiCampiPassword(['cp-chiave','cp-nuova','cp-ripeti']);
     closeModal('modal-password');
     showSuccess('Password cambiata!');
   }catch(e){
