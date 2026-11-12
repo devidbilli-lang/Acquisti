@@ -500,6 +500,7 @@ tbody tr:last-child td:last-child{border-bottom-right-radius:16px;}
 .mail-chip.coda{background:#fef3c7;color:#92400e;border-color:#fcd34d;}
 .mail-chip.err{background:#fee2e2;color:#dc2626;border-color:#fca5a5;cursor:pointer;}
 .mail-chip.no{background:#f1efe8;color:#6b6b8a;border-color:#d3d1c7;}
+.ddt-delta.delta-grigio{background:#f1efe8;color:#6b6b8a;border:1px solid #d3d1c7;}
 .giac-ok{font-weight:800;color:#0e5a37;}
 .giac-ko{font-weight:800;color:#dc2626;}
 .ord-detail .giac-ok{color:#0e5a37 !important;}
@@ -3807,7 +3808,8 @@ const TITOLO_BASE = document.title;
 const RICH_STATO = {
   in_attesa: ['In attesa', 'delta-yellow'],
   evasa: ['Evasa', 'delta-green'],
-  rifiutata: ['Rifiutata', 'delta-red']
+  rifiutata: ['Rifiutata', 'delta-red'],
+  annullata: ['Annullata dalla linea', 'delta-grigio']
 };
 
 function fmtDataOra(iso){
@@ -3876,6 +3878,7 @@ function toggleRichiesta(id){
 function htmlMailChip(r){
   if(r.mailStato==='inviata') return '<span class="mail-chip ok" title="Notifica mail inviata'+(r.mailInfo?' a '+escapeHtml(r.mailInfo):'')+'">✉</span>';
   if(r.mailStato==='da_inviare') return '<span class="mail-chip coda" title="Notifica mail in coda: parte entro un minuto">✉</span>';
+  if(r.mailStato==='annullata') return '<span class="mail-chip no" title="Eliminata dalla linea prima dell\'invio della mail">\u2709</span>';
   if(r.mailStato==='errore') return '<span class="mail-chip err" onclick="rinotificaRichiesta('+r.id+')" title="Mail non inviata'+(r.mailInfo?': '+escapeHtml(r.mailInfo):'')+'. Clicca per riprovare">✉</span>';
   return '<span class="mail-chip no" title="Nessuna mail impostata per questa linea">✉</span>';
 }
@@ -3915,7 +3918,8 @@ function renderRichieste(){
       let azioni = '<button class="btn-exp" onclick="toggleRichiesta('+r.id+')" title="Mostra/nascondi materiali">'+(aperta?'▾':'▸')+'</button>';
       if(r.stato==='in_attesa'){
         azioni += '<button class="btn-mini evadi" onclick="apriEvadi('+r.id+')" title="Consegna i materiali e scala le giacenze">Evadi</button>'+
-                  '<button class="btn-mini rifiuta" onclick="apriRifiuta('+r.id+')" title="Chiudi la richiesta senza consegnare">Rifiuta</button>';
+                  '<button class="btn-mini rifiuta" onclick="apriRifiuta('+r.id+')" title="Chiudi la richiesta senza consegnare">Rifiuta</button>'+
+                  '<button class="btn-danger" onclick="eliminaRichiesta('+r.id+')" title="Elimina la richiesta">\u00d7</button>';
       } else {
         if(r.stato==='rifiutata') azioni += '<button class="btn-mini riapri" onclick="riapriRichiesta('+r.id+')" title="Rimetti la richiesta in attesa">Riapri</button>';
         azioni += '<button class="btn-danger" onclick="eliminaRichiesta('+r.id+')" title="Elimina la richiesta dall\'elenco">×</button>';
@@ -4077,7 +4081,8 @@ function riapriRichiesta(id){
 }
 async function eliminaRichiesta(id){
   const r = richData.richieste.find(x=>x.id===id); if(!r) return;
-  const extra = r.stato==='evasa' ? ' Le consegne già registrate restano.' : '';
+  const extra = r.stato==='evasa' ? ' Le consegne già registrate restano.'
+              : (r.stato==='in_attesa' ? ' È ancora in attesa: sparirà anche dall\'elenco della linea, senza consegne.' : '');
   if(!await showConfirm('Eliminare la richiesta '+r.numero+' dall\'elenco?'+extra,'Elimina richiesta')) return;
   eseguiSuRichiesta('/api/gestione/richiesta-elimina', { id }, 'Eliminata!', 'Eliminazione...');
 }
