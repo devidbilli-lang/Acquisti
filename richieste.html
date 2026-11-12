@@ -133,7 +133,11 @@ button{cursor:pointer;}
   font-size:16px;font-weight:600;
 }
 .campo:focus{outline:none;border-color:var(--viola);box-shadow:0 0 0 3px rgba(134,53,231,0.18);}
-.occhio{flex-shrink:0;width:48px;border-radius:12px;border:1.5px solid var(--bordo);background:#fff;font-size:13px;font-weight:700;color:var(--testo-2);}
+.occhio{flex-shrink:0;width:50px;border-radius:12px;border:1.5px solid var(--bordo);background:#fff;color:var(--viola-scuro);display:flex;align-items:center;justify-content:center;padding:0;}
+.occhio svg{width:22px;height:22px;display:block;}
+.occhio .occhio-sbarrato{display:none;}
+.occhio[aria-pressed="true"] .occhio-aperto{display:none;}
+.occhio[aria-pressed="true"] .occhio-sbarrato{display:block;}
 .pass-box .btn{width:100%;margin-top:14px;padding:13px;font-size:15px;}
 .errore{
   margin-top:12px;padding:10px 12px;border-radius:10px;font-weight:700;font-size:14px;
@@ -520,7 +524,7 @@ function disegnaAccesso(errore) {
       '<label for="password">Password di ' + esc(scelta.nome) + '</label>' +
       '<div class="pass-riga">' +
         '<input class="campo" id="password" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" required>' +
-        '<button class="occhio" type="button" id="occhio" aria-label="Mostra o nascondi la password">Mostra</button>' +
+        '<button class="occhio" type="button" id="occhio" aria-label="Mostra la password" aria-pressed="false"><svg class="occhio-aperto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg><svg class="occhio-sbarrato" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1C11 5 11.5 5 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.3 4.2"/><path d="M6.2 6.3C3.6 8.1 2 12 2 12s3.6 7 10 7c1.6 0 3-.4 4.3-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg></button>' +
       '</div>' +
       (errore ? '<div class="errore" id="err-accesso">' + esc(errore) + '</div>' : '') +
       '<button class="btn btn-viola" type="submit" id="btn-entra">Entra</button>' +
@@ -533,9 +537,10 @@ function disegnaAccesso(errore) {
   if (scelta) {
     const p = $('password');
     $('occhio').onclick = () => {
-      const visibile = p.type === 'text';
-      p.type = visibile ? 'password' : 'text';
-      $('occhio').textContent = visibile ? 'Mostra' : 'Nascondi';
+      const mostra = p.type === 'password';
+      p.type = mostra ? 'text' : 'password';
+      $('occhio').setAttribute('aria-pressed', mostra ? 'true' : 'false');
+      $('occhio').setAttribute('aria-label', mostra ? 'Nascondi la password' : 'Mostra la password');
       p.focus();
     };
     $('form-accesso').onsubmit = entra;
