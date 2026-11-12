@@ -4139,6 +4139,7 @@ function renderLinee(){
     let tag = '';
     if(!l.attiva) tag += '<span class="tag off">Disattivata</span>';
     if(!l.haPassword) tag += '<span class="tag warn">Senza password</span>';
+    else if(l.daReimpostare) tag += '<span class="tag warn">Reimposta password</span>';
     if(!l.email) tag += '<span class="tag warn">Senza mail</span>';
     return '<div class="linea-riga">'+
       '<div class="info"><div class="nm">'+escapeHtml(l.nome)+tag+'</div>'+
@@ -4155,7 +4156,7 @@ function apriLinea(id){
   document.getElementById('m-l-nome').value = l ? l.nome : '';
   const p = document.getElementById('m-l-pass');
   p.value = '';
-  p.placeholder = l ? 'Lascia vuoto per non cambiarla' : 'Almeno 4 caratteri';
+  p.placeholder = (l && !l.daReimpostare) ? 'Lascia vuoto per non cambiarla' : 'Almeno 6 caratteri';
   document.getElementById('m-l-pass-lbl').textContent = l ? 'Nuova password' : 'Password *';
   document.getElementById('m-l-email').value = l ? (l.email||'') : '';
   document.getElementById('m-l-attiva').checked = l ? !!l.attiva : true;
@@ -4212,7 +4213,7 @@ async function salvaLinea(){
   const attiva = document.getElementById('m-l-attiva').checked;
   if(!nome){ showAlert('Inserisci il nome della linea','err'); return; }
   if(!editingLineaId && !password){ showAlert('Scegli una password per la linea','err'); return; }
-  if(password && password.length < 4){ showAlert('La password deve avere almeno 4 caratteri','err'); return; }
+  if(password && password.length < 6){ showAlert('La password deve avere almeno 6 caratteri','err'); return; }
   const materiali = state.anagrafica.filter(a=>lineaMatSel.has(a.id)).map(a=>a.id);
   if(!tutti && !materiali.length){ showAlert('Scegli almeno un materiale, oppure seleziona “tutti i materiali”','err'); return; }
   if(gestioneOccupata) return;
