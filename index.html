@@ -548,6 +548,10 @@ tbody tr:last-child td:last-child{border-bottom-right-radius:16px;}
 .modal-viola .fg label{color:#8635e7;}
 .modal-viola .fg input,.modal-viola .fg textarea{border-color:#8635e7;color:#3d1a70;box-shadow:0 0 6px rgba(134,53,231,0.22);text-transform:none;}
 .modal-viola .fg input:focus,.modal-viola .fg textarea:focus{border-color:#8635e7;box-shadow:0 0 0 3px rgba(134,53,231,0.18);}
+.modal-viola .fg select{border-color:#8635e7;color:#3d1a70;box-shadow:0 0 6px rgba(134,53,231,0.22);text-transform:none;cursor:pointer;}
+.modal-viola .fg select:focus{border-color:#8635e7;box-shadow:0 0 0 3px rgba(134,53,231,0.18);}
+.modal-viola .fg select:disabled{color:#9a8fb5;background:#f6f3fb;cursor:default;box-shadow:none;}
+.nota-campo{align-self:end;padding:0 2px 13px;font-size:12px;font-weight:600;line-height:1.35;color:#6b5a8e;}
 .modal-viola .btn-secondary{border-color:#8635e7;color:#8635e7;box-shadow:inset 0 1px 0 rgba(255,255,255,0.92),0 2px 8px rgba(134,53,231,0.3);}
 .modal-viola .codice{background:rgba(134,53,231,0.16);color:#8635e7;}
 .ev-tab{width:100%;border-collapse:collapse;margin-bottom:6px;}
@@ -891,7 +895,8 @@ body.bloccata>*:not(#blocco-app):not(#alert-box):not(#saving-overlay):not(#succe
       <input type="text" id="f-r-materiale" placeholder="Materiale..." style="width:180px;" oninput="filtra()"/>
       <button class="clear-btn" onclick="document.getElementById('f-r-materiale').value='';filtra()">×</button>
     </div>
-    <button class="btn-viola" onclick="apriLinee()" title="Crea le linee, imposta password, mail e materiali">Linee e password</button>
+    <button class="btn-viola" onclick="apriLinea(null)" title="Crea una linea: nome, password, mail e materiali">+ Aggiungi Linea</button>
+    <button class="btn-secondary" onclick="apriLinee()" title="Elenco delle linee: modifica, password, indirizzo della pagina">Gestisci linee</button>
     <button class="btn-secondary" onclick="caricaRichieste(false)" title="Rileggi le richieste dal server">↻ Aggiorna</button>
   </div>
   <div class="layout">
@@ -1106,10 +1111,10 @@ body.bloccata>*:not(#blocco-app):not(#alert-box):not(#saving-overlay):not(#succe
     </div>
   </div>
 </div>
-<!-- MODAL LINEE E PASSWORD -->
+<!-- MODAL GESTISCI LINEE -->
 <div class="modal-overlay modal-viola" id="modal-linee">
   <div class="modal" style="max-width:640px;">
-    <div class="modal-title">Linee e password</div>
+    <div class="modal-title">Gestisci linee</div>
     <div class="fg"><label>Indirizzo della pagina per le linee (correggilo qui se la pubblichi altrove)</label></div>
     <div class="link-box">
       <input type="text" id="m-linee-link" onchange="salvaLinkLinee()" autocomplete="off" autocapitalize="off" spellcheck="false">
@@ -1117,7 +1122,7 @@ body.bloccata>*:not(#blocco-app):not(#alert-box):not(#saving-overlay):not(#succe
     </div>
     <div id="m-linee-lista"></div>
     <div class="modal-actions" style="justify-content:space-between;">
-      <button class="btn-viola" onclick="apriLinea(null)">+ Nuova linea</button>
+      <button class="btn-viola" onclick="apriLinea(null)">+ Aggiungi Linea</button>
       <button class="btn-secondary" onclick="closeModal('modal-linee')">Chiudi</button>
     </div>
   </div>
@@ -1125,10 +1130,12 @@ body.bloccata>*:not(#blocco-app):not(#alert-box):not(#saving-overlay):not(#succe
 <!-- MODAL LINEA (nuova / modifica) -->
 <div class="modal-overlay modal-viola" id="modal-linea">
   <div class="modal" style="max-width:640px;">
-    <div class="modal-title" id="m-l-title">Nuova linea</div>
+    <div class="modal-title" id="m-l-title">Aggiungi linea</div>
     <div class="modal-grid" style="grid-template-columns:1fr 1fr;">
-      <div class="fg"><label>Nome linea *</label><input type="text" id="m-l-nome" maxlength="60" list="dl-linee" autocomplete="off"><datalist id="dl-linee"></datalist></div>
+      <div class="fg"><label>Nome linea *</label><input type="text" id="m-l-nome" maxlength="60" placeholder="Scrivi il nome" autocomplete="off" oninput="sincronizzaElencoLinea()"></div>
+      <div class="fg"><label>Oppure scegli dall'elenco</label><select id="m-l-elenco" onchange="scegliNomeLinea()"></select></div>
       <div class="fg"><label id="m-l-pass-lbl">Password *</label><input type="text" id="m-l-pass" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+      <div class="nota-campo">Ogni linea deve avere una password diversa.</div>
     </div>
     <div class="fg" style="margin-bottom:14px;"><label>Mail di chi gestisce gli ordini della linea</label><input type="text" id="m-l-email" placeholder="nome@azienda.it (più indirizzi separati da virgola)" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
     <div class="mat-scelta">
@@ -3907,7 +3914,7 @@ function renderRichieste(){
   if(!lista.length){
     let msg = 'Nessuna richiesta';
     if(richErrore && !richCaricate) msg = 'Richieste non caricate: '+escapeHtml(richErrore);
-    else if(!tutte.length && !richData.linee.length) msg = 'Nessuna richiesta. Per iniziare crea le linee con “Linee e password”.';
+    else if(!tutte.length && !richData.linee.length) msg = 'Nessuna richiesta. Per iniziare crea le linee con “+ Aggiungi Linea”.';
     else if(!tutte.length) msg = 'Nessuna richiesta ricevuta dalle linee';
     tb.innerHTML = '<tr><td colspan="10" class="empty">'+msg+'</td></tr>';
   } else {
@@ -4090,7 +4097,7 @@ function rinotificaRichiesta(id){
   eseguiSuRichiesta('/api/gestione/rinotifica', { id }, 'Mail rimessa in coda');
 }
 
-// ---------- Linee e password ----------
+// ---------- Linee ----------
 // Indirizzo della pagina per le linee: quello salvato, altrimenti richieste.html accanto a questa app
 function linkPaginaLinee(){
   if(richData.linkLinee) return richData.linkLinee;
@@ -4129,7 +4136,7 @@ function renderLinee(){
     return;
   }
   if(!richData.linee.length){
-    box.innerHTML = '<div class="modal-info">Nessuna linea. Crea la prima con <b>+ Nuova linea</b>: scegli nome, password, mail di chi gestisce gli ordini e i materiali che può richiedere.</div>';
+    box.innerHTML = '<div class="modal-info">Nessuna linea. Crea la prima con <b>+ Aggiungi Linea</b>: scegli nome, password, mail di chi gestisce gli ordini e i materiali che può richiedere.</div>';
     return;
   }
   const totMat = state.anagrafica.length;
@@ -4152,7 +4159,7 @@ function renderLinee(){
 function apriLinea(id){
   const l = id ? richData.linee.find(x=>x.id===id) : null;
   editingLineaId = l ? l.id : null;
-  document.getElementById('m-l-title').textContent = l ? 'Modifica linea' : 'Nuova linea';
+  document.getElementById('m-l-title').textContent = l ? 'Modifica linea' : 'Aggiungi linea';
   document.getElementById('m-l-nome').value = l ? l.nome : '';
   const p = document.getElementById('m-l-pass');
   p.value = '';
@@ -4165,12 +4172,44 @@ function apriLinea(id){
   document.getElementById('m-l-tutti-no').checked = !tutti;
   lineaMatSel = new Set(l ? (l.materiali||[]).map(Number) : []);
   document.getElementById('m-l-mat-cerca').value = '';
-  // suggerisce i nomi delle linee gia' usati nelle consegne
-  const usati = Array.from(new Set(state.consegne.map(c=>c.linea).filter(Boolean))).sort();
-  document.getElementById('dl-linee').innerHTML = usati.map(n=>'<option value="'+escapeHtml(n)+'">').join('');
+  riempiElencoLinea();
   aggiornaSceltaMateriali();
   openModal('modal-linea');
   setTimeout(()=>document.getElementById('m-l-nome').focus(), 50);
+}
+// Il nome si scrive liberamente oppure si prende dall'elenco: i nomi gia' usati nelle consegne
+// che non sono ancora di un'altra linea. Scegliere dall'elenco compila il campo, che resta modificabile.
+function nomiElencoLinea(){
+  const presi = new Set(richData.linee.filter(x=>x.id!==editingLineaId).map(x=>String(x.nome||'').trim().toLowerCase()));
+  const visti = new Set(), nomi = [];
+  state.consegne.forEach(c=>{
+    const n = String(c.linea||'').trim(), k = n.toLowerCase();
+    if(!n || visti.has(k) || presi.has(k)) return;
+    visti.add(k); nomi.push(n);
+  });
+  return nomi.sort((a,b)=>a.localeCompare(b,'it',{numeric:true,sensitivity:'base'}));
+}
+function riempiElencoLinea(){
+  const sel = document.getElementById('m-l-elenco');
+  const nomi = nomiElencoLinea();
+  sel.innerHTML = nomi.length
+    ? '<option value="">Scegli…</option>' + nomi.map(n=>'<option value="'+escapeHtml(n)+'">'+escapeHtml(n)+'</option>').join('')
+    : '<option value="">Nessun nome in elenco</option>';
+  sel.disabled = !nomi.length;
+  sincronizzaElencoLinea();
+}
+function scegliNomeLinea(){
+  const sel = document.getElementById('m-l-elenco');
+  if(!sel.value) return;
+  document.getElementById('m-l-nome').value = sel.value;
+  document.getElementById('m-l-pass').focus();
+}
+// mentre si scrive, l'elenco mostra il nome solo se coincide con uno dei suoi
+function sincronizzaElencoLinea(){
+  const sel = document.getElementById('m-l-elenco');
+  const v = document.getElementById('m-l-nome').value.trim().toLowerCase();
+  const uguale = Array.from(sel.options).find(o=>o.value && o.value.toLowerCase()===v);
+  sel.value = uguale ? uguale.value : '';
 }
 function aggiornaSceltaMateriali(){
   const soloScelti = document.getElementById('m-l-tutti-no').checked;
@@ -4224,7 +4263,8 @@ async function salvaLinea(){
     await caricaRichieste(true, true);
     closeModal('modal-linea');
     editingLineaId = null;
-    renderLinee();
+    if(document.getElementById('modal-linee').classList.contains('open')) renderLinee();
+    else apriLinee();   // aggiunta dal pulsante della scheda: mostra la linea appena creata
     showSuccess('Linea salvata!');
   }catch(e){
     hideSpinner();
