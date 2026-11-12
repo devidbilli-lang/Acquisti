@@ -580,7 +580,7 @@ function disegnaGriglia() {
   const g = $('griglia');
   if (!materiali.length) {
     g.innerHTML = '<div class="avviso-vuoto" style="grid-column:1/-1"><b>Nessun materiale abilitato per questa linea</b>' +
-      'Chiedi a chi gestisce gli ordini di aggiungerli da “Linee e password”.</div>';
+      'Chiedi a chi gestisce gli ordini di aggiungerli.</div>';
   } else if (!visibili.length) {
     g.innerHTML = '<div class="avviso-vuoto" style="grid-column:1/-1"><b>Nessun materiale trovato</b>Prova con un altro nome o con la codifica.</div>';
   } else {
