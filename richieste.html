@@ -92,41 +92,15 @@ button{cursor:pointer;}
 .btn:hover:not([disabled]){filter:brightness(1.05);}
 
 /* ---------- accesso ---------- */
-.accesso{max-width:880px;margin:6vh auto 0;text-align:center;}
-.accesso h1{font-size:26px;font-weight:800;margin-bottom:6px;}
-.accesso .sotto{color:var(--testo-2);font-weight:500;margin-bottom:26px;}
-.linee{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;margin-bottom:26px;}
-.linea-tile{
-  flex:0 1 200px;min-height:86px;padding:18px 14px;border-radius:18px;font-size:17px;font-weight:800;line-height:1.25;
-  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-  background:linear-gradient(135deg,rgba(134,53,231,0.22),rgba(134,53,231,0.07));
-  border:2px solid rgba(134,53,231,0.42);color:#6a26be;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,0.75),0 2px 12px rgba(134,53,231,0.22);
-  transition:transform .1s ease,box-shadow .15s ease;
-  overflow-wrap:anywhere;
+.accesso{max-width:460px;margin:8vh auto 0;}
+.linea-box{
+  padding:26px 28px 24px;border-radius:20px;text-align:left;
+  background:#f8fafc;border:1.5px solid #a78bfa;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.95),0 0 22px rgba(134,53,231,0.16);
 }
-.linea-tile:nth-child(even){
-  background:linear-gradient(135deg,rgba(57,224,244,0.26),rgba(57,224,244,0.08));
-  border-color:rgba(14,165,184,0.45);color:var(--ciano-testo);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,0.8),0 2px 12px rgba(57,224,244,0.25);
-}
-.linea-tile:hover{transform:translateY(-2px);}
-.linea-tile.scelta{
-  background:linear-gradient(135deg,rgba(134,53,231,0.92),rgba(96,32,180,0.75));border-color:rgba(96,32,180,0.7);color:#fff;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,0.45),0 6px 22px rgba(134,53,231,0.5);
-}
-.linea-tile:nth-child(even).scelta{
-  background:linear-gradient(135deg,rgba(57,224,244,0.95),rgba(14,165,184,0.78));border-color:rgba(14,165,184,0.75);color:#fff;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,0.55),0 6px 22px rgba(57,224,244,0.5);
-}
-.pass-box{
-  max-width:420px;margin:0 auto;padding:22px;border-radius:20px;text-align:left;
-  background:linear-gradient(135deg,rgba(255,255,255,0.88),rgba(255,255,255,0.55));
-  border:1.5px solid rgba(134,53,231,0.5);
-  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,0.95),0 0 22px rgba(134,53,231,0.22);
-}
-.pass-box label{display:block;font-weight:700;font-size:14px;margin-bottom:8px;}
+.linea-box-titolo{display:flex;align-items:center;gap:22px;font-size:30px;font-weight:800;line-height:1.1;color:var(--testo);margin-bottom:22px;}
+.linea-box-titolo::before{content:"";width:5px;height:46px;border-radius:3px;background:#7c3aed;flex-shrink:0;}
+.linea-box label{display:block;font-weight:700;font-size:14px;margin-bottom:8px;}
 .pass-riga{display:flex;gap:8px;}
 .campo{
   width:100%;padding:12px 14px;border-radius:12px;border:1.5px solid var(--bordo);background:#fff;
@@ -138,7 +112,7 @@ button{cursor:pointer;}
 .occhio .occhio-sbarrato{display:none;}
 .occhio[aria-pressed="true"] .occhio-aperto{display:none;}
 .occhio[aria-pressed="true"] .occhio-sbarrato{display:block;}
-.pass-box .btn{width:100%;margin-top:14px;padding:13px;font-size:15px;}
+.linea-box .btn{width:100%;margin-top:14px;padding:13px;font-size:15px;}
 .errore{
   margin-top:12px;padding:10px 12px;border-radius:10px;font-weight:700;font-size:14px;
   background:#fee2e2;color:#b91c1c;border:1px solid #fca5a5;
@@ -326,17 +300,15 @@ body.invio .griglia,body.invio .carrello-lista{opacity:.55;}
   .griglia{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;}
   .mat{padding:12px;min-height:138px;}
   .mat-nome{font-size:15px;}
-  .accesso{margin-top:2vh;}
 }
 @media (max-width:480px){
   .titolo{font-size:23px;text-shadow:0 0 6px rgba(57,224,244,0.9),0 0 14px rgba(57,224,244,0.6);}
   .testata .logo,.spirale{height:38px;}
   .spirale{width:38px;}
   .testata .centro{gap:8px;}
-  .linea-tile{flex:1 1 140px;min-height:68px;padding:12px 10px;font-size:15px;}
-  .linee{gap:10px;margin-bottom:18px;}
-  .accesso h1{font-size:22px;}
-  .accesso .sotto{margin-bottom:18px;}
+  .accesso{margin-top:4vh;}
+  .linea-box{padding:22px 18px 20px;}
+  .linea-box-titolo{font-size:26px;gap:16px;}
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms !important;transition-duration:.01ms !important;}
@@ -362,9 +334,16 @@ body.invio .griglia,body.invio .carrello-lista{opacity:.55;}
 
   <!-- ACCESSO -->
   <main class="accesso" id="v-accesso" hidden>
-    <h1>Scegli la tua linea</h1>
-    <p class="sotto">Poi inserisci la password della linea per richiedere i materiali.</p>
-    <div id="accesso-corpo"><div class="caricamento">Carico le linee…</div></div>
+    <form class="linea-box" id="form-accesso" autocomplete="off">
+      <div class="linea-box-titolo">Linea</div>
+      <label for="password">Password della linea</label>
+      <div class="pass-riga">
+        <input class="campo" id="password" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" required>
+        <button class="occhio" type="button" id="occhio" aria-label="Mostra la password" aria-pressed="false"><svg class="occhio-aperto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg><svg class="occhio-sbarrato" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1C11 5 11.5 5 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.3 4.2"/><path d="M6.2 6.3C3.6 8.1 2 12 2 12s3.6 7 10 7c1.6 0 3-.4 4.3-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg></button>
+      </div>
+      <div class="errore" id="err-accesso" hidden role="alert"></div>
+      <button class="btn btn-viola" type="submit" id="btn-entra">Entra</button>
+    </form>
   </main>
 
   <!-- NEGOZIO -->
@@ -445,7 +424,6 @@ body.invio .griglia,body.invio .carrello-lista{opacity:.55;}
 // Indirizzo del Worker: lo stesso dell'app principale
 const API_URL = 'https://mc-vt-api.devid-billi.workers.dev';
 const K_SESS = 'mcvt_linea_sessione';
-const K_ULTIMA = 'mcvt_linea_ultima';
 const QTA_MAX = 99999;
 
 const $ = (id) => document.getElementById(id);
@@ -457,8 +435,6 @@ const mem = {
   del(store, k) { try { store.removeItem(k); } catch (_) {} },
 };
 
-let linee = [];
-let lineaScelta = null;      // id della linea scelta nella schermata di accesso
 let sessione = null;         // { token, linea:{id,nome} }
 let materiali = [];          // [{id, nome, numeroCodifica, um}]
 let carrello = new Map();    // id materiale -> quantita'
@@ -511,87 +487,59 @@ function mostra(quale) {
 }
 
 // ---------- accesso ----------
-async function caricaLinee() {
-  const corpo = $('accesso-corpo');
-  corpo.innerHTML = '<div class="caricamento">Carico le linee…</div>';
-  try {
-    const d = await api('/api/linee/elenco');
-    if (!d.ok) throw new Error(d.error || 'Errore');
-    linee = d.linee || [];
-  } catch (e) {
-    corpo.innerHTML = '<div class="avviso-vuoto"><b>Non riesco a caricare le linee</b>' + esc(e.message) +
-      '<br><button class="btn btn-ciano" type="button" id="riprova-linee">Riprova</button></div>';
-    $('riprova-linee').onclick = caricaLinee;
-    return;
-  }
-  if (!linee.length) {
-    corpo.innerHTML = '<div class="avviso-vuoto"><b>Nessuna linea configurata</b>' +
-      'Chi gestisce il magazzino deve crearle dall’app, nella scheda Richieste, con “Linee e password”.</div>';
-    return;
-  }
-  const ultima = mem.get(localStorage, K_ULTIMA);
-  lineaScelta = linee.some((l) => l.id === ultima) ? ultima : (linee.length === 1 ? linee[0].id : null);
-  disegnaAccesso();
+// Un solo riquadro "Linea": la password dice da sola di quale linea si tratta, i nomi non compaiono.
+function preparaAccesso(errore) {
+  const p = $('password');
+  p.value = ''; p.type = 'password';
+  $('occhio').setAttribute('aria-pressed', 'false');
+  $('occhio').setAttribute('aria-label', 'Mostra la password');
+  erroreAccesso(errore);
+  setTimeout(() => p.focus({ preventScroll: true }), 30);
 }
-
-function disegnaAccesso(errore) {
-  const scelta = linee.find((l) => l.id === lineaScelta);
-  let h = '<div class="linee">' + linee.map((l) =>
-    '<button type="button" class="linea-tile' + (l.id === lineaScelta ? ' scelta' : '') + '" data-linea="' + l.id + '"' +
-    ' aria-pressed="' + (l.id === lineaScelta) + '">' + esc(l.nome) + '</button>').join('') + '</div>';
-  if (scelta) {
-    h += '<form class="pass-box" id="form-accesso" autocomplete="off">' +
-      '<label for="password">Password di ' + esc(scelta.nome) + '</label>' +
-      '<div class="pass-riga">' +
-        '<input class="campo" id="password" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" required>' +
-        '<button class="occhio" type="button" id="occhio" aria-label="Mostra la password" aria-pressed="false"><svg class="occhio-aperto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg><svg class="occhio-sbarrato" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1C11 5 11.5 5 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.3 4.2"/><path d="M6.2 6.3C3.6 8.1 2 12 2 12s3.6 7 10 7c1.6 0 3-.4 4.3-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg></button>' +
-      '</div>' +
-      (errore ? '<div class="errore" id="err-accesso">' + esc(errore) + '</div>' : '') +
-      '<button class="btn btn-viola" type="submit" id="btn-entra">Entra</button>' +
-    '</form>';
-  }
-  $('accesso-corpo').innerHTML = h;
-  document.querySelectorAll('.linea-tile').forEach((b) => {
-    b.onclick = () => { lineaScelta = Number(b.dataset.linea); disegnaAccesso(); };
-  });
-  if (scelta) {
-    const p = $('password');
-    $('occhio').onclick = () => {
-      const mostra = p.type === 'password';
-      p.type = mostra ? 'text' : 'password';
-      $('occhio').setAttribute('aria-pressed', mostra ? 'true' : 'false');
-      $('occhio').setAttribute('aria-label', mostra ? 'Nascondi la password' : 'Mostra la password');
-      p.focus();
-    };
-    $('form-accesso').onsubmit = entra;
-    if (errore) $('form-accesso').classList.add('scuoti');
-    p.focus({ preventScroll: true });
-    $('form-accesso').scrollIntoView({ block: 'nearest' });
-  }
+function erroreAccesso(msg) {
+  const e = $('err-accesso');
+  e.textContent = msg || ''; e.hidden = !msg;
+  if (msg) { const f = $('form-accesso'); f.classList.remove('scuoti'); void f.offsetWidth; f.classList.add('scuoti'); }
 }
+$('occhio').onclick = () => {
+  const p = $('password');
+  const mostraCaratteri = p.type === 'password';
+  p.type = mostraCaratteri ? 'text' : 'password';
+  $('occhio').setAttribute('aria-pressed', mostraCaratteri ? 'true' : 'false');
+  $('occhio').setAttribute('aria-label', mostraCaratteri ? 'Nascondi la password' : 'Mostra la password');
+  p.focus();
+};
 
+let accessoInCorso = false;
 async function entra(ev) {
   ev.preventDefault();
+  if (accessoInCorso) return;
+  const password = $('password').value;
+  if (!password) { erroreAccesso('Inserisci la password'); return; }
   const btn = $('btn-entra');
-  btn.disabled = true; btn.textContent = 'Controllo…';
+  accessoInCorso = true; btn.disabled = true; btn.textContent = 'Controllo…';
   try {
-    const d = await api('/api/linee/login', { lineaId: lineaScelta, password: $('password').value });
-    if (!d.ok) { disegnaAccesso(d.error || 'Accesso non riuscito'); return; }
+    const d = await api('/api/linee/login', { password });
+    if (!d.ok) { erroreAccesso(d.error || 'Accesso non riuscito'); $('password').select(); return; }
     sessione = { token: d.token, linea: d.linea };
     mem.set(sessionStorage, K_SESS, sessione);
-    mem.set(localStorage, K_ULTIMA, d.linea.id);
+    $('password').value = '';
     avviaNegozio(d.materiali || []);
   } catch (e) {
-    disegnaAccesso(e.message);
+    erroreAccesso(e.message);
+  } finally {
+    accessoInCorso = false; btn.disabled = false; btn.textContent = 'Entra';
   }
 }
+$('form-accesso').onsubmit = entra;
 
 function esci(messaggio) {
   if (invioInCorso) return;
   sessione = null; materiali = []; carrello = new Map(); idemInvio = null;
   mem.del(sessionStorage, K_SESS);
   mostra('accesso');
-  caricaLinee().then(() => { if (messaggio) avvisa(messaggio); });
+  preparaAccesso();
+  if (messaggio) avvisa(messaggio);
 }
 function sessioneScaduta() { esci('Sessione scaduta: inserisci di nuovo la password.'); }
 
@@ -873,7 +821,7 @@ document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') { chiudi
     sessione = null; mem.del(sessionStorage, K_SESS);
   }
   mostra('accesso');
-  caricaLinee();
+  preparaAccesso();
 })();
 </script>
 </body>
