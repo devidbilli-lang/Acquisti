@@ -621,6 +621,10 @@ body.bloccata>*:not(#blocco-app):not(#alert-box):not(#saving-overlay):not(#succe
 .side-btn svg{width:16px;height:16px;flex-shrink:0;}
 #modal-password .fg{margin-bottom:12px;}
 @media(max-width:800px){.side-accesso{flex-direction:row;margin-top:8px;}.side-btn{width:auto;}}
+/* Cambia password / Esci: in basso a sinistra, fermi mentre la pagina scorre.
+   Su schermi bassi o stretti restano sotto le schede: li' coprirebbero le schede
+   o, scorrendo di lato, le tabelle. */
+@media(min-width:1200px) and (min-height:620px){.side-accesso{position:fixed;left:16px;bottom:16px;width:220px;margin-top:0;z-index:5;}}
 @media(max-width:480px){.blocco-card{padding:22px 18px 18px;}.blocco-titolo{font-size:28px;}.blocco-logo{height:58px;}}
 </style>
 </head>
