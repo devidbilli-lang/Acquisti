@@ -620,6 +620,31 @@ body.bloccata>*:not(#blocco-app):not(#alert-box):not(#saving-overlay):not(#succe
 .side-btn:hover{border-color:var(--accent2);background:rgba(57,224,244,0.14);}
 .side-btn svg{width:16px;height:16px;flex-shrink:0;}
 #modal-password .fg{margin-bottom:12px;}
+/* scelta di quale password cambiare */
+.ruolo-scelta{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:4px;margin-bottom:14px;border-radius:12px;background:rgba(57,224,244,0.10);border:1.5px solid rgba(57,224,244,0.45);}
+.ruolo-scelta label{position:relative;display:block;text-align:center;padding:9px 8px;border-radius:9px;font-size:13px;font-weight:800;color:#0b6d7c;cursor:pointer;user-select:none;}
+.ruolo-scelta input{position:absolute;opacity:0;pointer-events:none;}
+.ruolo-scelta label:has(input:checked){background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 2px 10px rgba(57,224,244,0.45);}
+.ruolo-scelta label:has(input:focus-visible){outline:3px solid var(--accent2);outline-offset:2px;}
+.ruolo-scelta label.scelto{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 2px 10px rgba(57,224,244,0.45);}
+/* ===== SOLA LETTURA (chi entra con la password visualizzatore) =====
+   Spariscono tutti i comandi che modificano; filtri, ricerche, ordinamenti, dettagli e PDF restano.
+   Il divieto vero lo fa il Worker: qui si toglie solo cio' che non servirebbe. */
+body.sola-lettura .solo-gestore,
+body.sola-lettura .fab-host,
+body.sola-lettura .btn-edit,
+body.sola-lettura .btn-hl,
+body.sola-lettura .btn-mini,
+body.sola-lettura table .btn-danger,
+body.sola-lettura #modal-ddt .btn-danger{display:none !important;}
+/* colonne "Azioni" che resterebbero vuote */
+body.sola-lettura #tab-anagrafica th.th-act,body.sola-lettura #tb-anagrafica td:first-child:not(.empty),
+body.sola-lettura #tab-consegne th.th-act,body.sola-lettura #tb-consegne td:first-child:not(.empty),
+body.sola-lettura #tab-armadietto th.th-act,body.sola-lettura #tb-armadietto td:first-child:not(.empty){display:none;}
+body.sola-lettura .stock-cell,body.sola-lettura .mail-chip.err{cursor:default;pointer-events:none;}
+.side-ruolo{display:flex;align-items:center;gap:9px;width:100%;padding:9px 14px;border-radius:10px;border:1.5px dashed rgba(26,26,46,0.35);background:rgba(255,255,255,0.6);color:var(--text);font-size:12px;font-weight:800;letter-spacing:.3px;}
+.side-ruolo[hidden]{display:none;}
+.side-ruolo svg{width:16px;height:16px;flex-shrink:0;}
 @media(max-width:800px){.side-accesso{flex-direction:row;margin-top:8px;}.side-btn{width:auto;}}
 /* Cambia password / Esci: in basso a sinistra, fermi mentre la pagina scorre.
    Su schermi bassi o stretti restano sotto le schede: li' coprirebbero le schede
@@ -716,7 +741,8 @@ body.bloccata>*:not(#blocco-app):not(#alert-box):not(#saving-overlay):not(#succe
   </button>
 </div>
 <div class="side-accesso" id="side-accesso" hidden>
-  <button class="side-btn" onclick="apriCambiaPassword()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M14 9l2 2"/></svg>Cambia password</button>
+  <div class="side-ruolo" id="side-ruolo" hidden title="Sei entrato con la password visualizzatore"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>Sola lettura</div>
+  <button class="side-btn solo-gestore" onclick="apriCambiaPassword()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M14 9l2 2"/></svg>Cambia password</button>
   <button class="side-btn" onclick="esciApp()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><path d="M15 8l4 4-4 4M19 12H9"/></svg>Esci</button>
 </div>
 </aside>
@@ -861,7 +887,7 @@ body.bloccata>*:not(#blocco-app):not(#alert-box):not(#saving-overlay):not(#succe
       <input type="text" id="f-arm-tipologia" placeholder="Cerca materiale..." style="width:240px;" oninput="filtra()"/>
       <button class="clear-btn" onclick="document.getElementById('f-arm-tipologia').value='';filtra()">×</button>
     </div>
-    <button class="btn-secondary" onclick="ricalcolaGiacenze()" title="Ricalcola le giacenze dai DDT caricati meno le consegne">↻ Ricalcola giacenze</button>
+    <button class="btn-secondary solo-gestore" onclick="ricalcolaGiacenze()" title="Ricalcola le giacenze dai DDT caricati meno le consegne">↻ Ricalcola giacenze</button>
   </div>
   <div class="layout">
     <div class="table-wrap">
@@ -899,8 +925,8 @@ body.bloccata>*:not(#blocco-app):not(#alert-box):not(#saving-overlay):not(#succe
       <input type="text" id="f-r-materiale" placeholder="Materiale..." style="width:180px;" oninput="filtra()"/>
       <button class="clear-btn" onclick="document.getElementById('f-r-materiale').value='';filtra()">×</button>
     </div>
-    <button class="btn-viola" onclick="apriLinea(null)" title="Crea una linea: nome, password, mail e materiali">+ Aggiungi Linea</button>
-    <button class="btn-secondary" onclick="apriLinee()" title="Elenco delle linee: modifica, password, indirizzo della pagina">Gestisci linee</button>
+    <button class="btn-viola solo-gestore" onclick="apriLinea(null)" title="Crea una linea: nome, password, mail e materiali">+ Aggiungi Linea</button>
+    <button class="btn-secondary solo-gestore" onclick="apriLinee()" title="Elenco delle linee: modifica, password, indirizzo della pagina">Gestisci linee</button>
     <button class="btn-secondary" onclick="caricaRichieste(false)" title="Rileggi le richieste dal server">↻ Aggiorna</button>
   </div>
   <div class="layout">
@@ -974,7 +1000,7 @@ body.bloccata>*:not(#blocco-app):not(#alert-box):not(#saving-overlay):not(#succe
     <div class="modal-title">Documenti di Trasporto (DDT)</div>
     <div class="modal-info" id="m-ddt-info">—</div>
     <div id="m-ddt-list" style="margin-bottom:14px;"></div>
-    <div style="border-top:1.5px solid rgba(134,53,231,0.35);padding-top:14px;">
+    <div class="solo-gestore" style="border-top:1.5px solid rgba(134,53,231,0.35);padding-top:14px;">
       <p style="font-size:11px;font-weight:800;letter-spacing:1px;color:#8635e7;margin-bottom:10px;">+ Aggiungi DDT</p>
       <div class="modal-grid" style="grid-template-columns:1.5fr 1fr 1fr;">
         <div class="fg"><label>N° DDT *</label><input type="text" id="m-ddt-num"></div>
@@ -1168,10 +1194,14 @@ body.bloccata>*:not(#blocco-app):not(#alert-box):not(#saving-overlay):not(#succe
 <div class="modal-overlay" id="modal-password">
   <div class="modal" style="max-width:460px;">
     <div class="modal-title">Cambia password</div>
+    <div class="ruolo-scelta" role="radiogroup" aria-label="Quale password cambiare">
+      <label><input type="radio" name="cp-ruolo" value="gestore" checked onchange="aggiornaRuoloPassword()">Gestione</label>
+      <label><input type="radio" name="cp-ruolo" value="visualizzatore" onchange="aggiornaRuoloPassword()">Visualizzatore</label>
+    </div>
     <div class="fg"><label for="cp-chiave">Chiave amministratore</label><div class="pass-campo"><input type="password" id="cp-chiave" autocomplete="off" autocapitalize="off" spellcheck="false"><button type="button" class="occhio" data-occhio="cp-chiave" aria-label="Mostra la password" aria-pressed="false"><svg class="occhio-aperto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg><svg class="occhio-sbarrato" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1C11 5 11.5 5 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.3 4.2"/><path d="M6.2 6.3C3.6 8.1 2 12 2 12s3.6 7 10 7c1.6 0 3-.4 4.3-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg></button></div></div>
     <div class="fg"><label for="cp-nuova">Nuova password (almeno 8 caratteri)</label><div class="pass-campo"><input type="password" id="cp-nuova" autocomplete="new-password" autocapitalize="off" spellcheck="false"><button type="button" class="occhio" data-occhio="cp-nuova" aria-label="Mostra la password" aria-pressed="false"><svg class="occhio-aperto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg><svg class="occhio-sbarrato" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1C11 5 11.5 5 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.3 4.2"/><path d="M6.2 6.3C3.6 8.1 2 12 2 12s3.6 7 10 7c1.6 0 3-.4 4.3-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg></button></div></div>
     <div class="fg"><label for="cp-ripeti">Ripeti la nuova password</label><div class="pass-campo"><input type="password" id="cp-ripeti" autocomplete="new-password" autocapitalize="off" spellcheck="false"><button type="button" class="occhio" data-occhio="cp-ripeti" aria-label="Mostra la password" aria-pressed="false"><svg class="occhio-aperto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg><svg class="occhio-sbarrato" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1C11 5 11.5 5 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.3 4.2"/><path d="M6.2 6.3C3.6 8.1 2 12 2 12s3.6 7 10 7c1.6 0 3-.4 4.3-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg></button></div></div>
-    <div class="modal-info">Per cambiare la password serve la <b>chiave amministratore</b>.</div>
+    <div class="modal-info" id="cp-info">Per cambiare la password serve la <b>chiave amministratore</b>.</div>
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeModal('modal-password')">Annulla</button>
       <button class="btn-primary" onclick="salvaCambioPassword()">Salva</button>
@@ -1399,7 +1429,19 @@ function migrateArmadiettoToId(){
   }
   if(changed) state.armadietto = newArm;
 }
+// true quando si e' entrati con la password visualizzatore: si guarda e si filtra, non si modifica
+var solaLettura = false;
+function avvisoSolaLettura(){
+  if(typeof hideSpinner === 'function') hideSpinner();
+  showAlert('Accesso in sola lettura: non puoi modificare', 'err');
+}
 function saveState(){
+  if(solaLettura){
+    // non dovrebbe mai arrivare qui (i comandi sono nascosti e bloccati): si scarta la modifica rimasta in memoria
+    avvisoSolaLettura();
+    if(typeof lastServerState !== 'undefined' && lastServerState){ state = snapshot(lastServerState); filtra(); }
+    return;
+  }
   try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
   catch(e){ showAlert('Errore salvataggio: '+e.message,'err'); }
   // Background push to Cloudflare D1 (debounced 300ms, no-op if not configured)
@@ -3028,7 +3070,7 @@ function renderOrdini(){
         '<td><span class="badge badge-pink">'+fmtMigliaia(o.qta)+'</span></td>'+
         '<td>\u20ac'+fmtEuro(o.prezzo)+'</td>'+
         '<td><span class="badge">\u20ac'+fmtEuro(o.totale)+'</span></td>'+
-        '<td><span class="ddt-cell '+ddtClass+'" onclick="apriDdtModal('+o.id+')" title="Gestisci DDT">'+ddtText+'</span>'+deltaBadge+'</td>'+
+        '<td><span class="ddt-cell '+ddtClass+'" onclick="apriDdtModal('+o.id+')" title="'+(solaLettura?'Vedi i DDT':'Gestisci DDT')+'">'+ddtText+'</span>'+deltaBadge+'</td>'+
         '</tr>';
       }).join('');
       return master + dets;
@@ -3215,7 +3257,7 @@ function renderArmadietto(){
         '<td style="font-weight:700;">'+escapeHtml(a.tipologia)+'</td>'+
         '<td><code class="codice">'+escapeHtml(a.codice)+'</code></td>'+
         '<td>'+escapeHtml(a.classe||'\u2014')+'</td>'+
-        '<td><span class="stock-cell'+cls+'" id="stock-'+a.id+'" onclick="editStock('+a.id+')" title="Clicca per modifica rapida">'+fmtMigliaia(stock)+'</span></td>'+
+        '<td><span class="stock-cell'+cls+'" id="stock-'+a.id+'" onclick="editStock('+a.id+')"'+(solaLettura?'':' title="Clicca per modifica rapida"')+'>'+fmtMigliaia(stock)+'</span></td>'+
       '</tr>';
     }).join('');
   }
@@ -3602,6 +3644,7 @@ function computeDiff(oldS, newS, allowDeletes){
 function pushToCloud(){
   const cfg = getApiConfig();
   if(!cfg.url) return;
+  if(solaLettura) return;   // il visualizzatore non manda mai modifiche
   localDirty = true;
   clearTimeout(pushTimer);
   pushTimer = setTimeout(doPush, 300);
@@ -3610,6 +3653,7 @@ function pushToCloud(){
 async function doPush(){
   const cfg = getApiConfig();
   if(!cfg.url) return;
+  if(solaLettura){ localDirty = false; return; }
   pushInFlight = true;
   updateConnPill('syncing');
   try{
@@ -3689,6 +3733,7 @@ async function pollRefresh(){
 
 // ----- Manual full sync: solo D1 (il backup Sheets lo fa l'Apps Script da D1) -----
 async function syncAll(){
+  if(solaLettura){ avvisoSolaLettura(); return; }
   const apiCfg = getApiConfig();
   if(!apiCfg.url){
     showAlert('Configura prima Cloudflare D1 (icona ingranaggio)','err');
@@ -3773,7 +3818,12 @@ async function bootCloudFirst(){
       state.consegne.forEach(c => { if(c.numeroCodifica == null) c.numeroCodifica = ''; });
       try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
       lastServerState = snapshot(state);
-      if(migraMaiuscoli() > 0) saveState();
+      if(migraMaiuscoli() > 0 && !solaLettura) saveState();
+      filtra();
+    } else if(solaLettura){
+      // server vuoto e sola lettura: si mostra il vuoto, senza caricare nulla dal dispositivo
+      state = { anagrafica:[], ordini:[], consegne:[], armadietto:{}, highlights:[], fornitoriInfo:{} };
+      lastServerState = snapshot(state);
       filtra();
     } else {
       // Remote is empty: push the local snapshot to bootstrap D1
@@ -4312,7 +4362,18 @@ function getTokenApp(){
 }
 function tokenAppNonScaduto(){
   const p = getTokenApp().split('.');
-  return p.length === 4 && p[0] === 'app' && Number(p[1]) > Date.now();
+  return p.length === 4 && (p[0] === 'app' || p[0] === 'vis') && Number(p[1]) > Date.now();
+}
+// Il ruolo e' scritto nel token (e firmato dal Worker, che lo ricontrolla a ogni richiesta)
+function ruoloToken(){
+  return getTokenApp().split('.')[0] === 'vis' ? 'visualizzatore' : 'gestore';
+}
+let ruoloAvviato = null;        // ruolo con cui i dati sono stati caricati in questa scheda
+let workerConRuoli = false;     // il Worker conosce la password visualizzatore?
+function applicaRuolo(){
+  solaLettura = appProtetta && ruoloToken() === 'visualizzatore';
+  document.body.classList.toggle('sola-lettura', solaLettura);
+  document.getElementById('side-ruolo').hidden = !solaLettura;
 }
 function tokenRicordato(){
   try{ return !!localStorage.getItem(K_TOKEN_APP); }catch(_){ return false; }
@@ -4390,6 +4451,11 @@ function mostraBlocco(vista, errore){
   }
 }
 function sbloccaApp(){
+  // rientro con un ruolo diverso da prima (es. scaduta la sessione di chi gestisce, entra il visualizzatore):
+  // la pagina riparte da zero, cosi' non resta in memoria nulla dell'altro ruolo
+  if(appAvviata && ruoloAvviato && ruoloToken() !== ruoloAvviato){ uscitaVoluta = true; location.reload(); return; }
+  ruoloAvviato = ruoloToken();
+  applicaRuolo();
   document.getElementById('blocco-app').hidden = true;
   impostaInerte(false);
   document.getElementById('side-accesso').hidden = !appProtetta;
@@ -4479,8 +4545,21 @@ async function inviaImposta(ev){
   }
 }
 
+function ruoloPasswordScelto(){
+  const r = document.querySelector('input[name="cp-ruolo"]:checked');
+  return r && r.value === 'visualizzatore' ? 'visualizzatore' : 'gestore';
+}
+function aggiornaRuoloPassword(){
+  const vis = ruoloPasswordScelto() === 'visualizzatore';
+  document.querySelectorAll('.ruolo-scelta label').forEach(l=>l.classList.toggle('scelto', l.querySelector('input').checked));
+  document.getElementById('cp-info').innerHTML = vis
+    ? 'Con questa password si vede tutto e si usano i filtri, senza poter modificare. Serve la <b>chiave amministratore</b>.'
+    : 'Per cambiare la password serve la <b>chiave amministratore</b>.';
+}
 function apriCambiaPassword(){
   nascondiCampiPassword(['cp-chiave','cp-nuova','cp-ripeti']);
+  document.querySelector('input[name="cp-ruolo"][value="gestore"]').checked = true;
+  aggiornaRuoloPassword();
   openModal('modal-password');
   setTimeout(()=>document.getElementById('cp-chiave').focus(), 50);
 }
@@ -4493,10 +4572,21 @@ async function salvaCambioPassword(){
   if(!chiave){ showAlert('Inserisci la chiave amministratore','err'); return; }
   if(nuova.length < 8){ showAlert('La nuova password deve avere almeno 8 caratteri','err'); return; }
   if(nuova !== ripeti){ showAlert('Le due password nuove non coincidono','err'); return; }
+  const perVisualizzatore = ruoloPasswordScelto() === 'visualizzatore';
+  // un Worker non aggiornato ignorerebbe il ruolo e cambierebbe la password principale: meglio fermarsi prima
+  if(perVisualizzatore && !workerConRuoli){ showAlert('Per la password visualizzatore aggiorna prima il Worker su Cloudflare','err'); return; }
   accessoInCorso = true;
   showSpinner('Cambio password...');
   try{
     const ricorda = tokenRicordato();
+    if(perVisualizzatore){
+      const d = await postAccesso('/api/app/imposta', { chiave, password: nuova, ruolo: 'visualizzatore' });
+      if(!d.ok) throw new Error(d.error || 'Cambio non riuscito');
+      nascondiCampiPassword(['cp-chiave','cp-nuova','cp-ripeti']);
+      closeModal('modal-password');
+      showSuccess('Password visualizzatore salvata!');
+      return;
+    }
     const d = await postAccesso('/api/app/imposta', { chiave, password: nuova, ricorda });
     if(!d.ok) throw new Error(d.error || 'Cambio non riuscito');
     setTokenApp(d.token, ricorda);
@@ -4551,6 +4641,7 @@ async function avvioApp(){
     return;
   }
   appProtetta = !!st.protetta;
+  workerConRuoli = typeof st.ruolo === 'string';
   if(!st.protetta){ mostraBlocco('prima'); return; }
   if(st.valida){ sbloccaApp(); return; }
   clearTokenApp();
@@ -4561,6 +4652,25 @@ async function avvioApp(){
 // BOOT: prima l'accesso con password, poi i dati (cloud-first con copia locale)
 // ===========================================================
 setupFabDrag();
+// In sola lettura le funzioni che modificano non partono, da qualunque punto vengano chiamate
+// (pulsanti nascosti compresi). L'ultima parola resta comunque al Worker, che rifiuta le scritture.
+['apriAnagrafica','modificaAnagrafica','salvaAnagrafica','eliminaAnagrafica',
+ 'apriOrdine','modificaOrdine','salvaOrdine','eliminaOrdine','eliminaOrdineCompleto','aggiungiDdt','rimuoviDdt',
+ 'apriConsegna','modificaConsegna','salvaConsegna','eliminaConsegna',
+ 'editStock','saveStock','apriModificaGiacenza','salvaGiacenza','apriGiacenzaNuova','salvaGiacenzaNuova','ricalcolaGiacenze',
+ 'toggleHighlight','apriFab',
+ 'apriEvadi','confermaEvadi','confermaEvadiInterno','apriRifiuta','confermaRifiuta','riapriRichiesta','eliminaRichiesta','rinotificaRichiesta','eseguiSuRichiesta',
+ 'apriLinee','apriLinea','salvaLinea','eliminaLinea','salvaLinkLinee',
+ 'apriCambiaPassword','salvaCambioPassword'
+].forEach(nome=>{
+  const originale = window[nome];
+  if(typeof originale !== 'function') return;
+  window[nome] = function(){
+    if(solaLettura){ avvisoSolaLettura(); return; }
+    return originale.apply(this, arguments);
+  };
+});
+
 avvioApp();
 </script>
 </body>
