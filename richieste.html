@@ -253,6 +253,10 @@ body.invio .griglia,body.invio .carrello-lista{opacity:.55;}
 .ric-righe .q small{font-weight:700;color:var(--testo-2);}
 .ric-nota{margin-top:10px;font-size:13px;font-weight:600;color:var(--testo-2);}
 .ric-nota.rif{color:#b91c1c;}
+.ric-azioni{margin-top:12px;display:flex;justify-content:flex-end;}
+.btn-rosso{background:linear-gradient(135deg,rgba(254,226,226,0.95),rgba(252,165,165,0.6));color:#b91c1c;border:1px solid rgba(220,38,38,0.45);box-shadow:inset 0 1px 0 rgba(255,255,255,0.75),0 2px 6px rgba(220,38,38,0.18);padding:8px 14px;font-size:13px;}
+.conferma.rossa{border-color:#dc2626;box-shadow:0 0 26px rgba(220,38,38,0.35),0 20px 60px rgba(0,0,0,0.2);}
+.conferma.rossa .num{background:rgba(220,38,38,0.1);color:#b91c1c;}
 
 /* ---------- conferma invio ---------- */
 .velo{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(26,26,46,0.45);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}
@@ -275,6 +279,11 @@ body.invio .griglia,body.invio .carrello-lista{opacity:.55;}
 .caricamento{text-align:center;padding:50px 20px;color:var(--testo-2);font-weight:700;}
 
 /* ---------- schermi stretti ---------- */
+@media (max-width:1400px){
+  .testata .destra{flex-wrap:nowrap;gap:6px;}
+  .testata .destra .btn{padding:9px 12px;font-size:13px;white-space:nowrap;}
+  .chip-linea{font-size:13px;padding:7px 11px;max-width:170px;}
+}
 @media (max-width:1100px){
   .titolo{font-size:38px;}
   .testata .logo,.spirale{height:56px;}
@@ -306,7 +315,7 @@ body.invio .griglia,body.invio .carrello-lista{opacity:.55;}
 @media (max-width:980px){
   .testata{grid-template-columns:auto 1fr;gap:10px;}
   .testata .centro{justify-self:end;}
-  .testata .destra{grid-column:1/-1;justify-self:stretch;justify-content:flex-end;}
+  .testata .destra{grid-column:1/-1;justify-self:stretch;justify-content:flex-end;flex-wrap:wrap;}
   .testata .destra .chip-linea{margin-right:auto;}
 }
 @media (max-width:760px){
@@ -416,6 +425,17 @@ body.invio .griglia,body.invio .carrello-lista{opacity:.55;}
     <div class="azioni">
       <button class="btn btn-viola" id="conf-nuova" type="button">Nuova richiesta</button>
       <button class="btn btn-chiaro" id="conf-storico" type="button">Vedi le mie richieste</button>
+    </div>
+  </div>
+</div>
+<div class="velo" id="velo-elimina" hidden>
+  <div class="conferma rossa" role="dialog" aria-modal="true" aria-labelledby="eli-titolo">
+    <h2 id="eli-titolo">Eliminare la richiesta?</h2>
+    <div class="num" id="eli-num"></div>
+    <p>Non verrà consegnato nulla. Chi gestisce gli ordini la vedrà come annullata.</p>
+    <div class="azioni">
+      <button class="btn btn-rosso" id="eli-conferma" type="button" style="padding:12px;font-size:15px;">Elimina richiesta</button>
+      <button class="btn btn-chiaro" id="eli-annulla" type="button">Torna indietro</button>
     </div>
   </div>
 </div>
@@ -798,16 +818,48 @@ async function apriStorico() {
         '<ul class="ric-righe">' + righe + '</ul>' +
         (r.note ? '<div class="ric-nota">Note: ' + esc(r.note) + '</div>' : '') +
         (r.stato === 'rifiutata' && r.motivo ? '<div class="ric-nota rif">Motivo: ' + esc(r.motivo) + '</div>' : '') +
+        (r.stato === 'in_attesa' ? '<div class="ric-azioni"><button type="button" class="btn btn-rosso" data-elimina-ric="' + esc(r.numero) + '">Elimina richiesta</button></div>' : '') +
       '</article>';
     }).join('');
   } catch (e) {
     box.innerHTML = '<div class="avviso-vuoto"><b>Non riesco a caricare le richieste</b>' + esc(e.message) + '</div>';
   }
 }
+// La linea puo' eliminare una sua richiesta finche' e' in attesa
+let numeroDaEliminare = null;
+let eliminazioneInCorso = false;
+document.addEventListener('click', (ev) => {
+  const b = ev.target.closest('[data-elimina-ric]');
+  if (!b) return;
+  numeroDaEliminare = b.dataset.eliminaRic;
+  $('eli-num').textContent = numeroDaEliminare;
+  $('velo-elimina').hidden = false;
+  $('eli-annulla').focus();
+});
+function chiudiElimina() { $('velo-elimina').hidden = true; numeroDaEliminare = null; }
+$('eli-annulla').onclick = chiudiElimina;
+$('eli-conferma').onclick = async () => {
+  if (eliminazioneInCorso || !numeroDaEliminare) return;
+  eliminazioneInCorso = true;
+  const btn = $('eli-conferma');
+  btn.disabled = true; btn.textContent = 'Elimino…';
+  try {
+    const d = await api('/api/linee/annulla', { token: sessione.token, numero: numeroDaEliminare });
+    if (d.sessione === false) { chiudiElimina(); sessioneScaduta(); return; }
+    chiudiElimina();
+    if (!d.ok) avvisa(d.error || 'Eliminazione non riuscita');
+    await apriStorico();
+  } catch (e) {
+    avvisa(e.message);
+  } finally {
+    eliminazioneInCorso = false;
+    btn.disabled = false; btn.textContent = 'Elimina richiesta';
+  }
+};
 $('btn-vista').onclick = () => { if (invioInCorso) return; if (vista === 'storico') mostra('negozio'); else apriStorico(); };
 $('btn-aggiorna').onclick = apriStorico;
 $('btn-esci').onclick = () => esci();
-document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') chiudiCarrello(); });
+document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') { chiudiCarrello(); if (!eliminazioneInCorso) chiudiElimina(); } });
 
 // ---------- avvio ----------
 (async function avvio() {
