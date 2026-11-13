@@ -209,7 +209,9 @@ tbody tr:hover{background:#eeeeff;}
 .ddt-cell{cursor:pointer;display:inline-block;padding:6px 12px;border-radius:8px;font-weight:700;font-size:13px;background:#fff7ed;color:#9a3412;border:1.5px solid #fed7aa;transition:all .15s;white-space:nowrap;}
 .ddt-cell:hover{background:#ffedd5;border-color:#fdba74;}
 .ddt-cell.complete{background:#86efac;color:#1a1a2e;border-color:#22c55e;}
-.ddt-cell.partial{background:#fef3c7;color:#92400e;border-color:#fcd34d;}
+/* DDT arrivati in parte: lo stesso giallo dei riquadri Ordini Aperti / In Attesa */
+.ddt-cell.partial{background:#f5ff00;color:#1a1a2e;border-color:#e2eb00;box-shadow:0 0 6px rgba(245,255,0,0.8);}
+.ddt-cell.partial:hover{background:#ebf500;border-color:#cfd700;}
 .ddt-cell.empty-ddt{background:#f1efe8;color:#6b6b8a;border-color:#d3d1c7;font-style:italic;}
 .ddt-cell .ddt-arr{font-size:17px;font-weight:900;}
 .ddt-delta{display:inline-block;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:800;margin-left:6px;vertical-align:middle;line-height:1.4;white-space:nowrap;}
