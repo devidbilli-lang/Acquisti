@@ -228,7 +228,8 @@ code.codice{font-family:'Montserrat',sans-serif;font-size:13px;background:#cdf6f
 .supp-price{color:var(--accent2);font-weight:600;margin-left:4px;}
 .stock-cell{cursor:pointer;display:inline-block;min-width:70px;padding:7px 16px;border-radius:14px;font-weight:800;font-size:18px;color:#0e5a37;background:rgba(52,211,153,0.32);backdrop-filter:blur(10px) saturate(180%);-webkit-backdrop-filter:blur(10px) saturate(180%);border:1px solid rgba(255,255,255,0.65);box-shadow:0 4px 14px rgba(16,185,129,0.18),inset 0 1px 2px rgba(255,255,255,0.9);transition:all .15s;}
 .stock-cell:hover{background:rgba(52,211,153,0.5);transform:scale(1.05);box-shadow:0 6px 18px rgba(16,185,129,0.28),inset 0 1px 2px rgba(255,255,255,0.95);}
-.stock-cell.zero{background:rgba(52,211,153,0.32);color:#0e5a37;}
+.stock-cell.zero{background:rgba(248,113,113,0.28);color:#991b1b;box-shadow:0 4px 14px rgba(239,68,68,0.18),inset 0 1px 2px rgba(255,255,255,0.9);}
+.stock-cell.zero:hover{background:rgba(248,113,113,0.42);box-shadow:0 6px 18px rgba(239,68,68,0.26),inset 0 1px 2px rgba(255,255,255,0.95);}
 .stock-cell.low{background:rgba(251,191,36,0.34);color:#7c4a03;box-shadow:0 4px 14px rgba(245,158,11,0.2),inset 0 1px 2px rgba(255,255,255,0.9);}
 .stock-input{width:90px;padding:6px 10px;font-size:14px;font-weight:700;text-align:center;border:2px solid var(--accent);border-radius:8px;font-family:'Montserrat',sans-serif;}
 /* RIGHT SIDEBAR */
@@ -3268,8 +3269,8 @@ function renderConsegne(){
 }
 function renderArmadietto(){
   const fT=document.getElementById('f-arm-tipologia').value.toLowerCase();
+  // si vedono tutti i materiali, anche quelli con giacenza 0 (esauriti o mai caricati)
   let rows=state.anagrafica.filter(a=>{
-    if((state.armadietto[a.id]||0)===0) return false;
     if(fT && !(a.tipologia.toLowerCase().includes(fT)||a.codice.toLowerCase().includes(fT)||(a.numeroCodifica||'').toLowerCase().includes(fT))) return false;
     return true;
   });
