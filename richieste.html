@@ -135,9 +135,17 @@ button{cursor:pointer;}
 .barra{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
 .cerca{position:relative;flex:1 1 260px;max-width:520px;}
 .cerca input{padding-right:40px;}
+.cerca input:placeholder-shown{padding-right:12px;}   /* campo vuoto: la × non c'e', il testo d'esempio usa tutto lo spazio */
 .cerca button{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:30px;height:30px;border:none;background:none;font-size:20px;color:var(--testo-2);border-radius:8px;}
 .conta{font-weight:700;color:var(--testo-2);font-size:14px;}
 .griglia{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;}
+/* materiali divisi per classe: un titolo e la sua griglia */
+.classi{display:flex;flex-direction:column;gap:26px;}
+.classe-titolo{display:flex;align-items:center;gap:10px;margin:0 0 12px;font-size:20px;font-weight:800;line-height:1.2;color:var(--testo);}
+.classe-titolo::before{content:"";width:5px;height:24px;border-radius:3px;background:#7c3aed;flex-shrink:0;}
+.classe-titolo::after{content:"";flex:1;min-width:16px;height:2px;border-radius:2px;background:linear-gradient(90deg,rgba(57,224,244,0.75),rgba(57,224,244,0));}
+.classe-nome{overflow-wrap:anywhere;}
+.classe-n{flex-shrink:0;min-width:28px;padding:3px 9px;border-radius:999px;background:#cdf6fb;color:#0c6b78;font-size:13px;font-weight:800;text-align:center;}
 .mat{
   display:flex;flex-direction:column;gap:10px;min-height:150px;padding:16px;border-radius:18px;
   background:linear-gradient(135deg,rgba(255,255,255,0.86),rgba(255,255,255,0.5));
@@ -363,12 +371,12 @@ body.invio .griglia,body.invio .carrello-lista{opacity:.55;}
     <section aria-label="Materiali disponibili">
       <div class="barra">
         <div class="cerca">
-          <input class="campo" id="cerca" type="search" placeholder="Cerca per nome o codifica" autocomplete="off" aria-label="Cerca materiale">
+          <input class="campo" id="cerca" type="search" placeholder="Cerca per nome, codifica o classe" autocomplete="off" aria-label="Cerca materiale per nome, codifica o classe">
           <button type="button" id="cerca-x" aria-label="Cancella ricerca" hidden>×</button>
         </div>
         <span class="conta" id="conta"></span>
       </div>
-      <div class="griglia" id="griglia"></div>
+      <div class="classi" id="griglia"></div>
     </section>
 
     <div class="fondo-carrello" id="fondo-carrello" hidden></div>
@@ -448,7 +456,7 @@ const mem = {
 };
 
 let sessione = null;         // { token, linea:{id,nome} }
-let materiali = [];          // [{id, nome, numeroCodifica, um}]
+let materiali = [];          // [{id, nome, numeroCodifica, um, classe}]
 let carrello = new Map();    // id materiale -> quantita'
 let idemInvio = null;        // evita doppioni se l'invio viene ripetuto per un errore di rete
 let invioInCorso = false;    // durante l'invio il carrello e' fermo: niente modifiche, niente secondo invio
@@ -586,25 +594,50 @@ function htmlAzione(m) {
     : '<button type="button" class="btn btn-ciano" data-aggiungi="' + m.id + '">Aggiungi</button>';
 }
 
+const SENZA_CLASSE = 'Altri materiali';
+function classeDi(m) { return String(m.classe || '').trim(); }
+// Raggruppa per classe (senza badare a maiuscole/minuscole): classi in ordine alfabetico, i materiali senza classe in fondo
+function gruppiPerClasse(lista) {
+  const mappa = new Map();
+  lista.forEach((m) => {
+    const nome = classeDi(m), k = nome.toLowerCase();
+    if (!mappa.has(k)) mappa.set(k, { nome, mat: [] });
+    mappa.get(k).mat.push(m);
+  });
+  return Array.from(mappa.values()).sort((a, b) =>
+    (!a.nome) - (!b.nome) || a.nome.localeCompare(b.nome, 'it', { sensitivity: 'base', numeric: true }));
+}
+function htmlScheda(m) {
+  return '<article class="mat' + (carrello.has(m.id) ? ' nel-carrello' : '') + '" data-mat="' + m.id + '">' +
+    '<div class="mat-su">' +
+      (m.numeroCodifica ? '<span class="cod">' + esc(m.numeroCodifica) + '</span>' : '<span></span>') +
+      (m.um ? '<span class="um">U.M. <b>' + esc(m.um) + '</b></span>' : '') +
+    '</div>' +
+    '<h3 class="mat-nome">' + esc(m.nome) + '</h3>' +
+    '<div class="mat-az">' + htmlAzione(m) + '</div>' +
+  '</article>';
+}
+
 function disegnaGriglia() {
   const f = $('cerca').value.trim().toLowerCase();
-  const visibili = materiali.filter((m) => !f || m.nome.toLowerCase().includes(f) || (m.numeroCodifica || '').toLowerCase().includes(f));
+  const visibili = materiali.filter((m) => !f || m.nome.toLowerCase().includes(f) ||
+    (m.numeroCodifica || '').toLowerCase().includes(f) || classeDi(m).toLowerCase().includes(f));
   const g = $('griglia');
   if (!materiali.length) {
     g.innerHTML = '<div class="avviso-vuoto" style="grid-column:1/-1"><b>Nessun materiale abilitato per questa linea</b>' +
       'Chiedi a chi gestisce gli ordini di aggiungerli.</div>';
   } else if (!visibili.length) {
-    g.innerHTML = '<div class="avviso-vuoto" style="grid-column:1/-1"><b>Nessun materiale trovato</b>Prova con un altro nome o con la codifica.</div>';
+    g.innerHTML = '<div class="avviso-vuoto" style="grid-column:1/-1"><b>Nessun materiale trovato</b>Prova con un altro nome, con la codifica o con la classe.</div>';
+  } else if (!materiali.some(classeDi)) {
+    // nessun materiale ha una classe (o il Worker non la manda ancora): elenco unico, come prima
+    g.innerHTML = '<div class="griglia">' + visibili.map(htmlScheda).join('') + '</div>';
   } else {
-    g.innerHTML = visibili.map((m) =>
-      '<article class="mat' + (carrello.has(m.id) ? ' nel-carrello' : '') + '" data-mat="' + m.id + '">' +
-        '<div class="mat-su">' +
-          (m.numeroCodifica ? '<span class="cod">' + esc(m.numeroCodifica) + '</span>' : '<span></span>') +
-          (m.um ? '<span class="um">U.M. <b>' + esc(m.um) + '</b></span>' : '') +
-        '</div>' +
-        '<h3 class="mat-nome">' + esc(m.nome) + '</h3>' +
-        '<div class="mat-az">' + htmlAzione(m) + '</div>' +
-      '</article>').join('');
+    g.innerHTML = gruppiPerClasse(visibili).map((gr) =>
+      '<section class="classe-gruppo">' +
+        '<h2 class="classe-titolo"><span class="classe-nome">' + esc(gr.nome || SENZA_CLASSE) + '</span>' +
+          '<span class="classe-n" title="Materiali in questa classe">' + gr.mat.length + '</span></h2>' +
+        '<div class="griglia">' + gr.mat.map(htmlScheda).join('') + '</div>' +
+      '</section>').join('');
   }
   $('conta').textContent = materiali.length
     ? (f ? visibili.length + ' di ' + materiali.length + ' materiali' : materiali.length + (materiali.length === 1 ? ' materiale' : ' materiali'))
@@ -692,6 +725,11 @@ document.addEventListener('change', (ev) => {
 
 $('cerca').addEventListener('input', () => { $('cerca-x').hidden = !$('cerca').value; disegnaGriglia(); });
 $('cerca-x').onclick = () => { $('cerca').value = ''; $('cerca-x').hidden = true; disegnaGriglia(); $('cerca').focus(); };
+// sul telefono il campo e' stretto: testo d'esempio piu' corto, cosi' si legge intero
+const strettoPerCerca = window.matchMedia('(max-width:600px)');
+function segnapostoCerca() { $('cerca').placeholder = strettoPerCerca.matches ? 'Cerca materiale o classe' : 'Cerca per nome, codifica o classe'; }
+segnapostoCerca();
+if (strettoPerCerca.addEventListener) strettoPerCerca.addEventListener('change', segnapostoCerca); else window.addEventListener('resize', segnapostoCerca);
 $('richiedente').addEventListener('change', () => { if (sessione) mem.set(localStorage, chiaveNome(), $('richiedente').value.trim()); });
 
 function apriCarrello() { $('carrello').classList.add('aperto'); $('fondo-carrello').hidden = false; }
